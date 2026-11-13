@@ -1,0 +1,6 @@
+# ADR-0002 — Tenancy and immutable evidence
+The trusted backend derives app.user_id from a validated session and app.workspace_id from an authorized request. Set both with set_config(..., true) inside a database transaction; never forward raw client identity values. A pooled connection must not retain identity after commit or rollback.
+The application role is not a database owner, superuser, or BYPASSRLS role. RLS checks workspace and user membership; composite foreign keys reject cross-workspace links. Membership provisioning is reserved to a separately authenticated service (not implemented).
+Users and membership writes are not granted to the app role. Evidence, claims, chunks, source versions and reviews are append-only for that role. Revisions create new IDs; citations must pin versions. A separate audited erasure service must remove dependent records and objects when retention requires deletion.
+This protects against missing tenant predicates; it does not protect against a compromised trusted backend that can forge app.user_id. SQL injection prevention, parameterized queries, authentication, least privilege and audit remain required.
+Database grants do not establish a human review by themselves: the future API must derive reviewer identity from the authenticated human request and never expose review writes to agents.
