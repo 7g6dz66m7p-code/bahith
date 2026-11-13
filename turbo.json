@@ -1,0 +1,36 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "globalDependencies": [".env"],
+  "globalPassThroughEnv": [
+    "CI",
+    "DOCKER_HOST",
+    "TESTCONTAINERS_*",
+    "PLAYWRIGHT_*",
+    "DATABASE_URL",
+    "DATABASE_ADMIN_URL",
+    "REDIS_URL",
+    "S3_*",
+    "AI_*"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "lint": {},
+    "typecheck": {
+      "dependsOn": ["^typecheck"]
+    },
+    "test": {},
+    "test:integration": {
+      "cache": false
+    },
+    "test:e2e": {
+      "cache": false
+    }
+  }
+}

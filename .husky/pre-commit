@@ -1,0 +1,9 @@
+# Secrets must never reach the repository (engineering rule 4).
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "pre-commit: gitleaks is not installed." >&2
+  echo "  Install it (https://github.com/gitleaks/gitleaks#installing) and commit again." >&2
+  exit 1
+fi
+gitleaks git --pre-commit --staged --redact --no-banner
+
+pnpm exec lint-staged

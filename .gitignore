@@ -1,0 +1,37 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# build output
+.next/
+dist/
+out/
+*.tsbuildinfo
+next-env.d.ts
+
+# turbo
+.turbo/
+
+# env — only .env.example is tracked
+.env
+.env.*
+!.env.example
+
+# tests
+coverage/
+playwright-report/
+test-results/
+
+# python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# editors / OS
+.idea/
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+*.log
