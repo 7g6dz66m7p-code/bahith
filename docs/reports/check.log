@@ -1,0 +1,51 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> bahith-foundation@0.1.0 check
+> npm run typecheck && npm test
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> bahith-foundation@0.1.0 typecheck
+> tsc --noEmit
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> bahith-foundation@0.1.0 test
+> node --test tests/*.test.mjs
+
+✔ exact Arabic excerpt with human review can pass structural gate (1.202433ms)
+✔ cross-tenant evidence denied (0.169376ms)
+✔ fabricated quotation denied (0.108844ms)
+✔ metadata does not establish a claim (0.151659ms)
+✔ abstract-only evidence cannot approve fulltext finding (0.101674ms)
+✔ missing and invalid page locators rejected (0.103937ms)
+✔ human review required (0.089445ms)
+✔ hypothesis is not an established result (0.076756ms)
+✔ empty evidence denied (0.192911ms)
+✔ contradicting evidence blocks approval (0.254453ms)
+✔ terminal job cannot silently restart (0.262717ms)
+✔ job can pause for human review (0.875811ms)
+▶ PostgreSQL migration and tenant authorization integration
+  ✔ missing context returns no records (4.394957ms)
+  ✔ member sees only own workspace (2.603666ms)
+  ✔ cross-tenant reads return empty (1.24689ms)
+  ✔ cross-tenant insert rejected (1.887085ms)
+  ✔ cross-tenant foreign key rejected (2.066776ms)
+  ✔ forged workspace context without membership fails (1.225928ms)
+  ✔ viewer may read (1.331508ms)
+  ✔ viewer cannot insert (0.866157ms)
+  ✔ viewer cannot update (2.470556ms)
+  ✔ cannot self-upgrade role (0.745964ms)
+  ✔ cannot overwrite human review (0.656169ms)
+  ✔ reviewed evidence cannot be rewritten (1.197756ms)
+  ✔ source versions cannot be rewritten (1.047991ms)
+  ✔ application role cannot bypass RLS (1.490758ms)
+✔ PostgreSQL migration and tenant authorization integration (2866.41074ms)
+ℹ tests 27
+ℹ suites 0
+ℹ pass 27
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2991.24433
