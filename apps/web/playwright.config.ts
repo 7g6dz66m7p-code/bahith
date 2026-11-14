@@ -4,7 +4,8 @@ const PORT = 3100;
 
 export default defineConfig({
   testDir: './e2e',
-  fullyParallel: true,
+  fullyParallel: false,
+  workers: 1,
   forbidOnly: Boolean(process.env.CI),
   retries: 0,
   reporter: process.env.CI ? [['github'], ['list']] : 'list',
@@ -18,9 +19,10 @@ export default defineConfig({
     { name: 'en', use: { ...devices['Desktop Chrome'], locale: 'en' } },
   ],
   webServer: {
-    command: `pnpm exec next build && pnpm exec next start --port ${PORT}`,
+    command: 'pnpm --filter @bahith/db exec tsx ../../apps/web/e2e/server.ts',
     url: `http://localhost:${PORT}/ar`,
-    reuseExistingServer: !process.env.CI,
-    timeout: 180_000,
+    reuseExistingServer: false,
+    timeout: 240_000,
+    gracefulShutdown: { signal: 'SIGTERM', timeout: 15_000 },
   },
 });

@@ -15,7 +15,7 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 const nextConfig: NextConfig = {
   // Workspace packages ship TypeScript sources; Next compiles them.
-  transpilePackages: ['@bahith/db'],
+  transpilePackages: ['@bahith/db', '@bahith/auth'],
   poweredByHeader: false,
   reactStrictMode: true,
   typedRoutes: true,

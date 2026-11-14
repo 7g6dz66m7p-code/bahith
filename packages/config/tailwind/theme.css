@@ -1,8 +1,10 @@
-/*
- * Shared Tailwind v4 theme for BAHITH.
- * Phase 1 ships only neutral placeholders; the real design tokens (light/dark,
- * IBM Plex Sans Arabic, Noto Naskh Arabic) land in Phase 2.
- */
-@theme {
-  --font-sans: ui-sans-serif, system-ui, sans-serif;
+@theme inline {
+  --font-sans: 'IBM Plex Sans Arabic', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Noto Naskh Arabic Variable', Georgia, serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-surface: var(--surface);
 }
