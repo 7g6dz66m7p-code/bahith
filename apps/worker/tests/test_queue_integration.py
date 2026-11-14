@@ -26,7 +26,12 @@ async def _wait_for_state(queue: Queue, job_id: str, state: str) -> Job:
         while True:
             job = await Job.fromId(queue, job_id)
             if job is not None and await job.getState() == state:
-                return job
+                # The worker may finish between loading the hash and reading state.
+                # Reload after observing the terminal state, so result/error fields
+                # come from the completed transition rather than the earlier snapshot.
+                finished = await Job.fromId(queue, job_id)
+                if finished is not None:
+                    return finished
             await asyncio.sleep(0.05)
 
 
