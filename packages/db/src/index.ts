@@ -21,3 +21,9 @@ export { parseExtractionManifest, extractionManifestSchema } from './sanad/manif
 export type { ExtractionManifest } from './sanad/manifest';
 export { retrieve, sanadRetrieveSchema } from './sanad/retrieve';
 export type { SanadRetrieveInput, SanadRetrieveResult, SanadEvidence } from './sanad/retrieve';
+export {
+  createProject,
+  createProjectSchema,
+  listUserProjects,
+  withWorkspaceMember,
+} from './projects';

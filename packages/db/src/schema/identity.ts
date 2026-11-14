@@ -14,9 +14,8 @@ import { createdAt, currentUserId, currentWorkspaceId, id, updatedAt } from './_
 import { localeEnum, membershipRoleEnum, workspaceKindEnum } from './enums';
 
 /**
- * Global identity table (no workspace_id, no research data).
- * The authentication tables (sessions, accounts, verifications, two-factor) are added
- * in Phase 2 together with Better Auth (ADR-0004).
+ * Global identity, protected by RLS: the application reads the acting user's profile
+ * only, while the dedicated authentication connection manages identities.
  */
 export const users = pgTable(
   'users',
@@ -31,7 +30,22 @@ export const users = pgTable(
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
-  (t) => [uniqueIndex('users_email_lower_key').on(sql`lower(${t.email})`)],
+  (t) => [
+    uniqueIndex('users_email_lower_key').on(sql`lower(${t.email})`),
+    pgPolicy('users_self_select', {
+      as: 'permissive',
+      for: 'select',
+      to: 'public',
+      using: sql`${t.id} = ${currentUserId}`,
+    }),
+    pgPolicy('users_auth_manage', {
+      as: 'permissive',
+      for: 'all',
+      to: 'public',
+      using: sql`current_user = 'bahith_auth'`,
+      withCheck: sql`current_user = 'bahith_auth'`,
+    }),
+  ],
 );
 
 /**

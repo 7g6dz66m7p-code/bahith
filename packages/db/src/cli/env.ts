@@ -19,6 +19,9 @@ export interface CliEnv {
   /** Application-role connection string (its password provisions the role). */
   appUrl: string;
   appPassword: string;
+  /** Dedicated identity connection (required for provisioning migrations). */
+  authUrl?: string;
+  authPassword?: string;
 }
 
 /**
@@ -26,7 +29,10 @@ export interface CliEnv {
  * .env when present). Refuses any non-local database unless `--allow-remote` is passed
  * explicitly: migrating a shared or production database needs the owner's written approval.
  */
-export function loadCliEnv(argv: readonly string[] = process.argv.slice(2)): CliEnv {
+export function loadCliEnv(
+  argv: readonly string[] = process.argv.slice(2),
+  options: { requireAuth?: boolean } = {},
+): CliEnv {
   const rootEnv = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../../.env');
   if (existsSync(rootEnv)) {
     process.loadEnvFile(rootEnv);
@@ -55,10 +61,40 @@ export function loadCliEnv(argv: readonly string[] = process.argv.slice(2)): Cli
     throw new DbError('DB_CONFIG_INVALID', 'DATABASE_URL must include the application password.');
   }
 
+  const authValue = process.env.AUTH_DATABASE_URL;
+  const authResult = z.url({ protocol: /^postgres(ql)?$/ }).safeParse(authValue);
+  if (
+    (options.requireAuth || (authValue !== undefined && authValue !== '')) &&
+    !authResult.success
+  ) {
+    throw new DbError(
+      'DB_CONFIG_INVALID',
+      'Missing or invalid environment variable: AUTH_DATABASE_URL.',
+    );
+  }
+  let identity: { authUrl: string; authPassword: string } | undefined;
+  if (authResult.success) {
+    const auth = new URL(authResult.data);
+    if (
+      auth.username !== 'bahith_auth' ||
+      auth.password === '' ||
+      auth.hostname !== admin.hostname ||
+      auth.port !== admin.port ||
+      auth.pathname !== admin.pathname
+    ) {
+      throw new DbError(
+        'DB_CONFIG_INVALID',
+        'AUTH_DATABASE_URL must use bahith_auth on the migration database with a password.',
+      );
+    }
+    identity = { authUrl: authResult.data, authPassword: decodeURIComponent(auth.password) };
+  }
+
   return {
     adminUrl: parsed.data.DATABASE_ADMIN_URL,
     appUrl: parsed.data.DATABASE_URL,
     appPassword: decodeURIComponent(app.password),
+    ...identity,
   };
 }
 

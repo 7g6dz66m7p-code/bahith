@@ -10,6 +10,7 @@ describe('loadCliEnv', () => {
   beforeEach(() => {
     // Keep the developer's real .env out of the test.
     vi.spyOn(process, 'loadEnvFile').mockImplementation(() => undefined);
+    vi.stubEnv('AUTH_DATABASE_URL', '');
   });
 
   afterEach(() => {
@@ -53,4 +54,33 @@ describe('loadCliEnv', () => {
     vi.stubEnv('DATABASE_URL', 'postgresql://bahith_app:p%40ss%2Fw@localhost:5432/bahith');
     expect(loadCliEnv([]).appPassword).toBe('p@ss/w');
   });
+
+  it('requires the dedicated auth connection before provisioning migrations', () => {
+    vi.stubEnv('DATABASE_ADMIN_URL', local('bahith'));
+    vi.stubEnv('DATABASE_URL', local('bahith_app'));
+    expect(() => loadCliEnv([], { requireAuth: true })).toThrow(/AUTH_DATABASE_URL/);
+    vi.stubEnv('AUTH_DATABASE_URL', local('bahith_auth'));
+    expect(loadCliEnv([], { requireAuth: true })).toMatchObject({
+      authUrl: local('bahith_auth'),
+      authPassword: pw,
+    });
+  });
+
+  it.each([
+    local('bahith_app'),
+    'postgresql://bahith_auth@localhost:5432/bahith',
+    `postgresql://bahith_auth:${pw}@localhost:5433/bahith`,
+    `postgresql://bahith_auth:${pw}@localhost:5432/another`,
+    'not-a-connection-string',
+  ])(
+    'rejects auth credentials for the wrong role or database without exposing values',
+    (authUrl) => {
+      vi.stubEnv('DATABASE_ADMIN_URL', local('bahith'));
+      vi.stubEnv('DATABASE_URL', local('bahith_app'));
+      vi.stubEnv('AUTH_DATABASE_URL', authUrl);
+      expect(() => loadCliEnv([], { requireAuth: true })).toThrow(
+        expect.objectContaining({ code: 'DB_CONFIG_INVALID' }),
+      );
+    },
+  );
 });

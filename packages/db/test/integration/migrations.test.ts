@@ -25,7 +25,7 @@ const ENUMS = `SELECT t.typname AS name FROM pg_type t JOIN pg_namespace n ON n.
 const POLICIES = `SELECT policyname AS name FROM pg_policies WHERE schemaname = 'public' ORDER BY 1`;
 const EXTENSIONS = `SELECT extname AS name FROM pg_extension WHERE extname = 'vector'`;
 const SCHEMAS = `SELECT nspname AS name FROM pg_namespace WHERE nspname = 'app'`;
-const ROLES = `SELECT rolname AS name FROM pg_roles WHERE rolname = 'bahith_app'`;
+const ROLES = `SELECT rolname AS name FROM pg_roles WHERE rolname IN ('bahith_app', 'bahith_auth', 'bahith_identity_provisioner') ORDER BY 1`;
 
 describe('migrations', () => {
   let container: StartedPostgreSqlContainer;
@@ -46,9 +46,13 @@ describe('migrations', () => {
     const all = await loadMigrations();
     expect(await migrateUp(client)).toEqual(all.map((m) => m.tag));
 
-    expect(await listNames(client, TABLES)).toHaveLength(23 + 1); // + schema_migrations
+    expect(await listNames(client, TABLES)).toHaveLength(28 + 1); // + schema_migrations
     expect(await listNames(client, EXTENSIONS)).toEqual(['vector']);
-    expect(await listNames(client, ROLES)).toEqual(['bahith_app']);
+    expect(await listNames(client, ROLES)).toEqual([
+      'bahith_app',
+      'bahith_auth',
+      'bahith_identity_provisioner',
+    ]);
   });
 
   it('is idempotent: a second run applies nothing', async () => {
@@ -84,8 +88,22 @@ describe('migrations', () => {
     });
   });
 
-  it('rolls back one migration at a time, most recent first', async () => {
-    expect(await rollbackLast(client)).toEqual(['0003_sanad_provenance']);
+  it('rolls back private identity tables and roles before the preceding schema', async () => {
+    expect(await rollbackLast(client)).toEqual(['0004_auth_identity']);
+    expect(await listNames(client, ROLES)).toEqual(['bahith_app']);
+    expect(await listNames(client, TABLES)).toHaveLength(23 + 1);
+    expect(
+      (await client.query(`SELECT relrowsecurity FROM pg_class WHERE oid = 'users'::regclass`))
+        .rows,
+    ).toEqual([{ relrowsecurity: false }]);
+    expect(await migrateUp(client)).toEqual(['0004_auth_identity']);
+  });
+
+  it('can still roll back provenance while retaining the existing research schema', async () => {
+    const reverted = await rollbackLast(client, 2);
+    expect(reverted).toHaveLength(2);
+    expect(reverted[0]).toBe('0004_auth_identity');
+    expect(reverted[1]).toBe('0003_sanad_provenance');
     expect(await listNames(client, ROLES)).toEqual(['bahith_app']);
     const columns = await listNames(
       client,
@@ -93,15 +111,22 @@ describe('migrations', () => {
        WHERE table_name IN ('files', 'chunks') AND column_name IN ('extraction', 'provenance')`,
     );
     expect(columns).toEqual([]);
-    expect(await migrateUp(client)).toEqual(['0003_sanad_provenance']);
+    expect(await migrateUp(client)).toEqual(['0003_sanad_provenance', '0004_auth_identity']);
   });
 
   it('can still roll back the preceding security migration', async () => {
-    expect(await rollbackLast(client, 2)).toEqual(['0003_sanad_provenance', '0002_security']);
+    expect(await rollbackLast(client, 3)).toEqual([
+      '0004_auth_identity',
+      '0003_sanad_provenance',
+      '0002_security',
+    ]);
     expect(await listNames(client, ROLES)).toEqual([]);
-    // Tables are still there after reverting only the security migration.
     expect(await listNames(client, TABLES)).toHaveLength(23 + 1);
-    expect(await migrateUp(client)).toEqual(['0002_security', '0003_sanad_provenance']);
+    expect(await migrateUp(client)).toEqual([
+      '0002_security',
+      '0003_sanad_provenance',
+      '0004_auth_identity',
+    ]);
   });
 
   it('rolls everything back to an empty database, then applies it all again', async () => {
@@ -118,6 +143,6 @@ describe('migrations', () => {
     expect(await rollbackLast(client)).toEqual([]);
 
     expect(await migrateUp(client)).toEqual(all.map((m) => m.tag));
-    expect(await listNames(client, TABLES)).toHaveLength(23 + 1);
+    expect(await listNames(client, TABLES)).toHaveLength(28 + 1);
   });
 });

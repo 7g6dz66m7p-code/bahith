@@ -12,7 +12,15 @@ import { allTables } from '../tables';
 const tables = allTables.map((table) => getTableConfig(table));
 
 /** Tables that are global by design: they hold no research data. */
-const GLOBAL_TABLES = new Set(['users', 'plans']);
+const GLOBAL_TABLES = new Set([
+  'users',
+  'plans',
+  'sessions',
+  'accounts',
+  'verifications',
+  'two_factors',
+  'auth_rate_limits',
+]);
 /** The tenant root: isolated by its own id rather than by a workspace_id column. */
 const TENANT_ROOT = 'workspaces';
 
@@ -21,10 +29,12 @@ const tenantTables = tables.filter(
 );
 
 describe('database schema', () => {
-  it('declares exactly the tables Phase 1 specifies', () => {
+  it('declares the existing research tables and private identity tables', () => {
     expect(tables.map((table) => table.name).sort()).toEqual(
       [
         'agent_runs',
+        'accounts',
+        'auth_rate_limits',
         'audit_log',
         'chunks',
         'citations',
@@ -43,9 +53,12 @@ describe('database schema', () => {
         'projects',
         'research_plans',
         'sources',
+        'sessions',
         'subscriptions',
         'usage_counters',
         'users',
+        'two_factors',
+        'verifications',
         'workspaces',
       ].sort(),
     );

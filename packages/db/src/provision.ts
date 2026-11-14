@@ -1,7 +1,7 @@
 import type pg from 'pg';
 import { z } from 'zod';
 
-import { APP_ROLE } from './schema/_shared';
+import { APP_ROLE, AUTH_ROLE } from './schema/_shared';
 
 const formatted = z.array(z.object({ statement: z.string() })).length(1);
 
@@ -11,10 +11,23 @@ const formatted = z.array(z.object({ statement: z.string() })).length(1);
  * is never written to a migration, a log line or a tracked file.
  */
 export async function provisionAppRole(client: pg.ClientBase, password: string): Promise<void> {
+  return provisionLoginRole(client, APP_ROLE, password);
+}
+
+/** Private identity connection; never grant this role access to research tables. */
+export async function provisionAuthRole(client: pg.ClientBase, password: string): Promise<void> {
+  return provisionLoginRole(client, AUTH_ROLE, password);
+}
+
+async function provisionLoginRole(
+  client: pg.ClientBase,
+  role: string,
+  password: string,
+): Promise<void> {
   // ALTER ROLE cannot take bind parameters; format('%I' / '%L') quotes safely in SQL.
   const result = await client.query(
     `SELECT format('ALTER ROLE %I WITH LOGIN PASSWORD %L', $1::text, $2::text) AS statement`,
-    [APP_ROLE, password],
+    [role, password],
   );
   const [row] = formatted.parse(result.rows);
   if (row === undefined) {

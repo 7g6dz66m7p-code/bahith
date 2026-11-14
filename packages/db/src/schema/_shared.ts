@@ -4,6 +4,10 @@ import { customType, pgPolicy, timestamp, unique, uuid } from 'drizzle-orm/pg-co
 
 /** Name of the database role the application connects as. It has no BYPASSRLS. */
 export const APP_ROLE = 'bahith_app';
+/** Private identity runtime: no access to research tables. */
+export const AUTH_ROLE = 'bahith_auth';
+/** Trigger owner with only the INSERT grants needed for first-workspace provisioning. */
+export const IDENTITY_PROVISIONER_ROLE = 'bahith_identity_provisioner';
 
 /** Fixed dimension of `chunks.embedding` (see ADR-0002). */
 export const EMBEDDING_DIMENSIONS = 1024;

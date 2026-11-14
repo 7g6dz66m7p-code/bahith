@@ -50,6 +50,23 @@ set(
     `postgresql://bahith_app:${secret()}` +
     `@localhost:${env.get('POSTGRES_PORT')}/${env.get('POSTGRES_DB')}`,
 );
+set(
+  'AUTH_DATABASE_URL',
+  () =>
+    `postgresql://bahith_auth:${secret()}` +
+    `@localhost:${env.get('POSTGRES_PORT')}/${env.get('POSTGRES_DB')}`,
+);
+set('BETTER_AUTH_SECRET', secret);
+set('BETTER_AUTH_URL', () => 'http://localhost:3000');
+set('GOOGLE_CLIENT_ID', () => '');
+set('GOOGLE_CLIENT_SECRET', () => '');
+set('SMTP_HOST', () => 'localhost');
+set('SMTP_PORT', () => '1025');
+set('SMTP_SECURE', () => 'false');
+set('SMTP_FROM', () => 'no-reply@bahith.local');
+set('SMTP_USER', () => '');
+set('SMTP_PASSWORD', () => '');
+set('MAILPIT_HTTP_PORT', () => '8025');
 
 set('REDIS_PASSWORD', secret);
 set('REDIS_PORT', () => '6379');

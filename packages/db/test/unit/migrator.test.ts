@@ -35,6 +35,7 @@ describe('loadMigrations', () => {
       '0001_schema',
       '0002_security',
       '0003_sanad_provenance',
+      '0004_auth_identity',
     ]);
     for (const migration of migrations) {
       expect(migration.downSql.trim(), migration.tag).not.toBe('');

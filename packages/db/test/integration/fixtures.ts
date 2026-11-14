@@ -1,4 +1,7 @@
 import { getTableConfig } from 'drizzle-orm/pg-core';
+import { inject } from 'vitest';
+
+import { createDatabase } from '../../src/client';
 
 import type { Database } from '../../src/client';
 import * as schema from '../../src/schema/index';
@@ -44,24 +47,33 @@ export async function seedWorkspace(
   label: string,
   planId: string,
 ): Promise<WorkspaceFixture> {
-  const user = only(
-    await database.db
-      .insert(schema.users)
-      .values({ email: `${label}-${crypto.randomUUID()}@example.test`, name: `User ${label}` })
-      .returning({ id: schema.users.id }),
-  );
-  const workspaceId = crypto.randomUUID();
+  // Identity creation uses the real private auth role. The database trigger creates
+  // its personal workspace and owner membership atomically with the user.
+  const auth = createDatabase({ connectionString: inject('authUrl') });
+  let userId: string;
+  try {
+    userId = only(
+      await auth.db
+        .insert(schema.users)
+        .values({
+          email: `${label}-${crypto.randomUUID()}@example.test`,
+          name: `Workspace ${label}`,
+        })
+        .returning({ id: schema.users.id }),
+    ).id;
+  } finally {
+    await auth.close();
+  }
+  const user = { id: userId };
+  const workspaceId = only(
+    await database.withUser(userId, (tx) =>
+      tx.select({ id: schema.workspaces.id }).from(schema.workspaces),
+    ),
+  ).id;
 
   return database.withWorkspace(
     workspaceId,
     async (tx) => {
-      await tx.insert(schema.workspaces).values({
-        id: workspaceId,
-        name: `Workspace ${label}`,
-        createdBy: user.id,
-      });
-      await tx.insert(schema.memberships).values({ workspaceId, userId: user.id, role: 'owner' });
-
       const project = only(
         await tx
           .insert(schema.projects)
