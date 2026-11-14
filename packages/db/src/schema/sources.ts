@@ -43,6 +43,29 @@ export interface CslName {
   literal?: string;
 }
 
+/** Immutable processing identity of one uploaded source version. No source text. */
+export interface ExtractionMetadata {
+  schemaVersion: 1;
+  manifestSha256: string;
+  extractorVersion: string;
+  chunkerVersion: string;
+  unitCount: number;
+  chunkCount: number;
+  failures: { unitIndex: number; page: number | null; code: string }[];
+}
+
+/** Code-point offsets into the original extracted unit, before search normalisation. */
+export interface ChunkProvenance {
+  fileSha256: string;
+  extractorVersion: string;
+  chunkerVersion: string;
+  unitIndex: number;
+  charStart: number;
+  charEnd: number;
+  direction: 'rtl' | 'ltr' | 'auto';
+  unitKind: 'page' | 'paragraph' | 'table_cell' | 'text';
+}
+
 /**
  * Bibliographic record. References are always built by code from these rows
  * (never by a language model), and only once `verification_status = 'verified'`.
@@ -132,6 +155,7 @@ export const files = pgTable(
     mimeType: text('mime_type').notNull(),
     sizeBytes: bigint('size_bytes', { mode: 'number' }).notNull(),
     sha256: text('sha256'),
+    extraction: jsonb('extraction').$type<ExtractionMetadata>(),
     pageCount: integer('page_count'),
     status: fileStatusEnum('status').notNull().default('uploaded'),
     errorCode: text('error_code'),
@@ -175,6 +199,7 @@ export const chunks = pgTable(
     content: text('content').notNull(),
     tokenCount: integer('token_count'),
     locator: jsonb('locator').$type<ChunkLocator>(),
+    provenance: jsonb('provenance').$type<ChunkProvenance>(),
     tsv: tsvector('tsv').generatedAlwaysAs(
       (): SQL => sql`to_tsvector('simple', app.normalize_arabic(${chunks.content}))`,
     ),
@@ -202,6 +227,7 @@ export const chunks = pgTable(
       'chunks_embedding_has_model',
       sql`${t.embedding} is null or ${t.embeddingModel} is not null`,
     ),
+    check('chunks_provenance_has_file', sql`${t.provenance} is null or ${t.fileId} is not null`),
     foreignKey({
       name: 'chunks_source_fk',
       columns: [t.workspaceId, t.sourceId],

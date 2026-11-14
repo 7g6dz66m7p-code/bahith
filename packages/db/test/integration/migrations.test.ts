@@ -85,11 +85,23 @@ describe('migrations', () => {
   });
 
   it('rolls back one migration at a time, most recent first', async () => {
-    expect(await rollbackLast(client)).toEqual(['0002_security']);
+    expect(await rollbackLast(client)).toEqual(['0003_sanad_provenance']);
+    expect(await listNames(client, ROLES)).toEqual(['bahith_app']);
+    const columns = await listNames(
+      client,
+      `SELECT column_name AS name FROM information_schema.columns
+       WHERE table_name IN ('files', 'chunks') AND column_name IN ('extraction', 'provenance')`,
+    );
+    expect(columns).toEqual([]);
+    expect(await migrateUp(client)).toEqual(['0003_sanad_provenance']);
+  });
+
+  it('can still roll back the preceding security migration', async () => {
+    expect(await rollbackLast(client, 2)).toEqual(['0003_sanad_provenance', '0002_security']);
     expect(await listNames(client, ROLES)).toEqual([]);
     // Tables are still there after reverting only the security migration.
     expect(await listNames(client, TABLES)).toHaveLength(23 + 1);
-    expect(await migrateUp(client)).toEqual(['0002_security']);
+    expect(await migrateUp(client)).toEqual(['0002_security', '0003_sanad_provenance']);
   });
 
   it('rolls everything back to an empty database, then applies it all again', async () => {
