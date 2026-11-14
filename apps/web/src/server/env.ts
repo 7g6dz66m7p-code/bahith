@@ -15,7 +15,7 @@ export class EnvError extends Error {
   constructor(variables: string[]) {
     super(
       `Missing or invalid environment variables: ${variables.join(', ')}. ` +
-        'Run "pnpm setup" or see .env.example.',
+        'Run "pnpm bootstrap" or see .env.example.',
     );
     this.name = 'EnvError';
     this.variables = variables;

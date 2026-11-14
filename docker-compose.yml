@@ -1,6 +1,6 @@
 # Local development services for BAHITH. Not a production deployment.
 #
-# Every credential comes from .env (never tracked). Create it with:  pnpm setup
+# Every credential comes from .env (never tracked). Create it with:  pnpm bootstrap
 # All ports are published on 127.0.0.1 only.
 name: bahith
 
@@ -9,9 +9,9 @@ services:
     image: pgvector/pgvector:pg16
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:?Run "pnpm setup" to create .env}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run "pnpm setup" to create .env}
-      POSTGRES_DB: ${POSTGRES_DB:?Run "pnpm setup" to create .env}
+      POSTGRES_USER: ${POSTGRES_USER:?Run "pnpm bootstrap" to create .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run "pnpm bootstrap" to create .env}
+      POSTGRES_DB: ${POSTGRES_DB:?Run "pnpm bootstrap" to create .env}
     ports:
       - '127.0.0.1:${POSTGRES_PORT:-5432}:5432'
     volumes:
@@ -26,7 +26,7 @@ services:
     image: redis:7-alpine
     restart: unless-stopped
     environment:
-      REDIS_PASSWORD: ${REDIS_PASSWORD:?Run "pnpm setup" to create .env}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Run "pnpm bootstrap" to create .env}
     # BullMQ requires that no key is ever evicted.
     command:
       - sh
@@ -49,8 +49,8 @@ services:
     image: coollabsio/minio:RELEASE.2025-10-15T17-29-55Z
     restart: unless-stopped
     environment:
-      MINIO_ROOT_USER: ${S3_ACCESS_KEY_ID:?Run "pnpm setup" to create .env}
-      MINIO_ROOT_PASSWORD: ${S3_SECRET_ACCESS_KEY:?Run "pnpm setup" to create .env}
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY_ID:?Run "pnpm bootstrap" to create .env}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_ACCESS_KEY:?Run "pnpm bootstrap" to create .env}
     command: server /data --console-address ":9001"
     ports:
       - '127.0.0.1:${MINIO_PORT:-9000}:9000'

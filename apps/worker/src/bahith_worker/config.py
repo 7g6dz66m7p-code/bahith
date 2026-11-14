@@ -33,5 +33,5 @@ def load_settings() -> Settings:
         names = sorted({".".join(str(part) for part in e["loc"]).upper() for e in error.errors()})
         raise ConfigError(
             f"Missing or invalid environment variables: {', '.join(names)}. "
-            'Run "pnpm setup" or see .env.example.'
+            'Run "pnpm bootstrap" or see .env.example.'
         ) from None

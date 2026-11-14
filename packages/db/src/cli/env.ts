@@ -37,7 +37,7 @@ export function loadCliEnv(argv: readonly string[] = process.argv.slice(2)): Cli
     const missing = parsed.error.issues.map((issue) => issue.path.join('.')).join(', ');
     throw new DbError(
       'DB_CONFIG_INVALID',
-      `Missing or invalid environment variables: ${missing}. Run "pnpm setup" or see .env.example.`,
+      `Missing or invalid environment variables: ${missing}. Run "pnpm bootstrap" or see .env.example.`,
     );
   }
 

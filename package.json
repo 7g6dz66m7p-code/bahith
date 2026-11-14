@@ -8,7 +8,7 @@
     "node": ">=22.12"
   },
   "scripts": {
-    "setup": "node scripts/setup-env.mjs",
+    "bootstrap": "node scripts/setup-env.mjs",
     "dev": "turbo run dev",
     "build": "turbo run build",
     "lint": "turbo run lint",

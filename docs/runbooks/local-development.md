@@ -7,7 +7,7 @@ pnpm install
 ```
 
 ```bash
-pnpm setup
+pnpm bootstrap
 ```
 
 ```bash
@@ -26,7 +26,7 @@ pnpm db:seed
 pnpm dev
 ```
 
-- `pnpm setup` ينشئ `.env` (غير مُتتبَّع) بكلمات مرور عشوائية. إعادة تشغيله لا تغيّر القيم الموجودة.
+- `pnpm bootstrap` ينشئ `.env` (غير مُتتبَّع) بكلمات مرور عشوائية. إعادة تشغيله لا تغيّر القيم الموجودة.
 - `pnpm dev` يشغّل تطبيق الويب (المنفذ 3000) وعامل Python معاً.
 - الخدمات المحلية تُنشر على `127.0.0.1` فقط: Postgres 5432، Redis 6379، MinIO 9000 (واجهة الإدارة 9001).
 
@@ -98,12 +98,12 @@ pnpm db:rollback
 
 ## 4. حل المشكلات
 
-| العَرَض                                                     | السبب والحل                                                                                       |
-| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `Run "pnpm setup" to create .env` عند `docker compose up` | لا يوجد `.env`. شغّل `pnpm setup`.                                                                 |
-| `pre-commit: gitleaks is not installed`                   | ثبّت gitleaks (انظر README) ثم أعد الـcommit.                                                      |
-| `/api/health` يُرجع 503                                    | الحقل `checks` يحدد الخدمة المتوقفة. تحقق من `docker compose ps` ومن تشغيل `pnpm db:migrate`.     |
-| `password authentication failed for user "bahith_app"`    | تغيّرت كلمة المرور في `.env` بعد إنشاء الدور. أعد `pnpm db:migrate` (يعيد ضبطها).                  |
-| `Migration ... was modified after it was applied`         | عُدّلت هجرة مطبَّقة. تراجع عن التعديل وأضف هجرة جديدة. محلياً فقط: `docker compose down -v` لبدء نظيف. |
-| `Could not find a working container runtime strategy`     | Docker غير شغّال؛ اختبارات التكامل تحتاجه.                                                         |
-| فشل سحب صورة MinIO                                        | الصورة المستخدمة بناء مجتمعي (`coollabsio/minio`) لأن `minio/minio` لم تعد تُنشر على Docker Hub.   |
+| العَرَض                                                         | السبب والحل                                                                                       |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `Run "pnpm bootstrap" to create .env` عند `docker compose up` | لا يوجد `.env`. شغّل `pnpm bootstrap`.                                                             |
+| `pre-commit: gitleaks is not installed`                       | ثبّت gitleaks (انظر README) ثم أعد الـcommit.                                                      |
+| `/api/health` يُرجع 503                                        | الحقل `checks` يحدد الخدمة المتوقفة. تحقق من `docker compose ps` ومن تشغيل `pnpm db:migrate`.     |
+| `password authentication failed for user "bahith_app"`        | تغيّرت كلمة المرور في `.env` بعد إنشاء الدور. أعد `pnpm db:migrate` (يعيد ضبطها).                  |
+| `Migration ... was modified after it was applied`             | عُدّلت هجرة مطبَّقة. تراجع عن التعديل وأضف هجرة جديدة. محلياً فقط: `docker compose down -v` لبدء نظيف. |
+| `Could not find a working container runtime strategy`         | Docker غير شغّال؛ اختبارات التكامل تحتاجه.                                                         |
+| فشل سحب صورة MinIO                                            | الصورة المستخدمة بناء مجتمعي (`coollabsio/minio`) لأن `minio/minio` لم تعد تُنشر على Docker Hub.   |

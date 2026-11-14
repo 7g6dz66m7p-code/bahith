@@ -24,7 +24,7 @@ pnpm install
 ```
 
 ```bash
-pnpm setup
+pnpm bootstrap
 ```
 
 ```bash
@@ -45,7 +45,7 @@ pnpm dev
 
 ثم افتح <http://localhost:3000> (يُحوَّل إلى `/ar` أو `/en` حسب لغة المتصفح). فحص الصحة: <http://localhost:3000/api/health>.
 
-`pnpm setup` ينشئ `.env` محلياً بكلمات مرور عشوائية؛ الملف غير مُتتبَّع، و`.env.example` يحمل أسماء المتغيرات فقط.
+`pnpm bootstrap` ينشئ `.env` محلياً بكلمات مرور عشوائية؛ الملف غير مُتتبَّع، و`.env.example` يحمل أسماء المتغيرات فقط.
 
 ## الأوامر
 
