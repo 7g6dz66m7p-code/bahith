@@ -81,3 +81,9 @@ docs/           PRD، ADRs، runbooks، تقارير المراحل
 ```
 
 تفاصيل التطوير اليومي (إضافة هجرة، حل المشكلات): [`docs/runbooks/local-development.md`](docs/runbooks/local-development.md).
+
+نواة SANAD-X التدريجية: استخراج PDF/DOCX/TXT مع تتبع النسخ والمواضع، وحفظ واسترجاع
+داخلي مع عزل المشروع، وكشف مرشحات ادعاءات ومطابقة اقتباسات تحتاج مراجعة بشرية.
+التشغيل والحدود: [`docs/runbooks/sanad-x.md`](docs/runbooks/sanad-x.md)، والقرار:
+[`ADR-0006`](docs/adr/0006-sanad-x-incremental-evidence-engine.md). المصادقة والواجهة
+ومزودات النماذج والوحدات البحثية المتبقية غير مكتملة؛ هذه النواة لا تثبت صحة علمية.
