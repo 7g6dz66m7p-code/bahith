@@ -71,6 +71,7 @@ apps/
   web/          Next.js: الواجهة + Route Handlers
   worker/       Python: معالجة المستندات (يستهلك من BullMQ)
 packages/
+  auth/         Better Auth: جلسات موثقة وبريد وTOTP وصلاحيات هوية مستقلة
   db/           مخطط Drizzle، الهجرات، سياسات RLS، withWorkspace
   ai/           طبقة المزوّدين (الوكلاء والبرومبتات من المرحلة 3)
   citations/    citeproc + CSL (من المرحلة 4)
@@ -85,5 +86,14 @@ docs/           PRD، ADRs، runbooks، تقارير المراحل
 نواة SANAD-X التدريجية: استخراج PDF/DOCX/TXT مع تتبع النسخ والمواضع، وحفظ واسترجاع
 داخلي مع عزل المشروع، وكشف مرشحات ادعاءات ومطابقة اقتباسات تحتاج مراجعة بشرية.
 التشغيل والحدود: [`docs/runbooks/sanad-x.md`](docs/runbooks/sanad-x.md)، والقرار:
-[`ADR-0006`](docs/adr/0006-sanad-x-incremental-evidence-engine.md). المصادقة والواجهة
-ومزودات النماذج والوحدات البحثية المتبقية غير مكتملة؛ هذه النواة لا تثبت صحة علمية.
+[`ADR-0006`](docs/adr/0006-sanad-x-incremental-evidence-engine.md).
+
+المرحلة الثانية متاحة: التسجيل وتأكيد البريد والدخول والاستعادة وTOTP، ولوحة مشاريع
+فعلية بلغتين ووضعين فاتح/داكن. بعد التشغيل افتح `/ar/sign-up` أو `/en/sign-up`، ثم
+رسالة التحقق في [صندوق Mailpit المحلي](http://localhost:8025). بيانات الدخول لا تغادر
+خدمة SMTP المحلية في إعداد التطوير. Google اختياري ويتطلب إعداد مزود حقيقي.
+التقرير: [`docs/reports/phase-2.md`](docs/reports/phase-2.md)، وقرار الصلاحيات:
+[`ADR-0007`](docs/adr/0007-private-auth-and-verified-sessions.md).
+
+الرفع وربط العامل ومزودات النماذج وبقية الأدوات البحثية ما زالت قيد الاستكمال.
+مطابقة الاقتباس أو نتيجة الاسترجاع لا تثبت صحة علمية.
