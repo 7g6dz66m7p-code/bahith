@@ -1,0 +1,39 @@
+{
+  "name": "@bahith/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next typegen && eslint .",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run --config vitest.config.ts",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@bahith/db": "workspace:*",
+    "ioredis": "^5.8.2",
+    "next": "^16.4.6",
+    "next-intl": "^4.15.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@bahith/config": "workspace:*",
+    "@playwright/test": "1.63.0",
+    "@tailwindcss/postcss": "^4.3.5",
+    "@testcontainers/redis": "^12.2.1",
+    "@types/node": "^22.19.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "eslint": "^9.39.5",
+    "tailwindcss": "^4.3.5",
+    "testcontainers": "^12.2.1",
+    "typescript": "~6.0.3",
+    "vitest": "^5.1.0"
+  }
+}

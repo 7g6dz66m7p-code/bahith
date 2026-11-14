@@ -1,0 +1,22 @@
+{
+  "Metadata": {
+    "title": "BAHITH | باحث",
+    "description": "An Arabic-first academic research platform: from research question to export, with every claim tied to evidence."
+  },
+  "Home": {
+    "name": "BAHITH",
+    "tagline": "Your methodical assistant for academic research, from research question to export.",
+    "principleTitle": "Governing principle",
+    "principle": "Every claim is linked to verifiable evidence (source, page and passage), or explicitly labelled as an inference, a hypothesis or unsupported.",
+    "status": "The platform is under construction."
+  },
+  "LocaleSwitcher": {
+    "label": "Language",
+    "ar": "العربية",
+    "en": "English"
+  },
+  "NotFound": {
+    "title": "Page not found",
+    "backHome": "Back to the home page"
+  }
+}
