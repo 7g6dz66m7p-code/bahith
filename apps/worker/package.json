@@ -1,0 +1,12 @@
+{
+  "name": "@bahith/worker",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Python worker. This package.json only lets Turborepo run its tasks; dependencies live in pyproject.toml (uv).",
+  "scripts": {
+    "dev": "uv run python -m bahith_worker",
+    "lint": "uv run ruff check . && uv run ruff format --check .",
+    "test": "uv run pytest",
+    "test:integration": "uv run pytest -m integration"
+  }
+}
