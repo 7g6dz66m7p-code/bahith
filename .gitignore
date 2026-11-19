@@ -35,3 +35,6 @@ __pycache__/
 !.vscode/extensions.json
 .DS_Store
 *.log
+
+# agent worktrees (local only)
+.claude/worktrees/

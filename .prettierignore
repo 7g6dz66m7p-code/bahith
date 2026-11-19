@@ -13,3 +13,4 @@ packages/db/migrations/meta
 packages/db/migrations/*.sql
 # the owner's master prompt is kept verbatim
 CLAUDE.md
+.claude
