@@ -89,3 +89,40 @@ export async function createProject(database: Database, userId: string, input: u
     return project;
   });
 }
+
+/** One project with the caller's role, for the project workspace page. */
+export async function getProjectForUser(
+  database: Database,
+  userId: string,
+  workspaceId: string,
+  projectId: string,
+) {
+  if (!z.uuid().safeParse(projectId).success) throw new SanadError('SANAD_INVALID_INPUT');
+  return withWorkspaceMember(database, userId, workspaceId, false, async (tx) => {
+    const [member] = await tx
+      .select({ role: memberships.role })
+      .from(memberships)
+      .where(and(eq(memberships.userId, userId), eq(memberships.workspaceId, workspaceId)));
+    const [project] = await tx
+      .select({
+        id: projects.id,
+        workspaceId: projects.workspaceId,
+        title: projects.title,
+        researchQuestion: projects.researchQuestion,
+        language: projects.language,
+        citationStyle: projects.citationStyle,
+        createdAt: projects.createdAt,
+      })
+      .from(projects)
+      .where(and(eq(projects.workspaceId, workspaceId), eq(projects.id, projectId)));
+    if (project === undefined || member === undefined) {
+      throw new SanadError('SANAD_PROJECT_NOT_FOUND');
+    }
+    return {
+      ...project,
+      createdAt: project.createdAt.toISOString(),
+      role: member.role,
+      canWrite: member.role === 'owner' || member.role === 'editor',
+    };
+  });
+}

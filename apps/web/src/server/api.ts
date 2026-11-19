@@ -39,7 +39,7 @@ export function apiError(error: unknown): Response {
         status:
           error.code === 'SANAD_FORBIDDEN'
             ? 403
-            : error.code === 'SANAD_PROJECT_NOT_FOUND'
+            : error.code === 'SANAD_PROJECT_NOT_FOUND' || error.code === 'SANAD_FILE_NOT_FOUND'
               ? 404
               : 400,
       },

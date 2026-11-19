@@ -7,6 +7,7 @@ import path from 'node:path';
 
 import { createDatabase } from '@bahith/db';
 import { seedReferenceData, startTestDatabase } from '@bahith/db/testing';
+import { createStorage } from '@bahith/pipeline';
 import { GenericContainer, Wait } from 'testcontainers';
 
 const require = createRequire(import.meta.url);
@@ -18,6 +19,31 @@ const mail = await new GenericContainer('axllent/mailpit:v1.33.1')
   .withWaitStrategy(Wait.forListeningPorts())
   .start();
 const redis = await new GenericContainer('redis:7-alpine').withExposedPorts(6379).start();
+// Object storage for uploaded sources; credentials exist only inside this container.
+const s3User = `e2e-${crypto.randomUUID().slice(0, 8)}`;
+const s3Secret = crypto.randomUUID();
+const minio = await new GenericContainer('coollabsio/minio:RELEASE.2025-10-15T17-29-55Z')
+  .withEnvironment({ MINIO_ROOT_USER: s3User, MINIO_ROOT_PASSWORD: s3Secret })
+  .withCommand(['server', '/data'])
+  .withExposedPorts(9000)
+  .withWaitStrategy(Wait.forHttp('/minio/health/live', 9000))
+  .start();
+const storageEnv = {
+  S3_ENDPOINT: `http://${minio.getHost()}:${minio.getMappedPort(9000)}`,
+  S3_REGION: 'us-east-1',
+  S3_BUCKET: 'bahith-e2e',
+  S3_ACCESS_KEY_ID: s3User,
+  S3_SECRET_ACCESS_KEY: s3Secret,
+  S3_FORCE_PATH_STYLE: 'true',
+};
+await createStorage({
+  endpoint: storageEnv.S3_ENDPOINT,
+  region: storageEnv.S3_REGION,
+  bucket: storageEnv.S3_BUCKET,
+  accessKeyId: s3User,
+  secretAccessKey: s3Secret,
+  forcePathStyle: true,
+}).ensureBucket();
 const admin = createDatabase({ connectionString: database.adminUrl });
 const client = await admin.pool.connect();
 try {
@@ -42,17 +68,34 @@ const env = {
   GOOGLE_CLIENT_SECRET: '',
   NEXT_TELEMETRY_DISABLED: '1',
   REDIS_URL: `redis://${redis.getHost()}:${redis.getMappedPort(6379)}`,
+  ...storageEnv,
 };
+// The real background workers: Python extraction (OCR) and Node ingestion.
+const rootDir = path.resolve(appDir, '../..');
+const workers: ChildProcess[] = [
+  spawn('uv', ['run', '--quiet', 'python', '-m', 'bahith_worker'], {
+    cwd: path.join(rootDir, 'apps/worker'),
+    env,
+    stdio: ['ignore', 'ignore', 'inherit'],
+  }),
+  spawn(process.execPath, [require.resolve('tsx/cli'), 'src/main.ts'], {
+    cwd: path.join(rootDir, 'apps/jobs'),
+    env,
+    stdio: ['ignore', 'ignore', 'inherit'],
+  }),
+];
 let child: ChildProcess | undefined;
 let closing = false;
 async function cleanup() {
   if (closing) return;
   closing = true;
   child?.kill('SIGTERM');
+  for (const worker of workers) worker.kill('SIGTERM');
   await Promise.allSettled([
     database.stop(),
     mail.stop(),
     redis.stop(),
+    minio.stop(),
     rm(runtimeFile, { force: true }),
   ]);
 }

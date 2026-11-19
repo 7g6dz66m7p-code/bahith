@@ -23,7 +23,8 @@
     "db:rollback": "pnpm --filter @bahith/db run rollback",
     "db:seed": "pnpm --filter @bahith/db run seed",
     "secrets:scan": "gitleaks git --redact --no-banner",
-    "prepare": "husky"
+    "prepare": "husky",
+    "storage:init": "pnpm --filter @bahith/jobs exec tsx src/init-storage.ts"
   },
   "devDependencies": {
     "husky": "^9.1.7",

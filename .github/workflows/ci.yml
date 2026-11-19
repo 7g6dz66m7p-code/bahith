@@ -53,6 +53,8 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - uses: astral-sh/setup-uv@v6
+      # Local OCR for the document worker (Arabic + English traineddata).
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq tesseract-ocr tesseract-ocr-ara tesseract-ocr-eng
       - run: pnpm install --frozen-lockfile
       - run: pnpm test
 
@@ -68,14 +70,17 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - uses: astral-sh/setup-uv@v6
+      # Local OCR for the document worker (Arabic + English traineddata).
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq tesseract-ocr tesseract-ocr-ara tesseract-ocr-eng
       - run: pnpm install --frozen-lockfile
-      # Real Postgres 16 + pgvector and Redis containers; includes the isolation test.
-      - run: pnpm test:integration
+      # Real Postgres 16 + pgvector, Redis and MinIO containers, and the real Python
+      # worker for the document pipeline test; includes the isolation tests.
+      - run: pnpm test:integration --concurrency=1
 
   e2e:
     name: End-to-end tests (Playwright, ar + en)
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -83,6 +88,9 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
+      - uses: astral-sh/setup-uv@v6
+      # Local OCR for the document worker (Arabic + English traineddata).
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq tesseract-ocr tesseract-ocr-ara tesseract-ocr-eng
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @bahith/web exec playwright install --with-deps chromium
       - run: pnpm --filter @bahith/web run test:e2e

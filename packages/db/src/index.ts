@@ -24,6 +24,7 @@ export type { SanadRetrieveInput, SanadRetrieveResult, SanadEvidence } from './s
 export {
   createProject,
   createProjectSchema,
+  getProjectForUser,
   listUserProjects,
   withWorkspaceMember,
 } from './projects';

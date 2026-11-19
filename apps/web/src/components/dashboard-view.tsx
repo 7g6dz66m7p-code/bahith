@@ -266,6 +266,12 @@ export function DashboardView({ name, workspaces, projects }: DashboardData & { 
                   <p className="muted break-words leading-relaxed" dir="auto">
                     {project.researchQuestion ?? t('questionMissing')}
                   </p>
+                  <Link
+                    className="btn-secondary inline-block"
+                    href={`/workspaces/${project.workspaceId}/projects/${project.id}`}
+                  >
+                    {t('openProject')}
+                  </Link>
                   <div className="muted flex flex-wrap justify-between gap-3 text-sm">
                     <span>{t(project.language === 'ar' ? 'arabic' : 'english')}</span>
                     <time dateTime={project.createdAt}>
