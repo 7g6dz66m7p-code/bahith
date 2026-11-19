@@ -33,6 +33,7 @@ export {
   markFileFailed,
   markFileQueued,
   MAX_UPLOAD_BYTES,
+  recordProjectAudit,
   registerUpload,
   registerUploadSchema,
   titleFromFilename,

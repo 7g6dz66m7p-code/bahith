@@ -23,6 +23,29 @@ class Settings(BaseSettings):
     # Contract with the web app (the producer): one queue, jobs told apart by name.
     worker_queue: str = Field(default="bahith-documents", pattern=r"^[A-Za-z0-9_.-]+$")
     worker_concurrency: int = Field(default=2, ge=1, le=32)
+    # Queue consumed by the Node jobs process (packages/pipeline: INGEST_QUEUE).
+    ingest_queue: str = Field(default="bahith-ingest", pattern=r"^[A-Za-z0-9_.-]+$")
+
+    # Object storage. All optional here so the ping-only worker still starts; the
+    # document handler is enabled only when every required value is present.
+    s3_endpoint: str | None = None
+    s3_region: str | None = None
+    s3_bucket: str | None = None
+    s3_access_key_id: str | None = None
+    s3_secret_access_key: str | None = None
+    s3_force_path_style: bool = False
+
+    @property
+    def storage_configured(self) -> bool:
+        return all(
+            value
+            for value in (
+                self.s3_region,
+                self.s3_bucket,
+                self.s3_access_key_id,
+                self.s3_secret_access_key,
+            )
+        )
 
 
 def load_settings() -> Settings:

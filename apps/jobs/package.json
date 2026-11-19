@@ -1,0 +1,33 @@
+{
+  "name": "@bahith/jobs",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Node background jobs: validates extraction manifests and ingests them into SANAD.",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "start": "tsx src/main.ts",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test:integration": "vitest run --config vitest.integration.config.ts"
+  },
+  "dependencies": {
+    "@bahith/db": "workspace:*",
+    "@bahith/pipeline": "workspace:*",
+    "bullmq": "^6.7.6",
+    "tsx": "^4.23.15",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@bahith/config": "workspace:*",
+    "@testcontainers/postgresql": "^12.2.1",
+    "@types/node": "^22.19.0",
+    "@types/pg": "^8.23.1",
+    "eslint": "^9.39.5",
+    "ioredis": "^5.11.1",
+    "pg": "^8.23.1",
+    "testcontainers": "^12.2.1",
+    "typescript": "~6.0.3",
+    "vitest": "^5.1.0"
+  }
+}

@@ -7,7 +7,12 @@ from bahith_worker.jobs.ping import PING_JOB, handle_ping
 
 JobHandler = Callable[[Mapping[str, Any]], Awaitable[dict[str, Any]]]
 
-# Document jobs (extract, chunk, embed) are added in Phase 3.
+# Handlers that need storage or queues (sanad.extract) are registered at start-up by
+# __main__ once their configuration has been validated.
 HANDLERS: dict[str, JobHandler] = {
     PING_JOB: handle_ping,
 }
+
+
+def register_handler(name: str, handler: JobHandler) -> None:
+    HANDLERS[name] = handler

@@ -369,3 +369,28 @@ export async function listProjectLibrary(
     }));
   });
 }
+
+const auditInputSchema = z.strictObject({
+  action: z.string().regex(/^[a-z_]+(\.[a-z_]+)+$/),
+  entityType: z.string().regex(/^[a-z_]+$/),
+  entityId: z.uuid(),
+  /** Identifiers, codes and counts only — never research content. */
+  metadata: z.record(z.string(), z.union([z.string().max(100), z.number(), z.boolean(), z.null()])),
+});
+
+/** Appends an audit entry for an action the user performed (or a job did for them). */
+export async function recordProjectAudit(
+  database: Database,
+  context: SanadProjectContext,
+  input: z.input<typeof auditInputSchema>,
+): Promise<void> {
+  const parsed = auditInputSchema.safeParse(input);
+  if (!parsed.success) throw new SanadError('SANAD_INVALID_INPUT');
+  await withSanadProject(database, context, false, async (tx) => {
+    await tx.insert(auditLog).values({
+      workspaceId: context.workspaceId,
+      actorUserId: context.userId,
+      ...parsed.data,
+    });
+  });
+}
