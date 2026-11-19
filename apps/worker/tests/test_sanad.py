@@ -166,7 +166,8 @@ def test_docx_keeps_body_table_order_and_never_invents_page_numbers() -> None:
 @pytest.mark.parametrize(
     ("data", "mime_type", "code"),
     [
-        (b"synthetic", "image/png", "UNSUPPORTED_MIME_TYPE"),
+        (b"synthetic", "image/gif", "UNSUPPORTED_MIME_TYPE"),
+        (b"not an image private research", "image/png", "INVALID_DOCUMENT"),
         (b"%PDF-1.7 broken fixture private research", PDF, "INVALID_DOCUMENT"),
         (b"not a zip private research", DOCX, "INVALID_DOCUMENT"),
         (b"\xff\xfe invalid private research", TEXT, "INVALID_TEXT_ENCODING"),

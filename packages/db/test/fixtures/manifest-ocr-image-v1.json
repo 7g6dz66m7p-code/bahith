@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "fileSha256": "352ca758c64488bd77c0233c643c60decc14682cad34105f9eb93d1b83020405",
+  "mimeType": "image/png",
+  "extractorVersion": "sanad-image-v1+ocr-tesseract-5.3.4",
+  "chunkerVersion": "sanad-unicode-estimate-v1",
+  "units": [
+    {
+      "index": 0,
+      "page": 1,
+      "kind": "page",
+      "content": "المنهج العلمي في البحث\nتعتمد الدراسة على تحليل المصادر الأصلية",
+      "direction": "rtl",
+      "method": "ocr",
+      "ocrConfidence": 92.0
+    }
+  ],
+  "failures": [],
+  "chunks": [
+    {
+      "index": 0,
+      "unitIndex": 0,
+      "charStart": 0,
+      "charEnd": 62,
+      "content": "المنهج العلمي في البحث\nتعتمد الدراسة على تحليل المصادر الأصلية",
+      "pageStart": 1,
+      "pageEnd": 1,
+      "tokenCount": 10,
+      "direction": "rtl"
+    }
+  ]
+}

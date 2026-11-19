@@ -9,7 +9,7 @@ import { chunks, EMBEDDING_DIMENSIONS, files, projectSources, sources } from '..
 import type { SanadProjectContext } from './access';
 import { withSanadProject } from './access';
 import { SanadError } from './errors';
-import { parseExtractionManifest } from './manifest';
+import { isPagedMimeType, parseExtractionManifest } from './manifest';
 
 const embeddingBatchSchema = z.strictObject({
   model: z.string().trim().min(1).max(200),
@@ -130,6 +130,8 @@ export async function ingestExtraction(database: Database, input: IngestExtracti
               chunkerVersion: manifest.chunkerVersion,
               unitIndex: chunk.unitIndex,
               unitKind: units.get(chunk.unitIndex)?.kind ?? 'text',
+              extractionMethod: units.get(chunk.unitIndex)?.method ?? 'text',
+              ocrConfidence: units.get(chunk.unitIndex)?.ocrConfidence ?? null,
               charStart: chunk.charStart,
               charEnd: chunk.charEnd,
               direction: chunk.direction,
@@ -146,15 +148,14 @@ export async function ingestExtraction(database: Database, input: IngestExtracti
         sha256: manifest.fileSha256,
         status,
         errorCode: status === 'failed' ? 'SANAD_NO_TEXT' : null,
-        pageCount:
-          manifest.mimeType === 'application/pdf'
-            ? new Set(
-                [
-                  ...manifest.units.map((unit) => unit.page),
-                  ...manifest.failures.map((failure) => failure.page),
-                ].filter((page) => page !== null),
-              ).size
-            : null,
+        pageCount: isPagedMimeType(manifest.mimeType)
+          ? new Set(
+              [
+                ...manifest.units.map((unit) => unit.page),
+                ...manifest.failures.map((failure) => failure.page),
+              ].filter((page) => page !== null),
+            ).size
+          : null,
         extraction: {
           schemaVersion: 1,
           manifestSha256,

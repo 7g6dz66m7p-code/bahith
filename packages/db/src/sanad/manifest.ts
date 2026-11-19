@@ -10,15 +10,28 @@ const text = z
   .max(40_000_000)
   .refine((value) => !value.includes('\u0000') && !/\p{Surrogate}/u.test(value));
 
+/** MIME types the extractor understands; images are OCR'd page by page. */
+export const EXTRACTABLE_MIME_TYPES = [
+  'application/pdf',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'text/plain',
+  'image/png',
+  'image/jpeg',
+  'image/tiff',
+] as const;
+
+export type ExtractableMimeType = (typeof EXTRACTABLE_MIME_TYPES)[number];
+
+/** Formats whose units are physical pages (so every unit carries a page number). */
+export function isPagedMimeType(mimeType: string): boolean {
+  return mimeType === 'application/pdf' || mimeType.startsWith('image/');
+}
+
 /** Shared with the Python extractor. Offsets count Unicode code points, not UTF-16. */
 export const extractionManifestSchema = z.strictObject({
   schemaVersion: z.literal(1),
   fileSha256: z.string().regex(/^[a-f0-9]{64}$/),
-  mimeType: z.enum([
-    'application/pdf',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'text/plain',
-  ]),
+  mimeType: z.enum(EXTRACTABLE_MIME_TYPES),
   extractorVersion: z.string().min(1).max(200),
   chunkerVersion: z.string().min(1).max(200),
   units: z
@@ -29,6 +42,9 @@ export const extractionManifestSchema = z.strictObject({
         kind: z.enum(['page', 'paragraph', 'table_cell', 'text']),
         content: text,
         direction,
+        // Optional for manifests written before OCR existed (they are all "text").
+        method: z.enum(['text', 'ocr']).optional(),
+        ocrConfidence: z.number().min(0).max(100).nullable().optional(),
       }),
     )
     .max(20_000),
@@ -83,14 +99,20 @@ export function parseExtractionManifest(input: unknown): ExtractionManifest {
   if (manifest.units.reduce((sum, unit) => sum + codePointLength(unit.content), 0) > 20_000_000)
     invalid();
   const failed = new Set(manifest.failures.map((failure) => failure.unitIndex));
+  const paged = isPagedMimeType(manifest.mimeType);
   for (const unit of manifest.units) {
     if (failed.has(unit.index) && unit.content.length > 0) invalid();
-    if (manifest.mimeType === 'application/pdf') {
+    // OCR text only exists for page images, and always comes with its method label.
+    if (unit.method === 'ocr' && (!paged || unit.kind !== 'page')) invalid();
+    if (unit.method !== 'ocr' && unit.ocrConfidence != null) invalid();
+    if (manifest.mimeType.startsWith('image/') && unit.content.length > 0 && unit.method !== 'ocr')
+      invalid();
+    if (paged) {
       if (unit.kind !== 'page' || unit.page === null) invalid();
     } else if (unit.page !== null || unit.kind === 'page') invalid();
   }
   for (const failure of manifest.failures) {
-    if (manifest.mimeType !== 'application/pdf' && failure.page !== null) invalid();
+    if (!paged && failure.page !== null) invalid();
     const unit = unitMap.get(failure.unitIndex);
     if (unit !== undefined && unit.page !== failure.page) invalid();
   }

@@ -28,6 +28,10 @@ class ExtractionUnit(ManifestModel):
     kind: Literal["page", "paragraph", "table_cell", "text"]
     content: str
     direction: Direction
+    # "ocr" text comes from Tesseract on a page image; its confidence (0-100, mean word
+    # confidence) travels with it so evidence built on it can require human review.
+    method: Literal["text", "ocr"] = "text"
+    ocr_confidence: float | None = Field(default=None, ge=0, le=100)
 
 
 class ExtractionFailure(ManifestModel):

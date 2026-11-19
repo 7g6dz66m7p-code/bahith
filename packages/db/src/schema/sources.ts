@@ -64,6 +64,10 @@ export interface ChunkProvenance {
   charEnd: number;
   direction: 'rtl' | 'ltr' | 'auto';
   unitKind: 'page' | 'paragraph' | 'table_cell' | 'text';
+  /** "ocr" passages were recognised from a page image and need human review to cite. */
+  extractionMethod?: 'text' | 'ocr';
+  /** Tesseract mean word confidence (0-100) for OCR passages. */
+  ocrConfidence?: number | null;
 }
 
 /**
