@@ -88,22 +88,29 @@ describe('migrations', () => {
     });
   });
 
+  it('rolls back the library duplicate-detection index on its own', async () => {
+    const indexQuery = `SELECT indexname AS name FROM pg_indexes
+                        WHERE indexname = 'files_workspace_id_sha256_key'`;
+    expect(await listNames(client, indexQuery)).toEqual(['files_workspace_id_sha256_key']);
+    expect(await rollbackLast(client)).toEqual(['0005_library_dedup']);
+    expect(await listNames(client, indexQuery)).toEqual([]);
+    expect(await migrateUp(client)).toEqual(['0005_library_dedup']);
+  });
+
   it('rolls back private identity tables and roles before the preceding schema', async () => {
-    expect(await rollbackLast(client)).toEqual(['0004_auth_identity']);
+    expect(await rollbackLast(client, 2)).toEqual(['0005_library_dedup', '0004_auth_identity']);
     expect(await listNames(client, ROLES)).toEqual(['bahith_app']);
     expect(await listNames(client, TABLES)).toHaveLength(23 + 1);
     expect(
       (await client.query(`SELECT relrowsecurity FROM pg_class WHERE oid = 'users'::regclass`))
         .rows,
     ).toEqual([{ relrowsecurity: false }]);
-    expect(await migrateUp(client)).toEqual(['0004_auth_identity']);
+    expect(await migrateUp(client)).toEqual(['0004_auth_identity', '0005_library_dedup']);
   });
 
   it('can still roll back provenance while retaining the existing research schema', async () => {
-    const reverted = await rollbackLast(client, 2);
-    expect(reverted).toHaveLength(2);
-    expect(reverted[0]).toBe('0004_auth_identity');
-    expect(reverted[1]).toBe('0003_sanad_provenance');
+    const reverted = await rollbackLast(client, 3);
+    expect(reverted).toEqual(['0005_library_dedup', '0004_auth_identity', '0003_sanad_provenance']);
     expect(await listNames(client, ROLES)).toEqual(['bahith_app']);
     const columns = await listNames(
       client,
@@ -111,11 +118,16 @@ describe('migrations', () => {
        WHERE table_name IN ('files', 'chunks') AND column_name IN ('extraction', 'provenance')`,
     );
     expect(columns).toEqual([]);
-    expect(await migrateUp(client)).toEqual(['0003_sanad_provenance', '0004_auth_identity']);
+    expect(await migrateUp(client)).toEqual([
+      '0003_sanad_provenance',
+      '0004_auth_identity',
+      '0005_library_dedup',
+    ]);
   });
 
   it('can still roll back the preceding security migration', async () => {
-    expect(await rollbackLast(client, 3)).toEqual([
+    expect(await rollbackLast(client, 4)).toEqual([
+      '0005_library_dedup',
       '0004_auth_identity',
       '0003_sanad_provenance',
       '0002_security',
@@ -126,6 +138,7 @@ describe('migrations', () => {
       '0002_security',
       '0003_sanad_provenance',
       '0004_auth_identity',
+      '0005_library_dedup',
     ]);
   });
 

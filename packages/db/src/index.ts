@@ -27,3 +27,16 @@ export {
   listUserProjects,
   withWorkspaceMember,
 } from './projects';
+export {
+  getProjectFile,
+  listProjectLibrary,
+  markFileFailed,
+  markFileQueued,
+  MAX_UPLOAD_BYTES,
+  registerUpload,
+  registerUploadSchema,
+  titleFromFilename,
+} from './library';
+export type { LibraryEntry, RegisterUploadInput, RegisteredUpload } from './library';
+export { EXTRACTABLE_MIME_TYPES, isPagedMimeType } from './sanad/manifest';
+export type { ExtractableMimeType } from './sanad/manifest';

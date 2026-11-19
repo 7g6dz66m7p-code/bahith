@@ -170,6 +170,10 @@ export const files = pgTable(
   (t) => [
     ...tenantExtras('files', t),
     unique('files_storage_key_key').on(t.storageKey),
+    // Identical bytes are stored once per workspace (duplicate-upload detection).
+    uniqueIndex('files_workspace_id_sha256_key')
+      .on(t.workspaceId, t.sha256)
+      .where(sql`${t.sha256} is not null`),
     index('files_source_id_idx').on(t.workspaceId, t.sourceId),
     check('files_size_bytes_positive', sql`${t.sizeBytes} > 0`),
     foreignKey({
