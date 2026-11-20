@@ -56,6 +56,8 @@ jobs:
       # Local OCR for the document worker (Arabic + English traineddata).
       - run: sudo apt-get update -qq && sudo apt-get install -y -qq tesseract-ocr tesseract-ocr-ara tesseract-ocr-eng
       - run: pnpm install --frozen-lockfile
+      # @bahith/export prints PDFs with Playwright Chromium in its unit tests.
+      - run: pnpm --filter @bahith/export exec playwright install --with-deps chromium
       - run: pnpm test
 
   integration:
