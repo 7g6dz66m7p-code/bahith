@@ -93,3 +93,28 @@ def test_text_layer_pages_never_go_through_ocr() -> None:
     # A blank page has no text layer; with OCR disabled it is flagged, never filled.
     manifest = extract_document(buffer.getvalue(), PDF, ocr=False)
     assert manifest.units[0].method == "text"
+
+
+def test_a_pass_that_drops_lines_never_wins_on_average_confidence(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Regression (seen on CI): the Arabic-only pass dropped a whole line but had a higher
+    mean confidence, so the shorter text was kept. Selection now uses total confidence."""
+    from bahith_worker.sanad import ocr
+
+    full = ocr.OcrResult(
+        text="المنهج العلمي في البحث\nتعتمد الدراسة على تحليل المصادر الأصلية",
+        confidence=85.0,
+        score=85.0 * 10,
+    )
+    shorter = ocr.OcrResult(
+        text="تعتمد الدراسة على تحليل المصادر الأصلية", confidence=92.0, score=92.0 * 6
+    )
+    passes = {"ara+eng": full, "ara": shorter}
+    monkeypatch.setattr(ocr, "_recognise", lambda _image, languages: passes[languages])
+
+    assert ocr.recognise(Image.new("RGB", (10, 10))).text == full.text
+
+    better = ocr.OcrResult(text=full.text, confidence=95.0, score=95.0 * 10)
+    passes["ara"] = better
+    assert ocr.recognise(Image.new("RGB", (10, 10))) is better

@@ -110,7 +110,9 @@ describe('migrations', () => {
 
   it('can still roll back provenance while retaining the existing research schema', async () => {
     const reverted = await rollbackLast(client, 3);
-    expect(reverted).toEqual(['0005_library_dedup', '0004_auth_identity', '0003_sanad_provenance']);
+    const expected = ['0005_library_dedup', '0004_auth_identity'];
+    expected.push('0003_sanad_provenance');
+    expect(reverted).toEqual(expected);
     expect(await listNames(client, ROLES)).toEqual(['bahith_app']);
     const columns = await listNames(
       client,

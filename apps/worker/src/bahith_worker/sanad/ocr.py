@@ -31,6 +31,9 @@ Image.MAX_IMAGE_PIXELS = MAX_OCR_PIXELS
 class OcrResult:
     text: str
     confidence: float | None
+    # Sum of word confidences: rewards recognising more text well. Used to compare
+    # passes; a mean alone would prefer a pass that silently dropped whole lines.
+    score: float = 0.0
 
 
 def tesseract_version() -> str | None:
@@ -62,7 +65,8 @@ def recognise(image: Image.Image) -> OcrResult:
 
     A first pass uses Arabic and English together. When Arabic script clearly dominates,
     a second Arabic-only pass is run (mixed models tend to inject Latin look-alikes into
-    Arabic lines) and the result with the higher mean confidence is kept.
+    Arabic lines). The pass with the higher total word confidence is kept, so a pass that
+    reads fewer words cannot win just because its average looks better.
     """
     if image.width * image.height > MAX_OCR_PIXELS:
         raise SanadError("OCR_PAGE_TOO_LARGE")
@@ -71,7 +75,7 @@ def recognise(image: Image.Image) -> OcrResult:
     latin = len(LATIN_LETTER.findall(first.text))
     if arabic > 0 and arabic >= 2 * latin:
         second = _recognise(image, "ara")
-        if (second.confidence or 0) > (first.confidence or 0):
+        if second.score > first.score:
             return second
     return first
 
@@ -105,7 +109,7 @@ def _recognise(image: Image.Image, languages: str) -> OcrResult:
     # Tesseract emits words in logical (reading) order, also for Arabic.
     text = "\n".join(" ".join(words) for _, words in sorted(lines.items()))
     mean = round(sum(confidences) / len(confidences), 2) if confidences else None
-    return OcrResult(text=text, confidence=mean)
+    return OcrResult(text=text, confidence=mean, score=sum(confidences))
 
 
 def recognise_image_bytes(data: bytes) -> list[Image.Image]:

@@ -1,3 +1,7 @@
+# Format first, then scan what will actually be committed: scanning before lint-staged
+# rewrites files would let reformatted content reach the repository unscanned.
+pnpm exec lint-staged
+
 # Secrets must never reach the repository (engineering rule 4).
 if ! command -v gitleaks >/dev/null 2>&1; then
   echo "pre-commit: gitleaks is not installed." >&2
@@ -5,5 +9,3 @@ if ! command -v gitleaks >/dev/null 2>&1; then
   exit 1
 fi
 gitleaks git --pre-commit --staged --redact --no-banner
-
-pnpm exec lint-staged
