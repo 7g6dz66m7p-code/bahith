@@ -225,6 +225,22 @@ importers:
         version: 5.1.0(@types/node@22.20.5)(vite@8.3.8(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1))
 
   packages/citations:
+    dependencies:
+      '@citation-js/core':
+        specifier: ^0.9.0
+        version: 0.9.0
+      '@citation-js/plugin-bibtex':
+        specifier: ^0.9.0
+        version: 0.9.0(@citation-js/core@0.9.0)
+      '@citation-js/plugin-csl':
+        specifier: ^0.9.0
+        version: 0.9.0(@citation-js/core@0.9.0)
+      '@citation-js/plugin-ris':
+        specifier: ^0.9.0
+        version: 0.9.0(@citation-js/core@0.9.0)
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       '@bahith/config':
         specifier: workspace:*
@@ -591,6 +607,36 @@ packages:
 
   '@better-fetch/fetch@1.3.3':
     resolution: {integrity: sha512-U6SlDt/GUWtK2JAxS/NhdoYTEim+EL1G5byz2TUj83KjLZBUpYzb5SmX0aXaCnbGkAjFKnV/o/0+cyXMbEcqqg==}
+
+  '@citation-js/core@0.9.0':
+    resolution: {integrity: sha512-IIIfDFirx8B7eYiYIg412If3WVJAefJUS7IsAnkW3YSuThHK4fW9Ibog6wCqmT6pfXW1VM9wfGPFvO2J5k859A==}
+    engines: {node: '>=22.12.0'}
+
+  '@citation-js/date@0.5.1':
+    resolution: {integrity: sha512-1iDKAZ4ie48PVhovsOXQ+C6o55dWJloXqtznnnKy6CltJBQLIuLLuUqa8zlIvma0ZigjVjgDUhnVaNU1MErtZw==}
+    engines: {node: '>=10.0.0'}
+
+  '@citation-js/name@0.4.2':
+    resolution: {integrity: sha512-brSPsjs2fOVzSnARLKu0qncn6suWjHVQtrqSUrnqyaRH95r/Ad4wPF5EsoWr+Dx8HzkCGb/ogmoAzfCsqlTwTQ==}
+    engines: {node: '>=6'}
+
+  '@citation-js/plugin-bibtex@0.9.0':
+    resolution: {integrity: sha512-9n8EVP/kq+v7VuoWVI+p8SRE3KikQYd2c78NSRq9btC4b3XzuBA3qFI3uF6xyxbNLPtY7+Y4BQDayta2yrl1zQ==}
+    engines: {node: '>=22.12.0'}
+    peerDependencies:
+      '@citation-js/core': ^0.9.0
+
+  '@citation-js/plugin-csl@0.9.0':
+    resolution: {integrity: sha512-P0uxGr/rE9LaT5mY0T+Xh6JqDc+rdA7U3HDR/tLkiJ1ITRszQVhV9wBaOLc7vwCD+vuwh+m0Bha13hlgZEB7Ng==}
+    engines: {node: '>=22.12.0'}
+    peerDependencies:
+      '@citation-js/core': ^0.9.0
+
+  '@citation-js/plugin-ris@0.9.0':
+    resolution: {integrity: sha512-cqnZtV5C260xFYnwzu5fnrH/RDOUPuCLH9JOtkIgwUZvGtSbsBJ3sDrBtSXoH1h3/r2Aa1lCiWanVqv6jDRegQ==}
+    engines: {node: '>=22.12.0'}
+    peerDependencies:
+      '@citation-js/core': ^0.9.0
 
   '@drizzle-team/brocli@0.10.2':
     resolution: {integrity: sha512-z33Il7l5dKjUgGULTqBsQBQwckHh5AbIuxhdsIxDDiZAzBOrZO6q9ogcWC65kU382AfynTfgNumVcNIjuIua6w==}
@@ -2491,6 +2537,9 @@ packages:
   chownr@1.1.4:
     resolution: {integrity: sha512-jJ0bqzaylmJtVnNgzTeSOs8DPavpbYgEr/b0YL8/2GO3xJEhInFmhKMUnEJQjZumK7KXGFhUy89PrsJWlakBVg==}
 
+  citeproc@2.4.63:
+    resolution: {integrity: sha512-68F95Bp4UbgZU/DBUGQn0qV3HDZLCdI9+Bb2ByrTaNJDL5VEm9LqaiNaxljsvoaExSLEXe1/r6n2Z06SCzW3/Q==}
+
   client-only@0.0.1:
     resolution: {integrity: sha512-IV3Ou0jSMzZrd3pZ48nLkT9DA7Ag1pnPzaiQhpW7c3RbcqqzvzzVu+L8gfqMp/8IM2MQtSiqaCxrrcfu8I8rMA==}
 
@@ -3525,6 +3574,9 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
+  moo@0.5.3:
+    resolution: {integrity: sha512-m2fmM2dDm7GZQsY7KK2cme8agi+AAljILjQnof7p1ZMDe6dQ4bdnSMx0cPppudoeNv5hEFQirN6u+O4fDE0IWA==}
+
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
 
@@ -4134,6 +4186,10 @@ packages:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
 
+  sync-fetch-undici@0.7.1:
+    resolution: {integrity: sha512-t/rJBTRr3/WCs/04MnLStgGGFac1Ge6WDugNxO+KoMqtfmWENMPJbtAmGqIWnwsXi+B7Uh0P0ea2QRkKIZTIPg==}
+    engines: {node: '>=22.12.0'}
+
   tailwindcss@4.3.5:
     resolution: {integrity: sha512-FcQk9BuffmEHJP2G0XmB2SplU1aLTI7j07Kunk+U74Ny+XiWOtzXz9aujFZ/avntw1e2cOv/3PkgzflQ7gX2vQ==}
 
@@ -4361,6 +4417,10 @@ packages:
         optional: true
       jsdom:
         optional: true
+
+  whatwg-mimetype@5.0.0:
+    resolution: {integrity: sha512-sXcNcHOC51uPGF0P/D4NVtrkjSU2fNsm9iog4ZvZJsL3rjoDAzXZhkm2MWt1y+PUdggKAYVoMAIYcs78wJ51Cw==}
+    engines: {node: '>=20'}
 
   which-boxed-primitive@1.1.1:
     resolution: {integrity: sha512-TbX3mj8n0odCBFVlY8AxkqcHASw3L60jIuF8jFP78az3C2YhmGvqbHBpAjTRH2/xqYunrJ9g1jSyjCjpoWzIAA==}
@@ -4789,6 +4849,35 @@ snapshots:
       '@noble/hashes': 2.4.0
 
   '@better-fetch/fetch@1.3.3': {}
+
+  '@citation-js/core@0.9.0':
+    dependencies:
+      '@citation-js/date': 0.5.1
+      '@citation-js/name': 0.4.2
+      sync-fetch-undici: 0.7.1
+
+  '@citation-js/date@0.5.1': {}
+
+  '@citation-js/name@0.4.2': {}
+
+  '@citation-js/plugin-bibtex@0.9.0(@citation-js/core@0.9.0)':
+    dependencies:
+      '@citation-js/core': 0.9.0
+      '@citation-js/date': 0.5.1
+      '@citation-js/name': 0.4.2
+      moo: 0.5.3
+
+  '@citation-js/plugin-csl@0.9.0(@citation-js/core@0.9.0)':
+    dependencies:
+      '@citation-js/core': 0.9.0
+      '@citation-js/date': 0.5.1
+      citeproc: 2.4.63
+
+  '@citation-js/plugin-ris@0.9.0(@citation-js/core@0.9.0)':
+    dependencies:
+      '@citation-js/core': 0.9.0
+      '@citation-js/date': 0.5.1
+      '@citation-js/name': 0.4.2
 
   '@drizzle-team/brocli@0.10.2': {}
 
@@ -6291,6 +6380,8 @@ snapshots:
 
   chownr@1.1.4: {}
 
+  citeproc@2.4.63: {}
+
   client-only@0.0.1: {}
 
   cliui@6.0.0:
@@ -7429,6 +7520,8 @@ snapshots:
 
   mkdirp@3.0.1: {}
 
+  moo@0.5.3: {}
+
   ms@2.1.3: {}
 
   msgpackr-extract@3.0.7:
@@ -8144,6 +8237,10 @@ snapshots:
 
   supports-preserve-symlinks-flag@1.0.0: {}
 
+  sync-fetch-undici@0.7.1:
+    dependencies:
+      whatwg-mimetype: 5.0.0
+
   tailwindcss@4.3.5: {}
 
   tapable@2.3.4: {}
@@ -8412,6 +8509,8 @@ snapshots:
       '@types/node': 22.20.5
     transitivePeerDependencies:
       - msw
+
+  whatwg-mimetype@5.0.0: {}
 
   which-boxed-primitive@1.1.1:
     dependencies:

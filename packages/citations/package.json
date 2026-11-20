@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./styles": "./src/styles.ts"
   },
   "scripts": {
     "lint": "eslint .",
@@ -18,5 +19,12 @@
     "eslint": "^9.39.5",
     "typescript": "~6.0.3",
     "vitest": "^5.1.0"
+  },
+  "dependencies": {
+    "@citation-js/core": "^0.9.0",
+    "@citation-js/plugin-bibtex": "^0.9.0",
+    "@citation-js/plugin-csl": "^0.9.0",
+    "@citation-js/plugin-ris": "^0.9.0",
+    "zod": "^4.6.7"
   }
 }
