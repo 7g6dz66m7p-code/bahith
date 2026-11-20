@@ -42,3 +42,14 @@ export {
 export type { LibraryEntry, RegisterUploadInput, RegisteredUpload } from './library';
 export { EXTRACTABLE_MIME_TYPES, isPagedMimeType } from './sanad/manifest';
 export type { ExtractableMimeType } from './sanad/manifest';
+export {
+  createDocument,
+  createDocumentSchema,
+  getDocument,
+  listDocuments,
+  listDocumentVersions,
+  MAX_DOCUMENT_JSON_BYTES,
+  saveDocument,
+  saveDocumentSchema,
+} from './documents';
+export type { DocumentSummary, DocumentVersion } from './documents';
