@@ -36,6 +36,7 @@ from bahith_worker.sanad.ocr import (
     recognise_image_bytes,
     tesseract_version,
 )
+from bahith_worker.sanad.pdf_text import LOGICAL_ORDER_VERSION, page_text
 
 MAX_FILE_BYTES = 50 * 1024 * 1024
 MAX_DOCX_UNCOMPRESSED_BYTES = 100 * 1024 * 1024
@@ -174,31 +175,53 @@ def _pdf(data: bytes, units: _Units, ocr_enabled: bool) -> tuple[list[Extraction
             raise SanadError("ENCRYPTED_DOCUMENT")
         if len(reader.pages) > MAX_UNITS:
             raise SanadError("RESOURCE_LIMIT")
-        for index in range(len(reader.pages)):
-            try:
-                text = reader.pages[index].extract_text(extraction_mode="plain") or ""
-            except (LimitReachedError, MemoryError):
-                raise SanadError("RESOURCE_LIMIT") from None
-            except Exception:
-                # A failed page retains its position but contains no fabricated text.
-                units.append("", "page", index + 1)
-                failures.append(
-                    ExtractionFailure(
-                        unit_index=len(units.values) - 1,
-                        page=index + 1,
-                        code="PAGE_EXTRACTION_FAILED",
+        # pypdf validated structure, encryption and resource limits above; text comes
+        # from pdfium glyph geometry in logical reading order (see pdf_text.py).
+        document = pdfium.PdfDocument(data)
+        try:
+            page_count = len(document)
+        except Exception:
+            document.close()
+            raise SanadError("INVALID_DOCUMENT") from None
+        if page_count != len(reader.pages):
+            document.close()
+            raise SanadError("INVALID_DOCUMENT")
+        try:
+            for index in range(page_count):
+                try:
+                    text = _page_text(document, index)
+                except (LimitReachedError, MemoryError):
+                    raise SanadError("RESOURCE_LIMIT") from None
+                except Exception:
+                    # A failed page retains its position but contains no fabricated text.
+                    units.append("", "page", index + 1)
+                    failures.append(
+                        ExtractionFailure(
+                            unit_index=len(units.values) - 1,
+                            page=index + 1,
+                            code="PAGE_EXTRACTION_FAILED",
+                        )
                     )
+                    continue
+                if text.strip():
+                    units.append(text, "page", index + 1)
+                    continue
+                # No text layer: a scanned page or a manuscript image. Try local OCR.
+                used_ocr = (
+                    _ocr_page(_pdf_page_image(data, index), index + 1, units, failures, ocr_enabled)
+                    or used_ocr
                 )
-                continue
-            if text.strip():
-                units.append(text, "page", index + 1)
-                continue
-            # No text layer: a scanned page or a manuscript image. Try local OCR.
-            used_ocr = (
-                _ocr_page(_pdf_page_image(data, index), index + 1, units, failures, ocr_enabled)
-                or used_ocr
-            )
+        finally:
+            document.close()
     return failures, used_ocr
+
+
+def _page_text(document: pdfium.PdfDocument, index: int) -> str:
+    page = document[index]
+    try:
+        return page_text(page)
+    finally:
+        page.close()
 
 
 def _pdf_page_image(data: bytes, index: int) -> "Callable[[], Image.Image]":
@@ -299,7 +322,9 @@ def extract_document(data: bytes, mime_type: str, *, ocr: bool | None = None) ->
     try:
         if mime_type == "application/pdf":
             failures, used_ocr = _pdf(data, units, ocr_enabled)
-            extractor = f"sanad-pdf-v1:pypdf-{version('pypdf')}" + (ocr_tag if used_ocr else "")
+            extractor = f"sanad-pdf-v2:pdfium-{version('pypdfium2')}+{LOGICAL_ORDER_VERSION}" + (
+                ocr_tag if used_ocr else ""
+            )
         elif mime_type in IMAGE_MIME_TYPES:
             failures = _images(data, units, ocr_enabled)
             extractor = "sanad-image-v1" + (ocr_tag if ocr_enabled else "")

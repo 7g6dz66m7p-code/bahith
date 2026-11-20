@@ -17,7 +17,6 @@ from zipfile import ZIP_DEFLATED, ZipFile
 import pytest
 from docx import Document
 from pypdf import PdfWriter
-from pypdf._page import PageObject
 from pypdf.generic import DecodedStreamObject, DictionaryObject, NameObject
 
 from bahith_worker.sanad import ExtractionUnit, SanadError, chunk_units, extract_document
@@ -116,15 +115,19 @@ def test_pdf_maps_chunks_to_actual_pages_and_leaves_blank_page_empty() -> None:
 def test_pdf_page_failure_is_recorded_without_invented_text(
     monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
 ) -> None:
-    original = PageObject.extract_text
+    from bahith_worker.sanad import extraction
 
-    def fail_second_page(page: PageObject, *args: object, **kwargs: object) -> str:
-        text = original(page, *args, **kwargs)
+    original = extraction.page_text
+
+    # Page text now comes from the logical-order extractor (pdf_text.py); simulate a
+    # parser failure on page 2 there, with the page's private text in the message.
+    def fail_second_page(page: object) -> str:
+        text = original(page)  # type: ignore[arg-type]
         if text == "Failing fixture page":
             raise ValueError("private page text must never escape")
         return text
 
-    monkeypatch.setattr(PageObject, "extract_text", fail_second_page)
+    monkeypatch.setattr(extraction, "page_text", fail_second_page)
     caplog.set_level(logging.DEBUG)
     result = extract_document(
         pdf_bytes(["First fixture page", "Failing fixture page", "Third fixture page"]), PDF
