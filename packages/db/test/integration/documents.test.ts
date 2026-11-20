@@ -9,8 +9,10 @@ import {
   getDocument,
   listDocuments,
   listDocumentVersions,
+  resolveCitationTargets,
   saveDocument,
 } from '../../src/documents';
+import * as schema from '../../src/schema/index';
 import { seedReferenceData } from '../../src/seed';
 
 import type { WorkspaceFixture } from './fixtures';
@@ -141,5 +143,67 @@ describe('research drafts', () => {
     expect(await listDocuments(database, otherProject)).not.toContainEqual(
       expect.objectContaining({ id }),
     );
+  });
+});
+
+describe('citation targets', () => {
+  let database: Database;
+  let admin: pg.Client;
+  let a: WorkspaceFixture;
+  let b: WorkspaceFixture;
+
+  beforeAll(async () => {
+    database = createDatabase({ connectionString: inject('appUrl') });
+    admin = new pg.Client({ connectionString: inject('adminUrl') });
+    await admin.connect();
+    await seedReferenceData(admin);
+    const plan = z
+      .object({ id: z.string() })
+      .parse((await admin.query(`SELECT id FROM plans WHERE code = 'free'`)).rows[0]);
+    a = await seedWorkspace(database, 'CiteA', plan.id);
+    b = await seedWorkspace(database, 'CiteB', plan.id);
+  });
+
+  afterAll(async () => {
+    await database.close();
+    await admin.end();
+  });
+
+  const ctx = () => ({ userId: a.userId, workspaceId: a.workspaceId, projectId: a.projectId });
+
+  it('returns the stored pages of a cited passage, not anything from the editor', async () => {
+    const [target] = await resolveCitationTargets(database, ctx(), [
+      { sourceId: a.sourceId, chunkId: a.chunkId },
+    ]);
+    expect(target?.chunk).toMatchObject({ id: a.chunkId, pageStart: 3, pageEnd: 4 });
+    expect(target?.source.title).toBeTruthy();
+  });
+
+  it('refuses a passage from another source, and sources outside the project', async () => {
+    await expect(
+      resolveCitationTargets(database, ctx(), [{ sourceId: a.sourceId, chunkId: b.chunkId }]),
+    ).rejects.toMatchObject({ code: 'SANAD_SOURCE_MISMATCH' });
+    await expect(
+      resolveCitationTargets(database, ctx(), [{ sourceId: b.sourceId, chunkId: null }]),
+    ).rejects.toMatchObject({ code: 'SANAD_SOURCE_MISMATCH' });
+  });
+
+  it('never gives an abstract-only passage a page number', async () => {
+    const [chunk] = await database.withWorkspace(a.workspaceId, (tx) =>
+      tx
+        .insert(schema.chunks)
+        .values({
+          workspaceId: a.workspaceId,
+          sourceId: a.sourceId,
+          kind: 'abstract',
+          chunkIndex: 900,
+          content: 'ملخص فقط',
+        })
+        .returning({ id: schema.chunks.id }),
+    );
+    const [target] = await resolveCitationTargets(database, ctx(), [
+      { sourceId: a.sourceId, chunkId: chunk?.id ?? null },
+    ]);
+    expect(target?.chunk).toMatchObject({ pageStart: null, pageEnd: null, kind: 'abstract' });
   });
 });

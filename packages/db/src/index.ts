@@ -49,7 +49,8 @@ export {
   listDocuments,
   listDocumentVersions,
   MAX_DOCUMENT_JSON_BYTES,
+  resolveCitationTargets,
   saveDocument,
   saveDocumentSchema,
 } from './documents';
-export type { DocumentSummary, DocumentVersion } from './documents';
+export type { CitationTarget, DocumentSummary, DocumentVersion } from './documents';

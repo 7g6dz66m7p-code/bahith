@@ -1,8 +1,15 @@
-import { and, desc, eq, max } from 'drizzle-orm';
+import { and, desc, eq, inArray, max } from 'drizzle-orm';
 import { z } from 'zod';
 
 import type { Database } from './client';
-import { auditLog, documents, documentVersions } from './schema/index';
+import {
+  auditLog,
+  chunks,
+  documents,
+  documentVersions,
+  projectSources,
+  sources,
+} from './schema/index';
 import type { SanadProjectContext } from './sanad/access';
 import { withSanadProject } from './sanad/access';
 import { SanadError } from './sanad/errors';
@@ -297,5 +304,114 @@ export async function saveDocument(
       });
     }
     return { version, unchanged: false };
+  });
+}
+
+export const citationRefSchema = z.strictObject({
+  sourceId: z.uuid(),
+  chunkId: z.uuid().nullable(),
+});
+
+export interface CitationTarget {
+  sourceId: string;
+  /** CSL-ready bibliographic fields of the source, from its stored record. */
+  source: {
+    type: string;
+    title: string;
+    authors: { family?: string; given?: string; literal?: string }[];
+    year: number | null;
+    containerTitle: string | null;
+    publisher: string | null;
+    volume: string | null;
+    issue: string | null;
+    pages: string | null;
+    doi: string | null;
+    url: string | null;
+    language: string | null;
+    verificationStatus: string;
+    fullTextStatus: string;
+  };
+  /** Present when a passage was cited: its stored pages (null for unpaged text). */
+  chunk: { id: string; pageStart: number | null; pageEnd: number | null; kind: string } | null;
+}
+
+/**
+ * Resolves the citations of a draft against the database. Only sources attached to the
+ * project are accepted, and a cited passage must belong to its source. Page numbers are
+ * taken from the stored passage, never from editor content (engineering rule 9).
+ */
+export async function resolveCitationTargets(
+  database: Database,
+  context: SanadProjectContext,
+  refs: unknown,
+): Promise<CitationTarget[]> {
+  const parsed = z.array(citationRefSchema).max(5_000).safeParse(refs);
+  if (!parsed.success) throw new SanadError('SANAD_INVALID_INPUT');
+  if (parsed.data.length === 0) return [];
+  return withSanadProject(database, context, false, async (tx) => {
+    const sourceIds = [...new Set(parsed.data.map((ref) => ref.sourceId))];
+    const rows = await tx
+      .select({
+        id: sources.id,
+        type: sources.type,
+        title: sources.title,
+        authors: sources.authors,
+        year: sources.year,
+        containerTitle: sources.containerTitle,
+        publisher: sources.publisher,
+        volume: sources.volume,
+        issue: sources.issue,
+        pages: sources.pages,
+        doi: sources.doi,
+        url: sources.url,
+        language: sources.language,
+        verificationStatus: sources.verificationStatus,
+        fullTextStatus: sources.fullTextStatus,
+      })
+      .from(sources)
+      .innerJoin(
+        projectSources,
+        and(
+          eq(projectSources.workspaceId, sources.workspaceId),
+          eq(projectSources.sourceId, sources.id),
+          eq(projectSources.projectId, context.projectId),
+        ),
+      )
+      .where(and(eq(sources.workspaceId, context.workspaceId), inArray(sources.id, sourceIds)));
+    const byId = new Map(rows.map((row) => [row.id, row]));
+    const chunkIds = [
+      ...new Set(parsed.data.flatMap((ref) => (ref.chunkId === null ? [] : [ref.chunkId]))),
+    ];
+    const chunkRows =
+      chunkIds.length === 0
+        ? []
+        : await tx
+            .select({
+              id: chunks.id,
+              sourceId: chunks.sourceId,
+              pageStart: chunks.pageStart,
+              pageEnd: chunks.pageEnd,
+              kind: chunks.kind,
+            })
+            .from(chunks)
+            .where(and(eq(chunks.workspaceId, context.workspaceId), inArray(chunks.id, chunkIds)));
+    const chunkById = new Map(chunkRows.map((row) => [row.id, row]));
+
+    return parsed.data.map((ref) => {
+      const source = byId.get(ref.sourceId);
+      if (source === undefined) throw new SanadError('SANAD_SOURCE_MISMATCH');
+      let chunk: CitationTarget['chunk'] = null;
+      if (ref.chunkId !== null) {
+        const row = chunkById.get(ref.chunkId);
+        if (row?.sourceId !== ref.sourceId) throw new SanadError('SANAD_SOURCE_MISMATCH');
+        // An abstract-only passage is never cited with a page number.
+        chunk =
+          row.kind === 'abstract'
+            ? { id: row.id, pageStart: null, pageEnd: null, kind: row.kind }
+            : { id: row.id, pageStart: row.pageStart, pageEnd: row.pageEnd, kind: row.kind };
+      }
+      const { id, ...fields } = source;
+      return { sourceId: id, source: fields, chunk };
+    });
   });
 }
