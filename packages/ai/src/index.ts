@@ -8,3 +8,28 @@ export type {
   QuotationRequest,
   SanadVerifyErrorCode,
 } from './sanad/verify';
+export {
+  AiProviderError,
+  loadChatModelRef,
+  PROVIDER_KEY_VARIABLES,
+  resolveLanguageModel,
+} from './providers';
+export type { AiProviderErrorCode, ProviderId } from './providers';
+export {
+  AiCallError,
+  groundAnswer,
+  groundedAnswerOutputSchema,
+  MAX_ANSWER_PASSAGES,
+  passageHandles,
+  runGroundedAnswer,
+} from './agents/grounded-answer';
+export type {
+  AiCallErrorCode,
+  AnswerPassage,
+  GroundedAnswer,
+  GroundedAnswerOutput,
+  GroundedAnswerRun,
+  GroundedEvidence,
+  GroundedSentence,
+} from './agents/grounded-answer';
+export { GROUNDED_ANSWER_PROMPT_VERSION } from './prompts/grounded-answer';
