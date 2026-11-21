@@ -108,7 +108,11 @@ export function AssistantPanel({
   };
 
   const dropped =
-    reply === null ? 0 : reply.diagnostics.unknownPassages + reply.diagnostics.unverifiedQuotes;
+    reply === null
+      ? 0
+      : reply.diagnostics.unknownPassages +
+        reply.diagnostics.unverifiedQuotes +
+        reply.diagnostics.strippedCitations;
 
   return (
     <section className="surface space-y-5 p-5 sm:p-6" aria-labelledby="assistant-title">

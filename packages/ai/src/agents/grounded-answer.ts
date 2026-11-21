@@ -64,7 +64,34 @@ export interface GroundedAnswer {
     unverifiedQuotes: number;
     /** "supported" sentences left without any verified evidence. */
     downgraded: number;
+    /** Reference or page fragments the model wrote into sentences (removed). */
+    strippedCitations: number;
   };
+}
+
+/**
+ * References and page numbers come from stored records only (CLAUDE.md rule 9), so any
+ * the model writes itself are removed from the sentence: author–year parentheses
+ * "(Smith, 2020, p. 4)", "(الأحمد، ٢٠١٩)", and bare page markers "p. 12", "ص ١٢".
+ */
+const CITATION_PATTERNS = [
+  /\s*[(（[][^()（）[\]]{0,120}?(?:1[5-9]|20)\d{2}[a-z]?[^()（）[\]]{0,60}?[)）\]]/gu,
+  /\s*[(（[][^()（）[\]]{0,120}?[١][٥-٩][٠-٩]{2}[^()（）[\]]{0,60}?[)）\]]/gu,
+  /\s*[(（[][^()（）[\]]{0,120}?٢٠[٠-٩]{2}[^()（）[\]]{0,60}?[)）\]]/gu,
+  /\s*\b(?:pp?\.|pages?)\s*[0-9]+(?:\s*[-–]\s*[0-9]+)?/giu,
+  /\s*(?:ص|صفحة|الصفحة|صص)\.?\s*[0-9٠-٩]+(?:\s*[-–]\s*[0-9٠-٩]+)?/gu,
+];
+
+export function stripModelCitations(text: string): { text: string; removed: number } {
+  let removed = 0;
+  let out = text;
+  for (const pattern of CITATION_PATTERNS) {
+    out = out.replace(pattern, () => {
+      removed += 1;
+      return '';
+    });
+  }
+  return { text: out.replace(/\s{2,}/gu, ' ').trim(), removed };
 }
 
 /** Short, stable handles for the passages sent to the model: P1, P2, … */
@@ -83,7 +110,12 @@ export function groundAnswer(
 ): GroundedAnswer {
   const handles = passageHandles(passages);
   const allowed = passages.map(({ sourceTitle: _title, ...evidence }) => evidence);
-  const diagnostics = { unknownPassages: 0, unverifiedQuotes: 0, downgraded: 0 };
+  const diagnostics = {
+    unknownPassages: 0,
+    unverifiedQuotes: 0,
+    downgraded: 0,
+    strippedCitations: 0,
+  };
   if (output.abstain) return { status: 'abstained', sentences: [], diagnostics };
 
   const sentences: GroundedSentence[] = [];
@@ -120,7 +152,10 @@ export function groundAnswer(
       support = 'unsupported';
       diagnostics.downgraded += 1;
     }
-    sentences.push({ text: sentence.text.trim(), support, evidence });
+    const cleaned = stripModelCitations(sentence.text);
+    diagnostics.strippedCitations += cleaned.removed;
+    if (cleaned.text === '') continue;
+    sentences.push({ text: cleaned.text, support, evidence });
   }
   return { status: sentences.length === 0 ? 'abstained' : 'answered', sentences, diagnostics };
 }
@@ -165,7 +200,12 @@ export async function runGroundedAnswer(input: {
       answer: {
         status: 'abstained',
         sentences: [],
-        diagnostics: { unknownPassages: 0, unverifiedQuotes: 0, downgraded: 0 },
+        diagnostics: {
+          unknownPassages: 0,
+          unverifiedQuotes: 0,
+          downgraded: 0,
+          strippedCitations: 0,
+        },
       },
       promptVersion,
       usage: { inputTokens: 0, outputTokens: 0 },

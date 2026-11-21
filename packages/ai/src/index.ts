@@ -22,6 +22,7 @@ export {
   MAX_ANSWER_PASSAGES,
   passageHandles,
   runGroundedAnswer,
+  stripModelCitations,
 } from './agents/grounded-answer';
 export type {
   AiCallErrorCode,
@@ -32,4 +33,4 @@ export type {
   GroundedEvidence,
   GroundedSentence,
 } from './agents/grounded-answer';
-export { GROUNDED_ANSWER_PROMPT_VERSION } from './prompts/grounded-answer';
+export { escapeSourceText, GROUNDED_ANSWER_PROMPT_VERSION } from './prompts/grounded-answer';

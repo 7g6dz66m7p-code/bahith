@@ -111,7 +111,7 @@ export async function askAssistant(
     sourceVerificationStatus: item.verificationStatus,
     sourceTitle: item.sourceTitle,
   }));
-  const empty = { unknownPassages: 0, unverifiedQuotes: 0, downgraded: 0 };
+  const empty = { unknownPassages: 0, unverifiedQuotes: 0, downgraded: 0, strippedCitations: 0 };
   if (passages.length === 0) {
     return {
       status: 'abstained',

@@ -51,7 +51,12 @@ describe('groundAnswer', () => {
       support: 'supported',
       evidence: [{ chunkId: passages[0]?.chunkId, pageStart: 2, pageEnd: 2 }],
     });
-    expect(answer.diagnostics).toEqual({ unknownPassages: 0, unverifiedQuotes: 0, downgraded: 0 });
+    expect(answer.diagnostics).toEqual({
+      unknownPassages: 0,
+      unverifiedQuotes: 0,
+      downgraded: 0,
+      strippedCitations: 0,
+    });
   });
 
   it('rejects passages that were not sent and quotes that are not verbatim', () => {
@@ -76,7 +81,12 @@ describe('groundAnswer', () => {
       support: 'unsupported',
       evidence: [],
     });
-    expect(answer.diagnostics).toEqual({ unknownPassages: 1, unverifiedQuotes: 1, downgraded: 1 });
+    expect(answer.diagnostics).toEqual({
+      unknownPassages: 1,
+      unverifiedQuotes: 1,
+      downgraded: 1,
+      strippedCitations: 0,
+    });
   });
 
   it('an abstract supports a sentence without any page; inference stays inference', () => {
@@ -105,7 +115,7 @@ describe('groundAnswer', () => {
     expect(answer).toEqual({
       status: 'abstained',
       sentences: [],
-      diagnostics: { unknownPassages: 0, unverifiedQuotes: 0, downgraded: 0 },
+      diagnostics: { unknownPassages: 0, unverifiedQuotes: 0, downgraded: 0, strippedCitations: 0 },
     });
   });
 });

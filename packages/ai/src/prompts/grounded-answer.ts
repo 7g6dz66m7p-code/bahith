@@ -29,9 +29,20 @@ export function groundedAnswerSystemPrompt(language: 'ar' | 'en'): string {
   ].join('\n');
 }
 
-/** Neutralises a closing tag inside untrusted passage text so it cannot end the block. */
+/** Tag names that structure the prompt; untrusted text must not be able to write them. */
+const PROMPT_TAGS = new Set(['source_document', 'question', 'system', 'instructions']);
+
+/**
+ * Neutralises prompt-structure tags inside untrusted text (passages, titles, questions)
+ * so they cannot close or open a block: "<" becomes "<\\" before such a tag, also when
+ * the name is disguised with case, spaces or invisible format characters (U+200B, U+202E…).
+ * Everything else — including "p < 0.05" — is left exactly as stored, so verbatim quotes
+ * still match.
+ */
 export function escapeSourceText(text: string): string {
-  return text.replace(/<\/\s*source_document/giu, '<\\/source_document');
+  return text.replace(/<(\s*\/?\s*)([\p{L}\p{Cf}_]+)/gu, (match, slash: string, name: string) =>
+    PROMPT_TAGS.has(name.replace(/\p{Cf}/gu, '').toLowerCase()) ? `<\\${slash}${name}` : match,
+  );
 }
 
 export function groundedAnswerUserPrompt(
