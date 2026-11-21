@@ -38,3 +38,6 @@ __pycache__/
 
 # agent worktrees (local only)
 .claude/worktrees/
+
+# eval output (copied into reports, not committed)
+eval/sanad/results/
