@@ -8,7 +8,8 @@
     "eval:corpus": "tsx sanad/make-corpus.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "eval:assistant": "tsx sanad/assistant.ts"
   },
   "devDependencies": {
     "@bahith/ai": "workspace:*",

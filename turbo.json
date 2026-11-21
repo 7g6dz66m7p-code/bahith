@@ -22,6 +22,8 @@
     "REDIS_URL",
     "S3_*",
     "AI_*",
+    "ANTHROPIC_API_KEY",
+    "OPENAI_API_KEY",
     "SCHOLARLY_*",
     "OPENALEX_API_KEY",
     "SEMANTIC_SCHOLAR_API_KEY",

@@ -10,30 +10,17 @@
  * citation precision and model abstention need a configured AI provider and are
  * reported as not measured. Writes results/latest.json and results/latest.md.
  */
-import { execFile } from 'node:child_process';
-import { createHash, randomUUID } from 'node:crypto';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { promisify } from 'node:util';
 
 import { verifyQuotation } from '@bahith/ai';
-import {
-  createDatabase,
-  createProject,
-  ingestExtraction,
-  registerUpload,
-  retrieve,
-  schema,
-} from '@bahith/db';
+import { retrieve } from '@bahith/db';
 import type { SanadEvidence } from '@bahith/db';
-import { seedReferenceData, startTestDatabase } from '@bahith/db/testing';
 
-import { CORPUS_DIR, loadCorpus } from './corpus-schema';
 import { covers, perturbations, ratio, scoreRetrieval } from './metrics';
 import type { Gold } from './metrics';
+import { withIngestedCorpus } from './setup';
 
-const run = promisify(execFile);
-const ROOT = path.resolve(import.meta.dirname, '../..');
 const RESULTS_DIR = path.join(import.meta.dirname, 'results');
 
 /** Gates: the build fails when any is missed. Documented in eval/README.md. */
@@ -44,88 +31,8 @@ const TARGETS = {
   retrievalAbstention: 0.85,
 } as const;
 
-const corpus = await loadCorpus();
 const started = Date.now();
-const database = await startTestDatabase();
-const admin = createDatabase({ connectionString: database.adminUrl });
-const app = createDatabase({ connectionString: database.appUrl });
-const auth = createDatabase({ connectionString: database.authUrl });
-
-try {
-  const client = await admin.pool.connect();
-  try {
-    await seedReferenceData(client);
-  } finally {
-    client.release();
-  }
-  const [user] = await auth.db
-    .insert(schema.users)
-    .values({ email: `eval-${randomUUID()}@example.test`, name: 'SANAD evaluation' })
-    .returning({ id: schema.users.id });
-  if (user === undefined) throw new Error('user not created');
-  const [workspace] = await app.withUser(user.id, (tx) =>
-    tx.select({ id: schema.workspaces.id }).from(schema.workspaces),
-  );
-  if (workspace === undefined) throw new Error('personal workspace missing');
-  const project = await createProject(app, user.id, {
-    workspaceId: workspace.id,
-    title: 'SANAD evaluation',
-  });
-  const ctx = { userId: user.id, workspaceId: workspace.id, projectId: project.id };
-
-  // Ingest every document through the real extractor.
-  const sourceOf = new Map<string, string>();
-  const extraction: Record<string, unknown>[] = [];
-  for (const document of corpus.documents) {
-    const filePath = path.join(CORPUS_DIR, document.fileName);
-    const bytes = await readFile(filePath);
-    const fileId = randomUUID();
-    const upload = await registerUpload(app, ctx, {
-      fileId,
-      originalName: document.fileName,
-      mimeType: 'application/pdf',
-      sizeBytes: bytes.byteLength,
-      sha256: createHash('sha256').update(bytes).digest('hex'),
-      storageKey: `workspaces/${workspace.id}/files/${fileId}/original`,
-    });
-    const t0 = Date.now();
-    const { stdout } = await run(
-      'uv',
-      [
-        'run',
-        '--quiet',
-        '--project',
-        path.join(ROOT, 'apps/worker'),
-        'python',
-        '-I',
-        path.join(import.meta.dirname, 'extract.py'),
-        filePath,
-        'application/pdf',
-      ],
-      { maxBuffer: 64 * 1024 * 1024 },
-    );
-    const extractMs = Date.now() - t0;
-    const manifest = JSON.parse(stdout) as {
-      units: { method?: string }[];
-      chunks: unknown[];
-      failures: unknown[];
-      extractorVersion: string;
-    };
-    const ingested = await ingestExtraction(app, { ...ctx, fileId: upload.fileId, manifest });
-    sourceOf.set(document.id, upload.sourceId);
-    extraction.push({
-      document: document.id,
-      scanned: document.scanned,
-      pages: document.pages.length,
-      ocrUnits: manifest.units.filter((unit) => unit.method === 'ocr').length,
-      chunks: manifest.chunks.length,
-      failures: manifest.failures.length,
-      status: ingested.status,
-      extractor: manifest.extractorVersion,
-      extractMs,
-    });
-  }
-
+await withIngestedCorpus(async ({ corpus, app, ctx, sourceOf, extraction }) => {
   const goldOf = (doc: string, page: number): Gold => ({
     sourceId: sourceOf.get(doc) ?? '',
     page,
@@ -311,7 +218,4 @@ try {
   await writeFile(path.join(RESULTS_DIR, 'latest.md'), markdown);
   process.stdout.write(markdown);
   if (!Object.values(gates).every(Boolean)) process.exitCode = 1;
-} finally {
-  await Promise.allSettled([app.close(), admin.close(), auth.close()]);
-  await database.stop();
-}
+});

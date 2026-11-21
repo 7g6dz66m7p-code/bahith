@@ -85,6 +85,8 @@ set('S3_FORCE_PATH_STYLE', () => 'true');
 set('AI_CHAT_MODEL', () => '');
 set('AI_EMBEDDING_MODEL', () => '');
 set('AI_RERANK_MODEL', () => '');
+set('ANTHROPIC_API_KEY', () => '');
+set('OPENAI_API_KEY', () => '');
 
 // Left empty on purpose: the project owner provides a project contact mailbox and any keys.
 set('SCHOLARLY_CONTACT_EMAIL', () => '');
