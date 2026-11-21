@@ -1,6 +1,7 @@
-import { SanadError } from '@bahith/db';
+import { SanadError, withSanadProject } from '@bahith/db';
 import { z } from 'zod';
 
+import { getDatabase } from './db';
 import { getRequestSession } from './session';
 
 export interface ProjectRequestContext {
@@ -32,3 +33,15 @@ export async function projectContext(
 }
 
 export const unauthenticated = () => Response.json({ code: 'AUTH_REQUIRED' }, { status: 401 });
+
+/**
+ * Checks membership (and the owner/editor role when `write`) before a route does any
+ * work of its own — an external registry lookup, parsing an upload — so outsiders are
+ * refused up front, not only when the service finally writes.
+ */
+export async function requireProjectAccess(
+  context: ProjectRequestContext,
+  write: boolean,
+): Promise<void> {
+  await withSanadProject(getDatabase(), context, write, () => Promise.resolve());
+}

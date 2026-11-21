@@ -4,7 +4,7 @@ import { CitationError, parseBibtex, parseRis } from '@bahith/citations';
 
 import { apiError, requireSameOrigin } from '@/server/api';
 import { getDatabase } from '@/server/db';
-import { projectContext, unauthenticated } from '@/server/project-context';
+import { projectContext, requireProjectAccess, unauthenticated } from '@/server/project-context';
 import { cslToRecord } from '@/server/scholarly';
 
 type Params = { params: Promise<{ projectId: string }> };
@@ -20,6 +20,7 @@ export async function POST(request: Request, { params }: Params) {
     const context = await projectContext(request, params);
     if (context === null) return unauthenticated();
     requireSameOrigin(request);
+    await requireProjectAccess(context, true);
     const declared = Number(request.headers.get('content-length') ?? 'NaN');
     if (!Number.isFinite(declared) || declared > MAX_IMPORT_BYTES + 64 * 1024) {
       return Response.json({ code: 'IMPORT_TOO_LARGE' }, { status: 413 });

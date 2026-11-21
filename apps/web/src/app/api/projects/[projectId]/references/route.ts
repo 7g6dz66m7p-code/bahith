@@ -5,7 +5,7 @@ import { z } from 'zod';
 
 import { apiError, readJsonBody, requireSameOrigin } from '@/server/api';
 import { getDatabase } from '@/server/db';
-import { projectContext, unauthenticated } from '@/server/project-context';
+import { projectContext, requireProjectAccess, unauthenticated } from '@/server/project-context';
 import { cslToRecord, getScholarly } from '@/server/scholarly';
 
 type Params = { params: Promise<{ projectId: string }> };
@@ -30,6 +30,7 @@ export async function POST(request: Request, { params }: Params) {
     const context = await projectContext(request, params);
     if (context === null) return unauthenticated();
     requireSameOrigin(request);
+    await requireProjectAccess(context, true);
     const body = bodySchema.safeParse(await readJsonBody(request));
     if (!body.success) throw new SanadError('SANAD_INVALID_INPUT');
     const doi = normalizeDoi(body.data.doi);
