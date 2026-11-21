@@ -72,6 +72,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@bahith/ai':
+        specifier: workspace:*
+        version: link:../../packages/ai
       '@bahith/auth':
         specifier: workspace:*
         version: link:../../packages/auth

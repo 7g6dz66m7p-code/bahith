@@ -69,6 +69,10 @@ const env = {
   // Registry lookups stay off in e2e (no network dependency); the spec checks the clear
   // "not configured" path. Live registry checks are in packages/scholarly test:live.
   SCHOLARLY_CONTACT_EMAIL: '',
+  // No AI provider in e2e: the assistant must say it is not configured (never fake it).
+  AI_CHAT_MODEL: '',
+  ANTHROPIC_API_KEY: '',
+  OPENAI_API_KEY: '',
   NEXT_TELEMETRY_DISABLED: '1',
   REDIS_URL: `redis://${redis.getHost()}:${redis.getMappedPort(6379)}`,
   ...storageEnv,

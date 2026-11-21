@@ -1,10 +1,11 @@
 'use client';
 
 import type { DocumentSummary, LibraryEntry, SourceMetadata } from '@bahith/db';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import type { SubmitEvent } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import { AssistantPanel } from '@/components/assistant-panel';
 import { ReferencesPanel } from '@/components/references-panel';
 import { Link, useRouter } from '@/i18n/navigation';
 
@@ -64,13 +65,16 @@ export function ProjectWorkspace({
   initialLibrary,
   drafts,
   references,
+  assistant,
 }: {
   project: ProjectInfo;
   initialLibrary: LibraryEntry[];
   drafts: DocumentSummary[];
   references: SourceMetadata[];
+  assistant: { consent: boolean; model: string | null };
 }) {
   const t = useTranslations('Project');
+  const locale = useLocale();
   const router = useRouter();
   const [creatingDraft, setCreatingDraft] = useState(false);
   const [draftError, setDraftError] = useState(false);
@@ -388,6 +392,15 @@ export function ProjectWorkspace({
           )}
         </section>
       </div>
+
+      <AssistantPanel
+        projectId={project.id}
+        workspaceId={project.workspaceId}
+        canWrite={project.canWrite}
+        language={locale === 'en' ? 'en' : 'ar'}
+        initialConsent={assistant.consent}
+        model={assistant.model}
+      />
 
       <ReferencesPanel
         projectId={project.id}

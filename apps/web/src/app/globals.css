@@ -202,3 +202,24 @@ button:disabled {
 .diff-removed {
   color: var(--danger);
 }
+
+/* Research assistant: support labels for each answer sentence. */
+.support-badge {
+  display: inline-block;
+  border-radius: 9999px;
+  padding: 0 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  vertical-align: middle;
+  border: 1px solid currentColor;
+}
+.support-supported {
+  color: var(--accent);
+}
+.support-inference {
+  color: var(--foreground);
+  border-style: dashed;
+}
+.support-unsupported {
+  color: var(--danger);
+}
