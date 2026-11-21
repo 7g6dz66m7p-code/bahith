@@ -17,3 +17,5 @@ CLAUDE.md
 # CSL styles and locales are vendored verbatim from upstream (see packages/citations/NOTICE.md)
 packages/citations/styles
 packages/citations/locales
+# recorded upstream responses are kept byte-for-byte
+packages/scholarly/test/fixtures
