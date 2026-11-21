@@ -20,6 +20,8 @@ from bahith_worker.sanad.models import SanadError
 # Arabic first, then English. Requires the `ara` and `eng` traineddata packages.
 OCR_LANGUAGES = "ara+eng"
 OCR_DPI = 300
+# Lines of one Tesseract paragraph are joined with spaces (soft wraps).
+OCR_LAYOUT_VERSION = "paragraphs-v1"
 OCR_TIMEOUT_SECONDS = 120
 # Upper bound on rendered pixels (≈ A3 at 300 dpi) to bound memory per page.
 MAX_OCR_PIXELS = 50_000_000
@@ -106,8 +108,12 @@ def _recognise(image: Image.Image, languages: str) -> OcrResult:
         confidence = float(data["conf"][index])
         if confidence >= 0:
             confidences.append(confidence)
-    # Tesseract emits words in logical (reading) order, also for Arabic.
-    text = "\n".join(" ".join(words) for _, words in sorted(lines.items()))
+    # Tesseract emits words in logical (reading) order, also for Arabic. Lines of one
+    # paragraph are soft wraps: join them with a space, one paragraph per output line.
+    paragraphs: dict[tuple[int, int], list[str]] = {}
+    for (block, paragraph, _line), words in sorted(lines.items()):
+        paragraphs.setdefault((block, paragraph), []).append(" ".join(words))
+    text = "\n".join(" ".join(parts) for _, parts in sorted(paragraphs.items()))
     mean = round(sum(confidences) / len(confidences), 2) if confidences else None
     return OcrResult(text=text, confidence=mean, score=sum(confidences))
 

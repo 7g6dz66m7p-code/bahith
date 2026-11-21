@@ -5,6 +5,7 @@ forms, right-to-left runs in left-to-right order and reversed numbers ("١٢٪" 
 The fixture is a Chromium-made PDF of synthetic sentences (fixtures/pdf/make_fixtures.cjs).
 """
 
+import json
 from pathlib import Path
 
 import pypdfium2 as pdfium
@@ -56,7 +57,7 @@ def test_brackets_in_arabic_lines_are_not_mirrored(lines: list[str]) -> None:
 def test_extraction_manifest_uses_the_logical_order_extractor() -> None:
     manifest = extract_document(FIXTURE.read_bytes(), "application/pdf", ocr=False)
     assert manifest.extractor_version.startswith("sanad-pdf-v2:pdfium-")
-    assert manifest.extractor_version.endswith("+logical-order-v1")
+    assert manifest.extractor_version.endswith("+logical-order-v2")
     assert manifest.units[0].content.split("\n") == EXPECTED
     # Lexical search can now find what a researcher types.
     assert any("تحليل المصادر الأصلية" in chunk.content for chunk in manifest.chunks)
@@ -77,3 +78,22 @@ def test_a_second_producer_libreoffice_including_lam_alef_ligatures() -> None:
     # "الأصلية" and "طلاب" contain lam-alef ligatures written in visual order.
     assert "الأصلية" in lines[0]
     assert "طلاب" in lines[1]
+
+
+PARAGRAPHS = json.loads((FIXTURE.parent / "chromium-paragraphs.json").read_text("utf-8"))
+
+
+@pytest.mark.parametrize(
+    "name", ["chromium-arabic-paragraphs.pdf", "chromium-arabic-latin-terms.pdf"]
+)
+def test_multi_line_paragraphs_come_back_exactly_as_written(name: str) -> None:
+    """Regression (found by eval/sanad): soft-wrapped lines, decimals in Arabic lines
+    ("0.05" was "05.0"), spaces inside words after non-joining letters ("دا لاً"),
+    zero-width stream spaces ("أكثرمن"), marks on the wrong letter ("طُبقّ"), and Latin
+    terms run into the next Arabic word ("TEIلترميز")."""
+    document = pdfium.PdfDocument((FIXTURE.parent / name).read_bytes())
+    try:
+        pages = [page_text(document[index]).split("\n") for index in range(len(document))]
+    finally:
+        document.close()
+    assert pages == PARAGRAPHS[name]
