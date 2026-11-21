@@ -78,6 +78,8 @@ jobs:
       # Real Postgres 16 + pgvector, Redis and MinIO containers, and the real Python
       # worker for the document pipeline test; includes the isolation tests.
       - run: pnpm test:integration --concurrency=1
+      # Fixed SANAD evaluation (eval/sanad): fails below its retrieval, page and quote gates.
+      - run: pnpm eval
 
   e2e:
     name: End-to-end tests (Playwright, ar + en)
