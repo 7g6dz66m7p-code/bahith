@@ -5,6 +5,7 @@ import {
   jsonb,
   pgTable,
   text,
+  timestamp,
   unique,
   uuid,
 } from 'drizzle-orm/pg-core';
@@ -23,6 +24,12 @@ export const projects = pgTable(
     citationStyle: citationStyleEnum('citation_style').notNull().default('apa-7'),
     language: localeEnum('language').notNull().default('ar'),
     status: projectStatusEnum('status').notNull().default('active'),
+    /**
+     * Consent to send retrieved passages of this project to the configured AI provider
+     * (owner/editor, revocable). Null means no passage may leave the platform.
+     */
+    aiConsentAt: timestamp('ai_consent_at', { withTimezone: true }),
+    aiConsentBy: userRef('ai_consent_by'),
     createdBy: userRef('created_by'),
     createdAt: createdAt(),
     updatedAt: updatedAt(),

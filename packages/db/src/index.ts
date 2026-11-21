@@ -64,3 +64,13 @@ export {
   saveDocumentSchema,
 } from './documents';
 export type { CitationTarget, DocumentSummary, DocumentVersion } from './documents';
+export {
+  AI_REQUESTS_METRIC,
+  AssistantError,
+  finishAssistantRun,
+  getProjectAiConsent,
+  saveAssistantExchange,
+  setProjectAiConsent,
+  startAssistantRun,
+} from './assistant';
+export type { AssistantErrorCode, ProjectAiConsent } from './assistant';

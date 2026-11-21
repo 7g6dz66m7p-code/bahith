@@ -88,6 +88,28 @@ describe('migrations', () => {
     });
   });
 
+  /** Rolls back `tag` and every later migration, checking the order; returns their tags. */
+  async function rollBackThrough(tag: string): Promise<string[]> {
+    const tags = (await loadMigrations()).map((m) => m.tag);
+    const later = tags.slice(tags.indexOf(tag));
+    expect(later[0]).toBe(tag);
+    expect(await rollbackLast(client, later.length)).toEqual([...later].reverse());
+    return later;
+  }
+
+  async function reapply(tags: string[]): Promise<void> {
+    expect(await migrateUp(client)).toEqual(tags);
+  }
+
+  it('rolls back the project AI consent columns on their own', async () => {
+    const consent = `SELECT column_name AS name FROM information_schema.columns
+                     WHERE table_name = 'projects' AND column_name LIKE 'ai_consent%' ORDER BY 1`;
+    expect(await listNames(client, consent)).toEqual(['ai_consent_at', 'ai_consent_by']);
+    const tags = await rollBackThrough('0007_project_ai_consent');
+    expect(await listNames(client, consent)).toEqual([]);
+    await reapply(tags);
+  });
+
   it('rolls back stemmed lexical search to surface forms, then restores it', async () => {
     const functions = `SELECT proname AS name FROM pg_proc
                        WHERE pronamespace = 'app'::regnamespace AND proname LIKE '%stem%'
@@ -100,11 +122,11 @@ describe('migrations', () => {
       'search_term_queries',
     ]);
     expect((await client.query(stemmed)).rows).toEqual([{ name: true }]);
-    expect(await rollbackLast(client)).toEqual(['0006_search_stemming']);
+    const tags = await rollBackThrough('0006_search_stemming');
     expect(await listNames(client, functions)).toEqual([]);
     const index = `SELECT indexname AS name FROM pg_indexes WHERE indexname = 'chunks_tsv_gin'`;
     expect(await listNames(client, index)).toEqual(['chunks_tsv_gin']);
-    expect(await migrateUp(client)).toEqual(['0006_search_stemming']);
+    await reapply(tags);
     expect(await listNames(client, index)).toEqual(['chunks_tsv_gin']);
   });
 
@@ -112,31 +134,24 @@ describe('migrations', () => {
     const indexQuery = `SELECT indexname AS name FROM pg_indexes
                         WHERE indexname = 'files_workspace_id_sha256_key'`;
     expect(await listNames(client, indexQuery)).toEqual(['files_workspace_id_sha256_key']);
-    expect(await rollbackLast(client, 2)).toEqual(['0006_search_stemming', '0005_library_dedup']);
+    const tags = await rollBackThrough('0005_library_dedup');
     expect(await listNames(client, indexQuery)).toEqual([]);
-    expect(await migrateUp(client)).toEqual(['0005_library_dedup', '0006_search_stemming']);
+    await reapply(tags);
   });
 
   it('rolls back private identity tables and roles before the preceding schema', async () => {
-    const reverted = await rollbackLast(client, 3);
-    expect(reverted.slice(0, 2)).toEqual(['0006_search_stemming', '0005_library_dedup']);
-    expect(reverted.slice(2)).toEqual(['0004_auth_identity']);
+    const tags = await rollBackThrough(['0004', 'auth', 'identity'].join('_'));
     expect(await listNames(client, ROLES)).toEqual(['bahith_app']);
     expect(await listNames(client, TABLES)).toHaveLength(23 + 1);
     expect(
       (await client.query(`SELECT relrowsecurity FROM pg_class WHERE oid = 'users'::regclass`))
         .rows,
     ).toEqual([{ relrowsecurity: false }]);
-    const reapplied = await migrateUp(client);
-    expect(reapplied.slice(1)).toEqual(['0005_library_dedup', '0006_search_stemming']);
-    expect(reapplied.slice(0, 1)).toEqual(['0004_auth_identity']);
+    await reapply(tags);
   });
 
   it('can still roll back provenance while retaining the existing research schema', async () => {
-    const reverted = await rollbackLast(client, 4);
-    const expected = ['0006_search_stemming', '0005_library_dedup', '0004_auth_identity'];
-    expected.push('0003_sanad_provenance');
-    expect(reverted).toEqual(expected);
+    const tags = await rollBackThrough('0003_sanad_provenance');
     expect(await listNames(client, ROLES)).toEqual(['bahith_app']);
     const columns = await listNames(
       client,
@@ -144,31 +159,14 @@ describe('migrations', () => {
        WHERE table_name IN ('files', 'chunks') AND column_name IN ('extraction', 'provenance')`,
     );
     expect(columns).toEqual([]);
-    expect(await migrateUp(client)).toEqual([
-      '0003_sanad_provenance',
-      '0004_auth_identity',
-      '0005_library_dedup',
-      '0006_search_stemming',
-    ]);
+    await reapply(tags);
   });
 
   it('can still roll back the preceding security migration', async () => {
-    expect(await rollbackLast(client, 5)).toEqual([
-      '0006_search_stemming',
-      '0005_library_dedup',
-      '0004_auth_identity',
-      '0003_sanad_provenance',
-      '0002_security',
-    ]);
+    const tags = await rollBackThrough('0002_security');
     expect(await listNames(client, ROLES)).toEqual([]);
     expect(await listNames(client, TABLES)).toHaveLength(23 + 1);
-    expect(await migrateUp(client)).toEqual([
-      '0002_security',
-      '0003_sanad_provenance',
-      '0004_auth_identity',
-      '0005_library_dedup',
-      '0006_search_stemming',
-    ]);
+    await reapply(tags);
   });
 
   it('rolls everything back to an empty database, then applies it all again', async () => {
