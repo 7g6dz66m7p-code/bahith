@@ -43,6 +43,13 @@
       "when": 1795055938935,
       "tag": "0005_library_dedup",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1795266719630,
+      "tag": "0006_search_stemming",
+      "breakpoints": true
     }
   ]
 }

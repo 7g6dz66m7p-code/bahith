@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, inject, it } from 'vitest';
 import { z } from 'zod';
@@ -289,5 +289,51 @@ describe('SANAD project retrieval and access using the real app role', () => {
     await expect(
       withSanadProject(database, context(), true, () => Promise.resolve('authorized')),
     ).resolves.toBe('authorized');
+  });
+  it('lexical v2: matches stems and clitics, needs half the terms, ignores stopwords', async () => {
+    const rows = await database.withWorkspace(a.workspaceId, (tx) =>
+      tx
+        .insert(schema.chunks)
+        .values([
+          {
+            workspaceId: a.workspaceId,
+            sourceId: a.sourceId,
+            fileId: a.fileId,
+            chunkIndex: 40,
+            content: 'توصي الدراسة بتدريب المعلمين على تصميم الأنشطة المدمجة.',
+            pageStart: 7,
+            pageEnd: 7,
+          },
+          {
+            workspaceId: a.workspaceId,
+            sourceId: a.sourceId,
+            fileId: a.fileId,
+            chunkIndex: 41,
+            content: 'Limitations: actigraphy cannot distinguish wakefulness.',
+            pageStart: 8,
+            pageEnd: 8,
+          },
+        ])
+        .returning({ id: schema.chunks.id }),
+    );
+    const [arabic, english] = rows.map((row) => row.id);
+    try {
+      const ids = async (query: string) =>
+        (await retrieve(database, { ...context(), query })).results.map((row) => row.id);
+      // Proclitic ب and the article: "تدريب المعلمين" finds "بتدريب المعلمين".
+      expect(await ids('تدريب المعلمين')).toEqual([arabic]);
+      // English stems: "limitation" finds "Limitations".
+      expect(await ids('limitation of actigraphy')).toEqual([english]);
+      // One of four content terms is not enough evidence of relevance.
+      expect(await ids('تدريب الأطباء في المستشفيات الحكومية')).toEqual([]);
+      // Only stopwords: nothing to match, no results.
+      expect(await ids('في من على')).toEqual([]);
+      const ranked = await retrieve(database, { ...context(), query: 'تصميم الأنشطة' });
+      expect(ranked.ranking).toBe('rrf-60-lexical-v2-min-share-50');
+    } finally {
+      await database.withWorkspace(a.workspaceId, (tx) =>
+        tx.delete(schema.chunks).where(inArray(schema.chunks.id, [arabic ?? '', english ?? ''])),
+      );
+    }
   });
 });

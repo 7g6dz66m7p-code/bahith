@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 import type { Database } from '../client';
 import { chunks, EMBEDDING_DIMENSIONS, files, projectSources, sources } from '../schema/index';
-import { arabicTsQuery } from '../search';
+import { LEXICAL_MIN_TERM_SHARE, searchTermQueries } from '../search';
 
 import { sanadContextSchema, withSanadProject } from './access';
 import { SanadError } from './errors';
@@ -66,8 +66,14 @@ export async function retrieve(database: Database, input: SanadRetrieveInput) {
   }
   const { workspaceId, projectId, query, limit, queryEmbedding } = parsed.data;
   return withSanadProject(database, parsed.data, false, async (tx) => {
-    const tsQuery = arabicTsQuery(query);
-    const lexicalRelevance = sql<number>`ts_rank_cd(${chunks.tsv}, ${tsQuery})`;
+    // Minimum-should-match over per-term queries (ADR-0010): a passage must match at
+    // least half of the query's terms (by surface form or stem); relevance is the share
+    // matched, with cover density only breaking ties within the same share.
+    const terms = sql`(select ${searchTermQueries(query)})`;
+    const anyTerm = sql`(select coalesce(tsquery_or_agg, ''::tsquery) from (select string_agg(q::text, ' | ')::tsquery as tsquery_or_agg from unnest(${terms}) as t(q)) as any_term)`;
+    const matched = sql<number>`(select count(*) from unnest(${terms}) as t(q) where ${chunks.tsv} @@ t.q)`;
+    const termCount = sql<number>`cardinality(${terms})`;
+    const lexicalRelevance = sql<number>`(${matched}::float8 / greatest(${termCount}, 1) + ts_rank_cd(${chunks.tsv}, ${anyTerm}, 32) * 0.01)`;
     const scope = and(
       eq(chunks.workspaceId, workspaceId),
       eq(projectSources.workspaceId, workspaceId),
@@ -98,7 +104,14 @@ export async function retrieve(database: Database, input: SanadRetrieveInput) {
           ),
         );
     const lexical = await fromProject()
-      .where(and(scope, sql`${chunks.tsv} @@ ${tsQuery}`))
+      .where(
+        and(
+          scope,
+          sql`${termCount} > 0`,
+          sql`${chunks.tsv} @@ ${anyTerm}`,
+          sql`${matched} >= ceil(${termCount} * ${LEXICAL_MIN_TERM_SHARE}::float8)`,
+        ),
+      )
       .orderBy(desc(lexicalRelevance), asc(chunks.id))
       .limit(SANAD_CANDIDATE_LIMIT);
     let semantic: typeof lexical = [];
@@ -124,7 +137,7 @@ export async function retrieve(database: Database, input: SanadRetrieveInput) {
     );
     return {
       mode: queryEmbedding === undefined ? ('lexical' as const) : ('hybrid' as const),
-      ranking: 'rrf-60-lexical-tiebreak-v1' as const,
+      ranking: 'rrf-60-lexical-v2-min-share-50' as const,
       minimumCosineSimilarity: queryEmbedding === undefined ? null : SANAD_MIN_COSINE_SIMILARITY,
       results: ranking.slice(0, limit).map((rank) => {
         const candidate = candidates.get(rank.id);

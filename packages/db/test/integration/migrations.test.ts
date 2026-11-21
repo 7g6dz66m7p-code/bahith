@@ -88,29 +88,53 @@ describe('migrations', () => {
     });
   });
 
+  it('rolls back stemmed lexical search to surface forms, then restores it', async () => {
+    const functions = `SELECT proname AS name FROM pg_proc
+                       WHERE pronamespace = 'app'::regnamespace AND proname LIKE '%stem%'
+                          OR proname IN ('search_document', 'search_term_queries')`;
+    const stemmed = `SELECT app.search_document('بتدريب المعلمين') @@
+                            (app.search_term_queries('تدريب'))[1] AS name`;
+    expect(await listNames(client, functions)).toEqual([
+      'arabic_light_stem',
+      'search_document',
+      'search_term_queries',
+    ]);
+    expect((await client.query(stemmed)).rows).toEqual([{ name: true }]);
+    expect(await rollbackLast(client)).toEqual(['0006_search_stemming']);
+    expect(await listNames(client, functions)).toEqual([]);
+    const index = `SELECT indexname AS name FROM pg_indexes WHERE indexname = 'chunks_tsv_gin'`;
+    expect(await listNames(client, index)).toEqual(['chunks_tsv_gin']);
+    expect(await migrateUp(client)).toEqual(['0006_search_stemming']);
+    expect(await listNames(client, index)).toEqual(['chunks_tsv_gin']);
+  });
+
   it('rolls back the library duplicate-detection index on its own', async () => {
     const indexQuery = `SELECT indexname AS name FROM pg_indexes
                         WHERE indexname = 'files_workspace_id_sha256_key'`;
     expect(await listNames(client, indexQuery)).toEqual(['files_workspace_id_sha256_key']);
-    expect(await rollbackLast(client)).toEqual(['0005_library_dedup']);
+    expect(await rollbackLast(client, 2)).toEqual(['0006_search_stemming', '0005_library_dedup']);
     expect(await listNames(client, indexQuery)).toEqual([]);
-    expect(await migrateUp(client)).toEqual(['0005_library_dedup']);
+    expect(await migrateUp(client)).toEqual(['0005_library_dedup', '0006_search_stemming']);
   });
 
   it('rolls back private identity tables and roles before the preceding schema', async () => {
-    expect(await rollbackLast(client, 2)).toEqual(['0005_library_dedup', '0004_auth_identity']);
+    const reverted = await rollbackLast(client, 3);
+    expect(reverted.slice(0, 2)).toEqual(['0006_search_stemming', '0005_library_dedup']);
+    expect(reverted.slice(2)).toEqual(['0004_auth_identity']);
     expect(await listNames(client, ROLES)).toEqual(['bahith_app']);
     expect(await listNames(client, TABLES)).toHaveLength(23 + 1);
     expect(
       (await client.query(`SELECT relrowsecurity FROM pg_class WHERE oid = 'users'::regclass`))
         .rows,
     ).toEqual([{ relrowsecurity: false }]);
-    expect(await migrateUp(client)).toEqual(['0004_auth_identity', '0005_library_dedup']);
+    const reapplied = await migrateUp(client);
+    expect(reapplied.slice(1)).toEqual(['0005_library_dedup', '0006_search_stemming']);
+    expect(reapplied.slice(0, 1)).toEqual(['0004_auth_identity']);
   });
 
   it('can still roll back provenance while retaining the existing research schema', async () => {
-    const reverted = await rollbackLast(client, 3);
-    const expected = ['0005_library_dedup', '0004_auth_identity'];
+    const reverted = await rollbackLast(client, 4);
+    const expected = ['0006_search_stemming', '0005_library_dedup', '0004_auth_identity'];
     expected.push('0003_sanad_provenance');
     expect(reverted).toEqual(expected);
     expect(await listNames(client, ROLES)).toEqual(['bahith_app']);
@@ -124,11 +148,13 @@ describe('migrations', () => {
       '0003_sanad_provenance',
       '0004_auth_identity',
       '0005_library_dedup',
+      '0006_search_stemming',
     ]);
   });
 
   it('can still roll back the preceding security migration', async () => {
-    expect(await rollbackLast(client, 4)).toEqual([
+    expect(await rollbackLast(client, 5)).toEqual([
+      '0006_search_stemming',
       '0005_library_dedup',
       '0004_auth_identity',
       '0003_sanad_provenance',
@@ -141,6 +167,7 @@ describe('migrations', () => {
       '0003_sanad_provenance',
       '0004_auth_identity',
       '0005_library_dedup',
+      '0006_search_stemming',
     ]);
   });
 

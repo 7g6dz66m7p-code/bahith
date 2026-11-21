@@ -209,7 +209,8 @@ export const chunks = pgTable(
     locator: jsonb('locator').$type<ChunkLocator>(),
     provenance: jsonb('provenance').$type<ChunkProvenance>(),
     tsv: tsvector('tsv').generatedAlwaysAs(
-      (): SQL => sql`to_tsvector('simple', app.normalize_arabic(${chunks.content}))`,
+      // Surface forms plus Arabic light stems and English stems (migration 0006).
+      (): SQL => sql`app.search_document(${chunks.content})`,
     ),
     embedding: vector('embedding', { dimensions: EMBEDDING_DIMENSIONS }),
     /** Which embedding model produced `embedding`; needed to re-embed safely. */
