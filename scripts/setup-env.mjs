@@ -86,6 +86,12 @@ set('AI_CHAT_MODEL', () => '');
 set('AI_EMBEDDING_MODEL', () => '');
 set('AI_RERANK_MODEL', () => '');
 
+// Left empty on purpose: the project owner provides a project contact mailbox and any keys.
+set('SCHOLARLY_CONTACT_EMAIL', () => '');
+set('OPENALEX_API_KEY', () => '');
+set('SEMANTIC_SCHOLAR_API_KEY', () => '');
+set('NCBI_API_KEY', () => '');
+
 // Keep the comments and order of .env.example; fail if the two lists ever drift apart.
 const exampleNames = [...parse(readFileSync(examplePath, 'utf8')).keys()];
 const unknown = exampleNames.filter((name) => !env.has(name));

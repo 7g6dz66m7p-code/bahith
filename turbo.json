@@ -21,7 +21,12 @@
     "DATABASE_ADMIN_URL",
     "REDIS_URL",
     "S3_*",
-    "AI_*"
+    "AI_*",
+    "SCHOLARLY_*",
+    "OPENALEX_API_KEY",
+    "SEMANTIC_SCHOLAR_API_KEY",
+    "NCBI_API_KEY",
+    "NODE_USE_ENV_PROXY"
   ],
   "tasks": {
     "build": {
