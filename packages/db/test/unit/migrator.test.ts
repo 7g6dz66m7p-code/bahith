@@ -37,6 +37,8 @@ describe('loadMigrations', () => {
       '0003_sanad_provenance',
       '0004_auth_identity',
       '0005_library_dedup',
+      '0006_search_stemming',
+      '0007_project_ai_consent',
     ]);
     for (const migration of migrations) {
       expect(migration.downSql.trim(), migration.tag).not.toBe('');
