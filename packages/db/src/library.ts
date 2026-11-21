@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, inArray } from 'drizzle-orm';
+import { and, asc, count, desc, eq, inArray, sql } from 'drizzle-orm';
 import { z } from 'zod';
 
 import type { Database } from './client';
@@ -392,5 +392,278 @@ export async function recordProjectAudit(
       actorUserId: context.userId,
       ...parsed.data,
     });
+  });
+}
+
+/** Bibliographic fields of a source, as stored. */
+export interface SourceMetadata {
+  sourceId: string;
+  type: string;
+  title: string;
+  authors: { family?: string; given?: string; literal?: string }[];
+  year: number | null;
+  containerTitle: string | null;
+  publisher: string | null;
+  volume: string | null;
+  issue: string | null;
+  pages: string | null;
+  doi: string | null;
+  url: string | null;
+  language: string | null;
+  verificationStatus: string;
+  verificationProvider: string | null;
+}
+
+const sourceColumns = {
+  sourceId: sources.id,
+  type: sources.type,
+  title: sources.title,
+  authors: sources.authors,
+  year: sources.year,
+  containerTitle: sources.containerTitle,
+  publisher: sources.publisher,
+  volume: sources.volume,
+  issue: sources.issue,
+  pages: sources.pages,
+  doi: sources.doi,
+  url: sources.url,
+  language: sources.language,
+  verificationStatus: sources.verificationStatus,
+  verificationProvider: sources.verificationProvider,
+};
+
+/** The stored metadata of every source attached to the project (for export/verification). */
+export async function listProjectSourceMetadata(
+  database: Database,
+  context: SanadProjectContext,
+  sourceId?: string,
+): Promise<SourceMetadata[]> {
+  if (sourceId !== undefined && !z.uuid().safeParse(sourceId).success) {
+    throw new SanadError('SANAD_INVALID_INPUT');
+  }
+  return withSanadProject(database, context, false, async (tx) => {
+    const rows = await tx
+      .select(sourceColumns)
+      .from(sources)
+      .innerJoin(
+        projectSources,
+        and(
+          eq(projectSources.workspaceId, sources.workspaceId),
+          eq(projectSources.sourceId, sources.id),
+          eq(projectSources.projectId, context.projectId),
+        ),
+      )
+      .where(
+        and(
+          eq(sources.workspaceId, context.workspaceId),
+          ...(sourceId === undefined ? [] : [eq(sources.id, sourceId)]),
+        ),
+      )
+      .orderBy(asc(sources.title));
+    if (sourceId !== undefined && rows.length === 0) throw new SanadError('SANAD_SOURCE_MISMATCH');
+    return rows;
+  });
+}
+
+const nameSchema = z
+  .object({
+    family: z.string().max(200).optional(),
+    given: z.string().max(200).optional(),
+    literal: z.string().max(300).optional(),
+  })
+  .loose()
+  .transform(({ family, given, literal }) => ({
+    ...(family === undefined ? {} : { family }),
+    ...(given === undefined ? {} : { given }),
+    ...(literal === undefined ? {} : { literal }),
+  }));
+
+/** Registry metadata accepted for a source (normalised CSL-JSON fields). */
+export const registryRecordSchema = z.object({
+  type: z.string().min(1).max(64),
+  title: z.string().trim().min(1).max(2000),
+  authors: z.array(nameSchema).max(500).default([]),
+  year: z.number().int().min(0).max(3000).nullable().default(null),
+  containerTitle: z.string().max(1000).nullable().default(null),
+  publisher: z.string().max(500).nullable().default(null),
+  volume: z.string().max(64).nullable().default(null),
+  issue: z.string().max(64).nullable().default(null),
+  pages: z.string().max(64).nullable().default(null),
+  doi: z.string().max(300).nullable().default(null),
+  url: z.url().max(2000).nullable().default(null),
+  language: z.string().max(35).nullable().default(null),
+  abstract: z.string().max(20_000).nullable().default(null),
+  csl: z.record(z.string(), z.unknown()).nullable().default(null),
+});
+
+export type RegistryRecord = z.input<typeof registryRecordSchema>;
+
+const verificationOutcomeSchema = z.discriminatedUnion('status', [
+  z.strictObject({
+    status: z.literal('verified'),
+    provider: z.string().regex(/^[a-z_]{2,40}$/),
+    record: registryRecordSchema,
+  }),
+  z.strictObject({
+    status: z.enum(['mismatch', 'not_found']),
+    provider: z
+      .string()
+      .regex(/^[a-z_]{2,40}$/)
+      .nullable(),
+  }),
+]);
+
+/**
+ * Records the result of checking a source against a scholarly registry.
+ *
+ * `verified` replaces the bibliographic fields with the registry's (the registry is the
+ * authority for its own record) and stamps provider + time. `mismatch` / `not_found`
+ * only change the status: the researcher's metadata is kept for correction. An
+ * unverifiable check (registry unreachable) must not be recorded at all.
+ */
+export async function applySourceVerification(
+  database: Database,
+  context: SanadProjectContext,
+  sourceId: string,
+  outcome: unknown,
+): Promise<void> {
+  const parsed = verificationOutcomeSchema.safeParse(outcome);
+  if (!parsed.success || !z.uuid().safeParse(sourceId).success) {
+    throw new SanadError('SANAD_INVALID_INPUT');
+  }
+  const result = parsed.data;
+  await listProjectSourceMetadata(database, context, sourceId);
+  await withSanadProject(database, context, true, async (tx) => {
+    const where = and(eq(sources.workspaceId, context.workspaceId), eq(sources.id, sourceId));
+    if (result.status === 'verified') {
+      const { record } = result;
+      await tx
+        .update(sources)
+        .set({
+          type: record.type,
+          title: record.title,
+          authors: record.authors,
+          year: record.year,
+          containerTitle: record.containerTitle,
+          publisher: record.publisher,
+          volume: record.volume,
+          issue: record.issue,
+          pages: record.pages,
+          doi: record.doi,
+          url: record.url,
+          language: record.language,
+          ...(record.abstract === null ? {} : { abstract: record.abstract }),
+          ...(record.csl === null ? {} : { csl: record.csl }),
+          verificationStatus: 'verified',
+          verificationProvider: result.provider,
+          verifiedAt: new Date(),
+        })
+        .where(where);
+    } else {
+      await tx
+        .update(sources)
+        .set({
+          verificationStatus: result.status,
+          verificationProvider: result.provider,
+          verifiedAt: null,
+        })
+        .where(where);
+    }
+    await tx.insert(auditLog).values({
+      workspaceId: context.workspaceId,
+      actorUserId: context.userId,
+      action: 'source.verification_checked',
+      entityType: 'source',
+      entityId: sourceId,
+      metadata: { status: result.status, provider: result.provider },
+    });
+  });
+}
+
+/**
+ * Adds a bibliographic record found in a registry (or imported from BibTeX/RIS) to the
+ * project. A source with the same DOI already in the workspace is linked instead of
+ * duplicated. `verifiedBy` is set only for records fetched from a registry by DOI.
+ */
+export async function addReferenceSource(
+  database: Database,
+  context: SanadProjectContext,
+  input: { record: RegistryRecord; origin: 'search' | 'import'; verifiedBy: string | null },
+): Promise<{ sourceId: string; duplicate: boolean }> {
+  const record = registryRecordSchema.safeParse(input.record);
+  if (!record.success) throw new SanadError('SANAD_INVALID_INPUT');
+  const data = record.data;
+  return withSanadProject(database, context, true, async (tx) => {
+    if (data.doi !== null) {
+      const [existing] = await tx
+        .select({ id: sources.id })
+        .from(sources)
+        .where(
+          and(
+            eq(sources.workspaceId, context.workspaceId),
+            sql`lower(${sources.doi}) = lower(${data.doi})`,
+          ),
+        )
+        .limit(1);
+      if (existing !== undefined) {
+        await tx
+          .insert(projectSources)
+          .values({
+            workspaceId: context.workspaceId,
+            projectId: context.projectId,
+            sourceId: existing.id,
+            addedBy: context.userId,
+          })
+          .onConflictDoNothing();
+        return { sourceId: existing.id, duplicate: true };
+      }
+    }
+    const [source] = await tx
+      .insert(sources)
+      .values({
+        workspaceId: context.workspaceId,
+        origin: input.origin,
+        type: data.type,
+        title: data.title,
+        authors: data.authors,
+        year: data.year,
+        containerTitle: data.containerTitle,
+        publisher: data.publisher,
+        volume: data.volume,
+        issue: data.issue,
+        pages: data.pages,
+        doi: data.doi,
+        url: data.url,
+        language: data.language,
+        abstract: data.abstract,
+        csl: data.csl,
+        // Metadata only: no full text was provided, so nothing is citable by page.
+        fullTextStatus: data.abstract === null ? 'none' : 'abstract_only',
+        ...(input.verifiedBy === null
+          ? {}
+          : {
+              verificationStatus: 'verified' as const,
+              verificationProvider: input.verifiedBy,
+              verifiedAt: new Date(),
+            }),
+        createdBy: context.userId,
+      })
+      .returning({ id: sources.id });
+    if (source === undefined) throw new SanadError('SANAD_INVALID_INPUT');
+    await tx.insert(projectSources).values({
+      workspaceId: context.workspaceId,
+      projectId: context.projectId,
+      sourceId: source.id,
+      addedBy: context.userId,
+    });
+    await tx.insert(auditLog).values({
+      workspaceId: context.workspaceId,
+      actorUserId: context.userId,
+      action: input.origin === 'import' ? 'source.imported' : 'source.added_from_registry',
+      entityType: 'source',
+      entityId: source.id,
+      metadata: { verified: input.verifiedBy !== null },
+    });
+    return { sourceId: source.id, duplicate: false };
   });
 }

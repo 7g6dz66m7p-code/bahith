@@ -29,6 +29,10 @@ export {
   withWorkspaceMember,
 } from './projects';
 export {
+  addReferenceSource,
+  applySourceVerification,
+  listProjectSourceMetadata,
+  registryRecordSchema,
   getProjectFile,
   listProjectLibrary,
   markFileFailed,
@@ -39,7 +43,13 @@ export {
   registerUploadSchema,
   titleFromFilename,
 } from './library';
-export type { LibraryEntry, RegisterUploadInput, RegisteredUpload } from './library';
+export type {
+  LibraryEntry,
+  RegisterUploadInput,
+  RegisteredUpload,
+  RegistryRecord,
+  SourceMetadata,
+} from './library';
 export { EXTRACTABLE_MIME_TYPES, isPagedMimeType } from './sanad/manifest';
 export type { ExtractableMimeType } from './sanad/manifest';
 export {
