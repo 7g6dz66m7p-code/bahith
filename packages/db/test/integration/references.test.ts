@@ -97,6 +97,38 @@ describe('references: registry import and verification', () => {
     expect(stored?.verificationStatus).toBe('unverified');
   });
 
+  it('re-importing a DOI-less record (case and spacing aside) links the existing source', async () => {
+    const first = await addReferenceSource(database, ctx(), {
+      record: { type: 'book', title: 'مناهج البحث  النوعي: مدخل', year: 2019, doi: null },
+      origin: 'import',
+      verifiedBy: null,
+    });
+    const again = await addReferenceSource(database, ctx(), {
+      record: { type: 'book', title: ' مناهج البحث النوعي مدخل ', year: 2019, doi: null },
+      origin: 'import',
+      verifiedBy: null,
+    });
+    expect(again).toEqual({ sourceId: first.sourceId, duplicate: true });
+    // A different year is a different work (e.g. another edition).
+    const otherEdition = await addReferenceSource(database, ctx(), {
+      record: { type: 'book', title: 'مناهج البحث النوعي: مدخل', year: 2023, doi: null },
+      origin: 'import',
+      verifiedBy: null,
+    });
+    expect(otherEdition.duplicate).toBe(false);
+    // Workspace B's identical record is its own source.
+    const inB = await addReferenceSource(
+      database,
+      { userId: b.userId, workspaceId: b.workspaceId, projectId: b.projectId },
+      {
+        record: { type: 'book', title: 'مناهج البحث النوعي: مدخل', year: 2019, doi: null },
+        origin: 'import',
+        verifiedBy: null,
+      },
+    );
+    expect(inB.duplicate).toBe(false);
+  });
+
   it('verification replaces metadata with the registry record; mismatch keeps it', async () => {
     const { sourceId } = await addReferenceSource(database, ctx(), {
       record: { type: 'document', title: 'deep lerning (typo)', doi: null },

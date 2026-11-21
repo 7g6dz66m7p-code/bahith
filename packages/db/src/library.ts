@@ -1,4 +1,5 @@
 import { and, asc, count, desc, eq, inArray, sql } from 'drizzle-orm';
+import type { SQL, SQLWrapper } from 'drizzle-orm';
 import { z } from 'zod';
 
 import type { Database } from './client';
@@ -585,6 +586,11 @@ export async function applySourceVerification(
  * project. A source with the same DOI already in the workspace is linked instead of
  * duplicated. `verifiedBy` is set only for records fetched from a registry by DOI.
  */
+/** lower(title) with runs of whitespace and punctuation collapsed, for duplicate matching. */
+function foldedTitle(value: SQLWrapper | string): SQL {
+  return sql`lower(regexp_replace(btrim(${value}), '[[:space:][:punct:]]+', ' ', 'g'))`;
+}
+
 export async function addReferenceSource(
   database: Database,
   context: SanadProjectContext,
@@ -594,16 +600,24 @@ export async function addReferenceSource(
   if (!record.success) throw new SanadError('SANAD_INVALID_INPUT');
   const data = record.data;
   return withSanadProject(database, context, true, async (tx) => {
-    if (data.doi !== null) {
+    {
+      // Same DOI, or — when the record has no DOI — the same title (case and whitespace
+      // folded) and year: re-importing a bibliography must not duplicate its entries.
       const [existing] = await tx
         .select({ id: sources.id })
         .from(sources)
         .where(
           and(
             eq(sources.workspaceId, context.workspaceId),
-            sql`lower(${sources.doi}) = lower(${data.doi})`,
+            data.doi === null
+              ? and(
+                  sql`${foldedTitle(sources.title)} = ${foldedTitle(data.title)}`,
+                  sql`${sources.year} is not distinct from ${data.year}`,
+                )
+              : sql`lower(${sources.doi}) = lower(${data.doi})`,
           ),
         )
+        .orderBy(asc(sources.createdAt))
         .limit(1);
       if (existing !== undefined) {
         await tx

@@ -1,10 +1,11 @@
 'use client';
 
-import type { DocumentSummary, LibraryEntry } from '@bahith/db';
+import type { DocumentSummary, LibraryEntry, SourceMetadata } from '@bahith/db';
 import { useTranslations } from 'next-intl';
 import type { SubmitEvent } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import { ReferencesPanel } from '@/components/references-panel';
 import { Link, useRouter } from '@/i18n/navigation';
 
 interface ProjectInfo {
@@ -62,10 +63,12 @@ export function ProjectWorkspace({
   project,
   initialLibrary,
   drafts,
+  references,
 }: {
   project: ProjectInfo;
   initialLibrary: LibraryEntry[];
   drafts: DocumentSummary[];
+  references: SourceMetadata[];
 }) {
   const t = useTranslations('Project');
   const router = useRouter();
@@ -385,6 +388,13 @@ export function ProjectWorkspace({
           )}
         </section>
       </div>
+
+      <ReferencesPanel
+        projectId={project.id}
+        workspaceId={project.workspaceId}
+        canWrite={project.canWrite}
+        initialReferences={references}
+      />
 
       <section className="surface space-y-4 p-5 sm:p-6" aria-labelledby="drafts-title">
         <div className="space-y-1">

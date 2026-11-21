@@ -66,6 +66,9 @@ const env = {
   SMTP_PASSWORD: '',
   GOOGLE_CLIENT_ID: '',
   GOOGLE_CLIENT_SECRET: '',
+  // Registry lookups stay off in e2e (no network dependency); the spec checks the clear
+  // "not configured" path. Live registry checks are in packages/scholarly test:live.
+  SCHOLARLY_CONTACT_EMAIL: '',
   NEXT_TELEMETRY_DISABLED: '1',
   REDIS_URL: `redis://${redis.getHost()}:${redis.getMappedPort(6379)}`,
   ...storageEnv,

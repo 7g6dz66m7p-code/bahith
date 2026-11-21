@@ -5,27 +5,11 @@ import type { ExportFormat, ExportResult } from '@bahith/export';
 import { exportDocument } from '@bahith/export';
 
 import type { DraftNode } from './draft-export';
+import { recordToCsl } from './scholarly';
 import { collectCitations, draftToExportDocument, targetKey } from './draft-export';
 
-type CslItem = Record<string, unknown>;
-
-function cslItem(target: CitationTarget): CslItem {
-  const { source } = target;
-  return {
-    id: target.sourceId,
-    type: source.type,
-    title: source.title,
-    ...(source.authors.length > 0 ? { author: source.authors } : {}),
-    ...(source.year === null ? {} : { issued: { 'date-parts': [[source.year]] } }),
-    ...(source.containerTitle === null ? {} : { 'container-title': source.containerTitle }),
-    ...(source.publisher === null ? {} : { publisher: source.publisher }),
-    ...(source.volume === null ? {} : { volume: source.volume }),
-    ...(source.issue === null ? {} : { issue: source.issue }),
-    ...(source.pages === null ? {} : { page: source.pages }),
-    ...(source.doi === null ? {} : { DOI: source.doi }),
-    ...(source.url === null ? {} : { URL: source.url }),
-    ...(source.language === null ? {} : { language: source.language }),
-  };
+function cslItem(target: CitationTarget): Record<string, unknown> {
+  return recordToCsl({ sourceId: target.sourceId, ...target.source });
 }
 
 const BIBLIOGRAPHY_HEADING = { ar: 'المصادر والمراجع', en: 'References' } as const;
