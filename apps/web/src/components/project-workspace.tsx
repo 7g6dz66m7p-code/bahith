@@ -1,11 +1,11 @@
 'use client';
 
-import type { LibraryEntry } from '@bahith/db';
+import type { DocumentSummary, LibraryEntry } from '@bahith/db';
 import { useTranslations } from 'next-intl';
 import type { SubmitEvent } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { Link } from '@/i18n/navigation';
+import { Link, useRouter } from '@/i18n/navigation';
 
 interface ProjectInfo {
   id: string;
@@ -61,11 +61,16 @@ function errorKey(
 export function ProjectWorkspace({
   project,
   initialLibrary,
+  drafts,
 }: {
   project: ProjectInfo;
   initialLibrary: LibraryEntry[];
+  drafts: DocumentSummary[];
 }) {
   const t = useTranslations('Project');
+  const router = useRouter();
+  const [creatingDraft, setCreatingDraft] = useState(false);
+  const [draftError, setDraftError] = useState(false);
   const [library, setLibrary] = useState(initialLibrary);
   const [uploading, setUploading] = useState(false);
   const [notice, setNotice] = useState<{ kind: 'error' | 'success'; text: string } | null>(null);
@@ -156,6 +161,33 @@ export function ProjectWorkspace({
       setSearchError(true);
     } finally {
       setSearching(false);
+    }
+  };
+
+  const createDraft = async (event: SubmitEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const title = new FormData(event.currentTarget).get('title');
+    if (typeof title !== 'string' || title.trim() === '') return;
+    setCreatingDraft(true);
+    setDraftError(false);
+    try {
+      const response = await fetch(`${base}/documents?${query}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: title.trim() }),
+      });
+      if (!response.ok) {
+        setDraftError(true);
+        return;
+      }
+      const { document } = (await response.json()) as { document: { id: string } };
+      router.push(
+        `/workspaces/${project.workspaceId}/projects/${project.id}/documents/${document.id}`,
+      );
+    } catch {
+      setDraftError(true);
+    } finally {
+      setCreatingDraft(false);
     }
   };
 
@@ -353,6 +385,61 @@ export function ProjectWorkspace({
           )}
         </section>
       </div>
+
+      <section className="surface space-y-4 p-5 sm:p-6" aria-labelledby="drafts-title">
+        <div className="space-y-1">
+          <h2 className="section-title" id="drafts-title">
+            {t('draftsTitle')}
+          </h2>
+          <p className="muted text-sm">{t('draftsDescription')}</p>
+        </div>
+        {project.canWrite ? (
+          <form className="flex flex-wrap gap-3" onSubmit={(event) => void createDraft(event)}>
+            <label className="sr-only" htmlFor="draft-title">
+              {t('draftTitle')}
+            </label>
+            <input
+              id="draft-title"
+              name="title"
+              className="field min-w-0 flex-1"
+              dir="auto"
+              maxLength={300}
+              required
+              placeholder={t('draftTitle')}
+            />
+            <button className="btn" type="submit" disabled={creatingDraft}>
+              {t(creatingDraft ? 'creatingDraft' : 'createDraft')}
+            </button>
+          </form>
+        ) : null}
+        {draftError ? (
+          <p className="error-text" role="alert">
+            {t('draftCreateFailed')}
+          </p>
+        ) : null}
+        {drafts.length === 0 ? (
+          <p className="muted">{t('draftsEmpty')}</p>
+        ) : (
+          <ul className="grid gap-3 sm:grid-cols-2">
+            {drafts.map((draft) => (
+              <li key={draft.id} className="rounded-xl border border-border p-4">
+                <p className="break-words font-semibold" dir="auto">
+                  {draft.title}
+                </p>
+                <p className="muted text-sm">
+                  {t('draftVersion', { version: draft.latestVersion })}
+                </p>
+                <Link
+                  className="underline underline-offset-4"
+                  href={`/workspaces/${project.workspaceId}/projects/${project.id}/documents/${draft.id}`}
+                >
+                  {t('openDraft')}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </main>
   );
 }

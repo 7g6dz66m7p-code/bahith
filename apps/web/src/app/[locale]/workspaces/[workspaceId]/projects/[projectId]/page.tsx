@@ -1,4 +1,4 @@
-import { getProjectForUser, listProjectLibrary, SanadError } from '@bahith/db';
+import { getProjectForUser, listDocuments, listProjectLibrary, SanadError } from '@bahith/db';
 import { hasLocale } from 'next-intl';
 import { notFound } from 'next/navigation';
 import { locale as rootLocale } from 'next/root-params';
@@ -28,12 +28,13 @@ export default async function ProjectPage({
   const data = await Promise.all([
     getProjectForUser(database, session.user.id, workspaceId, projectId),
     listProjectLibrary(database, { userId: session.user.id, workspaceId, projectId }),
+    listDocuments(database, { userId: session.user.id, workspaceId, projectId }),
   ]).catch((error: unknown) => {
     // Not a member, or not this workspace's project: indistinguishable from "missing".
     if (error instanceof SanadError) return null;
     throw error;
   });
   if (data === null) notFound();
-  const [project, library] = data;
-  return <ProjectWorkspace project={project} initialLibrary={library} />;
+  const [project, library, drafts] = data;
+  return <ProjectWorkspace project={project} initialLibrary={library} drafts={drafts} />;
 }

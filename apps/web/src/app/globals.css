@@ -116,3 +116,89 @@ button:disabled {
   max-width: 76rem;
   margin-inline: auto;
 }
+
+/* Academic editor */
+.tool-button {
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  padding: 0.35rem 0.75rem;
+  background: var(--surface);
+  font-size: 0.875rem;
+}
+.tool-button.is-active {
+  background: var(--accent);
+  color: var(--surface);
+  border-color: var(--accent);
+}
+.draft-surface .draft-content {
+  min-height: 24rem;
+  outline: none;
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  line-height: 2;
+  counter-reset: footnote;
+}
+.draft-content h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-block: 1.25rem 0.5rem;
+}
+.draft-content h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-block: 1rem 0.5rem;
+}
+.draft-content h3,
+.draft-content h4 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-block: 0.75rem 0.25rem;
+}
+.draft-content p {
+  margin-block: 0.5rem;
+  text-align: start;
+}
+.draft-content ul,
+.draft-content ol {
+  padding-inline-start: 1.5rem;
+  list-style: revert;
+}
+.draft-content blockquote {
+  border-inline-start: 4px solid var(--accent);
+  padding-inline-start: 1rem;
+  color: var(--muted);
+}
+.draft-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-block: 0.75rem;
+}
+.draft-content th,
+.draft-content td {
+  border: 1px solid var(--border);
+  padding: 0.35rem 0.6rem;
+  text-align: start;
+}
+.citation-chip {
+  border-radius: 0.4rem;
+  padding-inline: 0.25rem;
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--foreground);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 0.9em;
+}
+.footnote-ref::after {
+  counter-increment: footnote;
+  content: counter(footnote);
+  color: var(--accent);
+  font-weight: 700;
+  padding-inline: 0.1rem;
+}
+.diff-added {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  text-decoration: none;
+}
+.diff-removed {
+  color: var(--danger);
+}
