@@ -1,5 +1,7 @@
 'use client';
 
+import type { MembershipRole, ReviewComment } from '@bahith/db';
+import { locateQuote, textAt } from '@bahith/db/review-anchor';
 import { TableKit } from '@tiptap/extension-table';
 import { EditorContent, useEditor, useEditorState } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -11,6 +13,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from '@/i18n/navigation';
 
 import { Citation, Footnote } from './nodes';
+import type { ReviewRange } from './review-highlights';
+import { ReviewHighlights, setReviewRanges } from './review-highlights';
+import type { ReviewNotice, ReviewSelection } from './review-panel';
+import { ReviewPanel } from './review-panel';
 
 interface DraftEditorProps {
   workspaceId: string;
@@ -20,6 +26,9 @@ interface DraftEditorProps {
   initialVersion: number;
   initialContent: Record<string, unknown>;
   canWrite: boolean;
+  /** The viewer's role: supervisors review (comment, suggest) but do not edit. */
+  role: MembershipRole;
+  initialComments: ReviewComment[];
 }
 
 type SaveState = 'saved' | 'dirty' | 'saving' | 'conflict' | 'error';
@@ -86,6 +95,11 @@ export function DraftEditor(props: DraftEditorProps) {
   const [exportNotice, setExportNotice] = useState<{ ok: boolean; warnings: string[] } | null>(
     null,
   );
+  const canReview = props.role !== 'viewer';
+  const [comments, setComments] = useState<ReviewComment[]>(props.initialComments);
+  const [selection, setSelection] = useState<ReviewSelection | 'invalid' | null>(null);
+  const [reviewBusy, setReviewBusy] = useState(false);
+  const [reviewNotice, setReviewNotice] = useState<ReviewNotice | null>(null);
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -97,6 +111,7 @@ export function DraftEditor(props: DraftEditorProps) {
       TableKit.configure({ table: { resizable: false } }),
       Citation,
       Footnote,
+      ReviewHighlights,
     ],
     content: props.initialContent,
     editorProps: {
@@ -173,6 +188,154 @@ export function DraftEditor(props: DraftEditorProps) {
       clearInterval(timer);
     };
   }, [save, saveState]);
+
+  const loadComments = useCallback(async () => {
+    const response = await fetch(`${base}/comments?${query}`, { cache: 'no-store' });
+    if (response.ok)
+      setComments(((await response.json()) as { comments: ReviewComment[] }).comments);
+  }, [base, query]);
+
+  // Marks the open notes in the text: where the quote is exactly at its anchor (same
+  // version) or occurs once near it (later versions), the same rule the server applies.
+  useEffect(() => {
+    if (editor === null) return;
+    const doc = editor.getJSON();
+    const ranges: ReviewRange[] = comments.flatMap((comment) => {
+      if (comment.status !== 'open') return [];
+      const range = locateQuote(
+        doc,
+        comment.anchor,
+        comment.anchor.versionNumber === version.current && !dirty.current,
+      );
+      return range === null ? [] : [{ id: comment.id, kind: comment.kind, ...range }];
+    });
+    editor.view.dispatch(setReviewRanges(editor.state.tr, ranges));
+  }, [comments, editor]);
+
+  // The text selected in the editor (also in a read-only editor), as a review anchor.
+  useEffect(() => {
+    if (editor === null || !canReview) return;
+    const onSelectionChange = () => {
+      const dom = window.getSelection();
+      if (dom === null || dom.rangeCount === 0 || dom.isCollapsed) {
+        setSelection(null);
+        return;
+      }
+      const range = dom.getRangeAt(0);
+      const root = editor.view.dom;
+      if (!root.contains(range.startContainer) || !root.contains(range.endContainer)) return;
+      try {
+        const from = editor.view.posAtDOM(range.startContainer, range.startOffset);
+        const to = editor.view.posAtDOM(range.endContainer, range.endOffset);
+        const quote = textAt(editor.getJSON(), Math.min(from, to), Math.max(from, to));
+        setSelection(
+          quote === null || quote.trim() === ''
+            ? 'invalid'
+            : { from: Math.min(from, to), to: Math.max(from, to), quote },
+        );
+      } catch {
+        setSelection('invalid');
+      }
+    };
+    document.addEventListener('selectionchange', onSelectionChange);
+    return () => {
+      document.removeEventListener('selectionchange', onSelectionChange);
+    };
+  }, [editor, canReview]);
+
+  /** Makes sure the server has what the editor shows; false if it could not be saved. */
+  const flush = async (): Promise<boolean> => {
+    if (props.canWrite && dirty.current) await save('manual');
+    return !dirty.current;
+  };
+
+  const addNote = async (
+    target: ReviewSelection,
+    note:
+      { kind: 'comment'; body: string } | { kind: 'suggestion'; replacement: string; body: string },
+  ): Promise<boolean> => {
+    setReviewBusy(true);
+    setReviewNotice(null);
+    try {
+      // An anchor names a saved version, so unsaved edits are saved first.
+      if (!(await flush())) {
+        setReviewNotice({ kind: 'error', code: 'failed' });
+        return false;
+      }
+      const response = await fetch(`${base}/comments?${query}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...note,
+          anchor: { versionNumber: version.current, ...target },
+        }),
+      });
+      if (!response.ok) {
+        const code = ((await response.json()) as { code?: string }).code;
+        setReviewNotice({
+          kind: 'error',
+          code: code === 'REVIEW_ANCHOR_INVALID' ? 'invalidAnchor' : 'failed',
+        });
+        return false;
+      }
+      await loadComments();
+      return true;
+    } catch {
+      setReviewNotice({ kind: 'error', code: 'failed' });
+      return false;
+    } finally {
+      setReviewBusy(false);
+    }
+  };
+
+  const reviewAction = async (comment: ReviewComment, action: 'resolve' | 'accept' | 'reject') => {
+    if (editor === null) return;
+    setReviewBusy(true);
+    setReviewNotice(null);
+    try {
+      if (action === 'accept' && !(await flush())) {
+        setReviewNotice({ kind: 'error', code: 'conflict' });
+        return;
+      }
+      const response = await fetch(`${base}/comments/${comment.id}?${query}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(
+          action === 'accept' ? { action, baseVersion: version.current } : { action },
+        ),
+      });
+      if (!response.ok) {
+        const code = ((await response.json()) as { code?: string }).code;
+        setReviewNotice({
+          kind: 'error',
+          code:
+            code === 'REVIEW_ANCHOR_STALE'
+              ? 'stale'
+              : code === 'DOCUMENT_VERSION_CONFLICT'
+                ? 'conflict'
+                : 'failed',
+        });
+        return;
+      }
+      if (action === 'accept') {
+        const accepted = (await response.json()) as {
+          version: number;
+          content: Record<string, unknown>;
+        };
+        // The new version is the saved content: load it without marking the draft dirty.
+        editor.commands.setContent(accepted.content, { emitUpdate: false });
+        version.current = accepted.version;
+        dirty.current = false;
+        setSaveState('saved');
+        setReviewNotice({ kind: 'accepted', version: accepted.version });
+      }
+      await loadComments();
+    } catch {
+      setReviewNotice({ kind: 'error', code: 'failed' });
+    } finally {
+      setReviewBusy(false);
+    }
+  };
 
   const searchEvidence = async (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -296,7 +459,7 @@ export function DraftEditor(props: DraftEditorProps) {
   );
 
   return (
-    <main className="app-shell mx-auto min-h-dvh w-full max-w-5xl space-y-5 px-5 py-7 sm:px-8">
+    <main className="app-shell mx-auto min-h-dvh w-full max-w-6xl space-y-5 px-5 py-7 sm:px-8">
       <nav aria-label={t('breadcrumb')} className="text-sm">
         <Link
           href={`/workspaces/${props.workspaceId}/projects/${props.projectId}`}
@@ -363,7 +526,7 @@ export function DraftEditor(props: DraftEditorProps) {
           </button>
         </div>
       ) : (
-        <p className="muted">{t('readOnly')}</p>
+        <p className="muted">{canReview ? t('reviewOnly') : t('readOnly')}</p>
       )}
 
       {panel === 'footnote' ? (
@@ -443,9 +606,21 @@ export function DraftEditor(props: DraftEditorProps) {
         </section>
       ) : null}
 
-      <section className="surface draft-surface p-5 sm:p-8" aria-label={t('editorLabel')}>
-        <EditorContent editor={editor} />
-      </section>
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
+        <section className="surface draft-surface min-w-0 p-5 sm:p-8" aria-label={t('editorLabel')}>
+          <EditorContent editor={editor} />
+        </section>
+        <ReviewPanel
+          comments={comments}
+          selection={selection}
+          canReview={canReview}
+          canDecide={props.canWrite}
+          busy={reviewBusy}
+          notice={reviewNotice}
+          onAdd={addNote}
+          onAction={(comment, action) => void reviewAction(comment, action)}
+        />
+      </div>
 
       <section className="surface space-y-3 p-4" aria-labelledby="export-title">
         <h2 id="export-title" className="section-title">

@@ -241,6 +241,19 @@ button:disabled {
   color: var(--danger);
 }
 
+/* Draft review: anchored ranges are a view-only decoration, never stored in the draft. */
+.review-anchor {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  border-block-end: 2px solid var(--accent);
+}
+.review-anchor-suggestion {
+  border-block-end-style: dashed;
+}
+.review-quote {
+  border-inline-start: 3px solid var(--border);
+  padding-inline-start: 0.5rem;
+}
+
 /* Research assistant: support labels for each answer sentence. */
 .support-badge {
   display: inline-block;

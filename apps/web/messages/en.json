@@ -279,7 +279,56 @@
     },
     "compare": "Compare with current",
     "comparing": "Difference between version {version} and the current text (added is highlighted, removed is struck through)",
-    "restore": "Restore version {version}"
+    "restore": "Restore version {version}",
+    "reviewOnly": "You are reviewing this draft: you can comment and suggest changes; the authors decide what to apply.",
+    "review": {
+      "title": "Review",
+      "hint": "Select text in the draft, then add a comment or suggest a change.",
+      "selectionInvalid": "Select text within a single paragraph, without citations or footnotes.",
+      "comment": "Comment",
+      "suggest": "Suggest change",
+      "selected": "Selected text",
+      "commentLabel": "Your comment",
+      "replacementLabel": "Replace with",
+      "noteLabel": "Note (optional)",
+      "addComment": "Add comment",
+      "addSuggestion": "Add suggestion",
+      "cancel": "Cancel",
+      "openTitle": "Open notes ({count})",
+      "closedTitle": "Closed notes ({count})",
+      "none": "No open comments or suggestions.",
+      "byline": "{name} · {role}",
+      "unknownAuthor": "Unknown author",
+      "formerMember": "former member",
+      "role": {
+        "owner": "Owner",
+        "editor": "Editor",
+        "viewer": "Viewer",
+        "supervisor": "Supervisor"
+      },
+      "kind": {
+        "comment": "Comment",
+        "suggestion": "Suggested change"
+      },
+      "status": {
+        "open": "Open",
+        "resolved": "Resolved",
+        "accepted": "Accepted",
+        "rejected": "Rejected"
+      },
+      "replaceWith": "Replace with:",
+      "deleteText": "delete this text",
+      "resolve": "Resolve",
+      "accept": "Accept",
+      "reject": "Reject",
+      "accepted": "Suggestion applied and saved as version {version}.",
+      "error": {
+        "stale": "This suggestion was not applied: the text it refers to has changed or now appears more than once near its place. Edit the draft by hand, or reject the suggestion.",
+        "invalidAnchor": "The selected text does not match the saved draft. Wait for the draft to save, then select the text again.",
+        "conflict": "The draft was changed elsewhere. Reopen it before accepting this suggestion.",
+        "failed": "The action could not be completed. Please try again."
+      }
+    }
   },
   "References": {
     "title": "References and verification",

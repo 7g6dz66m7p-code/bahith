@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { SanadError } from '@bahith/db';
+
 import { apiError, readJsonBody, requireSameOrigin } from '@/server/api';
 
 afterEach(() => vi.unstubAllEnvs());
@@ -44,6 +46,19 @@ describe('research API request boundary', () => {
         }),
       ),
     ).toEqual({ title: 'سؤال بحثي' });
+  });
+  it('maps review errors to stable status codes', async () => {
+    const cases = [
+      ['REVIEW_NOT_FOUND', 404],
+      ['REVIEW_ANCHOR_STALE', 409],
+      ['REVIEW_INVALID_STATE', 409],
+      ['REVIEW_ANCHOR_INVALID', 400],
+    ] as const;
+    for (const [code, status] of cases) {
+      const response = apiError(new SanadError(code, 'quoted draft text'));
+      expect(response.status, code).toBe(status);
+      expect(await response.json()).toEqual({ code });
+    }
   });
   it('never serializes database error details or supplied research text', async () => {
     const response = apiError(new Error('private source text and SQL parameters'));

@@ -39,9 +39,13 @@ export function apiError(error: unknown): Response {
         status:
           error.code === 'SANAD_FORBIDDEN'
             ? 403
-            : error.code === 'SANAD_PROJECT_NOT_FOUND' || error.code === 'SANAD_FILE_NOT_FOUND'
+            : error.code === 'SANAD_PROJECT_NOT_FOUND' ||
+                error.code === 'SANAD_FILE_NOT_FOUND' ||
+                error.code === 'REVIEW_NOT_FOUND'
               ? 404
-              : 400,
+              : error.code === 'REVIEW_ANCHOR_STALE' || error.code === 'REVIEW_INVALID_STATE'
+                ? 409
+                : 400,
       },
     );
   }

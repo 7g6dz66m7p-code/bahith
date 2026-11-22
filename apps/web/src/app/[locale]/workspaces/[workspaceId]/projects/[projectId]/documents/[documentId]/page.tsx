@@ -1,4 +1,4 @@
-import { getDocument, getProjectForUser, SanadError } from '@bahith/db';
+import { getDocument, getProjectForUser, listComments, SanadError } from '@bahith/db';
 import { hasLocale } from 'next-intl';
 import { notFound } from 'next/navigation';
 import { locale as rootLocale } from 'next/root-params';
@@ -33,12 +33,13 @@ export default async function DraftPage({
   const data = await Promise.all([
     getProjectForUser(database, session.user.id, workspaceId, projectId),
     getDocument(database, context, documentId),
+    listComments(database, context, documentId),
   ]).catch((error: unknown) => {
     if (error instanceof SanadError) return null;
     throw error;
   });
   if (data === null) notFound();
-  const [project, draft] = data;
+  const [project, draft, comments] = data;
   return (
     <DraftEditor
       workspaceId={workspaceId}
@@ -48,6 +49,8 @@ export default async function DraftPage({
       initialVersion={draft.version}
       initialContent={draft.content}
       canWrite={project.canWrite}
+      role={project.role}
+      initialComments={comments}
     />
   );
 }

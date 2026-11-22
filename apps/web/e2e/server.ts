@@ -134,6 +134,8 @@ try {
       JSON.stringify({
         mailUrl: `http://${mail.getHost()}:${mail.getMappedPort(8025)}`,
         authUrl: database.authUrl,
+        // Test-only: lets a spec add a member to a workspace (there is no invitation flow yet).
+        appUrl: database.appUrl,
       }),
       { mode: 0o600 },
     );

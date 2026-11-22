@@ -4,7 +4,7 @@ import path from 'node:path';
 
 import { expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
-import { createDatabase } from '@bahith/db';
+import { createDatabase, schema } from '@bahith/db';
 import { z } from 'zod';
 
 const BASE = 'http://localhost:3100';
@@ -31,6 +31,33 @@ export async function resetRateLimits() {
   const database = createDatabase({ connectionString: metadata.authUrl });
   try {
     await database.pool.query('DELETE FROM auth_rate_limits');
+  } finally {
+    await database.close();
+  }
+}
+
+/**
+ * Test fixture only (there is no invitation flow yet): adds a user to a workspace with a
+ * role, through the application role and the workspace's own RLS context, as the product
+ * itself would. Never reachable over HTTP.
+ */
+export async function addWorkspaceMember(
+  workspaceId: string,
+  userId: string,
+  role: 'editor' | 'viewer' | 'supervisor',
+) {
+  const metadata = z
+    .object({ appUrl: z.url() })
+    .parse(
+      JSON.parse(
+        await readFile(path.resolve(import.meta.dirname, '../.next/e2e-runtime.json'), 'utf8'),
+      ),
+    );
+  const database = createDatabase({ connectionString: metadata.appUrl });
+  try {
+    await database.withWorkspace(workspaceId, (tx) =>
+      tx.insert(schema.memberships).values({ workspaceId, userId, role }),
+    );
   } finally {
     await database.close();
   }
