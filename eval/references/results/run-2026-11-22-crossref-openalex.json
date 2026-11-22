@@ -1,0 +1,3275 @@
+{
+  "startedAt": "2026-11-22T06:04:57.034Z",
+  "finishedAt": "2026-11-22T06:06:21.512Z",
+  "datasetGeneratedAt": "2026-11-21T13:10:44.778Z",
+  "node": "v22.23.4",
+  "providers": "crossref+openalex",
+  "live": true,
+  "cache": "none",
+  "openAlexApiKey": false,
+  "http": {
+    "api.crossref.org 429": 69,
+    "api.crossref.org 200": 174,
+    "api.crossref.org 404": 25,
+    "api.openalex.org 404": 25,
+    "api.openalex.org 429": 50
+  },
+  "concurrency": 3,
+  "byKind": {
+    "real": {
+      "total": 100,
+      "pass": 100,
+      "verified": 100,
+      "mismatch": 0,
+      "not_found": 0,
+      "unverifiable": 0,
+      "error": 0
+    },
+    "fabricated": {
+      "total": 50,
+      "pass": 25,
+      "verified": 0,
+      "mismatch": 0,
+      "not_found": 25,
+      "unverifiable": 25,
+      "error": 0
+    },
+    "mismatched": {
+      "total": 25,
+      "pass": 25,
+      "verified": 0,
+      "mismatch": 25,
+      "not_found": 0,
+      "unverifiable": 0,
+      "error": 0
+    }
+  },
+  "targets": [
+    {
+      "name": "Real references verified",
+      "value": "100/100 (100.0%)",
+      "target": "100%",
+      "met": true
+    },
+    {
+      "name": "Fabricated references rejected (not_found or mismatch)",
+      "value": "25/50 (50.0%)",
+      "target": "100%",
+      "met": false
+    },
+    {
+      "name": "False acceptances (fabricated or mismatched marked verified)",
+      "value": "0",
+      "target": "0",
+      "met": true
+    },
+    {
+      "name": "Mismatched references detected as mismatch",
+      "value": "25/25 (100.0%)",
+      "target": "100%",
+      "met": true
+    },
+    {
+      "name": "Unverifiable or errored items (provider failures; never a pass)",
+      "value": "25",
+      "target": "0",
+      "met": false
+    }
+  ],
+  "results": [
+    {
+      "id": "real-001",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 599,
+      "provider": "crossref",
+      "matchedDoi": "10.1016/j.stam.2006.05.008"
+    },
+    {
+      "id": "real-002",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 1053,
+      "provider": "crossref",
+      "matchedDoi": "10.1177/092137409500700309"
+    },
+    {
+      "id": "real-003",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 592,
+      "provider": "crossref",
+      "matchedDoi": "10.1007/s00270-005-0149-2"
+    },
+    {
+      "id": "real-004",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 89,
+      "provider": "crossref",
+      "matchedDoi": "10.14309/01.ajg.0000954632.85026.8f"
+    },
+    {
+      "id": "real-005",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 2642,
+      "provider": "crossref",
+      "matchedDoi": "10.1038/s41523-024-00635-5"
+    },
+    {
+      "id": "real-006",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 92,
+      "provider": "crossref",
+      "matchedDoi": "10.3390/systems13080693"
+    },
+    {
+      "id": "real-007",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 88,
+      "provider": "crossref",
+      "matchedDoi": "10.1152/ajpheart.1997.273.4.h1688"
+    },
+    {
+      "id": "real-008",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 90,
+      "provider": "crossref",
+      "matchedDoi": "10.1002/cite.201650132"
+    },
+    {
+      "id": "real-009",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 1168,
+      "provider": "crossref",
+      "matchedDoi": "10.5307/jbe.2010.35.2.138"
+    },
+    {
+      "id": "real-010",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 85,
+      "provider": "crossref",
+      "matchedDoi": "10.2109/jcersj2.24032"
+    },
+    {
+      "id": "real-011",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 93,
+      "provider": "crossref",
+      "matchedDoi": "10.1016/j.egyr.2022.07.140"
+    },
+    {
+      "id": "real-012",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 1499,
+      "provider": "crossref",
+      "matchedDoi": "10.1191/135245899678846050"
+    },
+    {
+      "id": "real-013",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 149,
+      "provider": "crossref",
+      "matchedDoi": "10.3389/fphar.2022.1090014"
+    },
+    {
+      "id": "real-014",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 85,
+      "provider": "crossref",
+      "matchedDoi": "10.1016/s0022-5347(05)64734-9"
+    },
+    {
+      "id": "real-015",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 90,
+      "provider": "crossref",
+      "matchedDoi": "10.1021/jacs.5b10692"
+    },
+    {
+      "id": "real-016",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 89,
+      "provider": "crossref",
+      "matchedDoi": "10.1163/15685403-00003247"
+    },
+    {
+      "id": "real-017",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 89,
+      "provider": "crossref",
+      "matchedDoi": "10.21307/ijanmc-2018-026"
+    },
+    {
+      "id": "real-018",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 88,
+      "provider": "crossref",
+      "matchedDoi": "10.1007/s00127-005-0022-2"
+    },
+    {
+      "id": "real-019",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 83,
+      "provider": "crossref",
+      "matchedDoi": "10.1002/adma.201907035"
+    },
+    {
+      "id": "real-020",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 86,
+      "provider": "crossref",
+      "matchedDoi": "10.1016/j.endmts.2021.100093"
+    },
+    {
+      "id": "real-021",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 93,
+      "provider": "crossref",
+      "matchedDoi": "10.1016/j.jia.2026.05.002"
+    },
+    {
+      "id": "real-022",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 85,
+      "provider": "crossref",
+      "matchedDoi": "10.34117/bjdv12n7-058"
+    },
+    {
+      "id": "real-023",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 1319,
+      "provider": "crossref",
+      "matchedDoi": "10.31893/multiscience.2026602"
+    },
+    {
+      "id": "real-024",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 92,
+      "provider": "crossref",
+      "matchedDoi": "10.1007/bf02724176"
+    },
+    {
+      "id": "real-025",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 88,
+      "provider": "crossref",
+      "matchedDoi": "10.1109/tpas.1982.317463"
+    },
+    {
+      "id": "real-026",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 1167,
+      "provider": "crossref",
+      "matchedDoi": "10.3917/rdr.066.0004"
+    },
+    {
+      "id": "real-027",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 96,
+      "provider": "crossref",
+      "matchedDoi": "10.4328/acam.6218"
+    },
+    {
+      "id": "real-028",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 557,
+      "provider": "crossref",
+      "matchedDoi": "10.1080/10447318.2022.2074646"
+    },
+    {
+      "id": "real-029",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 87,
+      "provider": "crossref",
+      "matchedDoi": "10.3390/su11051270"
+    },
+    {
+      "id": "real-030",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 86,
+      "provider": "crossref",
+      "matchedDoi": "10.1192/j.eurpsy.2021.221"
+    },
+    {
+      "id": "real-031",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 94,
+      "provider": "crossref",
+      "matchedDoi": "10.1007/bf01657840"
+    },
+    {
+      "id": "real-032",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 85,
+      "provider": "crossref",
+      "matchedDoi": "10.1177/15271544231214527"
+    },
+    {
+      "id": "real-033",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 85,
+      "provider": "crossref",
+      "matchedDoi": "10.5606/ehc.2016.30"
+    },
+    {
+      "id": "real-034",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 562,
+      "provider": "crossref",
+      "matchedDoi": "10.32466/eufv-rel.2017.4.333.153-160"
+    },
+    {
+      "id": "real-035",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 114,
+      "provider": "crossref",
+      "matchedDoi": "10.1093/annonc/mdx380.054"
+    },
+    {
+      "id": "real-036",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 90,
+      "provider": "crossref",
+      "matchedDoi": "10.1007/s11295-016-1038-3"
+    },
+    {
+      "id": "real-037",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 3525,
+      "provider": "crossref",
+      "matchedDoi": "10.3390/plants14040500"
+    },
+    {
+      "id": "real-038",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 721,
+      "provider": "crossref",
+      "matchedDoi": "10.1002/(sici)1097-4598(199805)21:5<680::aid-mus25>3.3.co;2-f"
+    },
+    {
+      "id": "real-039",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 111,
+      "provider": "crossref",
+      "matchedDoi": "10.1016/j.talanta.2018.01.064"
+    },
+    {
+      "id": "real-040",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 111,
+      "provider": "crossref",
+      "matchedDoi": "10.4044/joma1947.77.10-12_1363"
+    },
+    {
+      "id": "real-041",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 335,
+      "provider": "crossref",
+      "matchedDoi": "10.2174/2666082219666230106143424"
+    },
+    {
+      "id": "real-042",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 167,
+      "provider": "crossref",
+      "matchedDoi": "10.1007/s00202-022-01505-8"
+    },
+    {
+      "id": "real-043",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 604,
+      "provider": "crossref",
+      "matchedDoi": "10.1016/j.ahj.2016.01.013"
+    },
+    {
+      "id": "real-044",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 289,
+      "provider": "crossref",
+      "matchedDoi": "10.5962/p.396157"
+    },
+    {
+      "id": "real-045",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 96,
+      "provider": "crossref",
+      "matchedDoi": "10.1109/lawp.2008.2010960"
+    },
+    {
+      "id": "real-046",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 147,
+      "provider": "crossref",
+      "matchedDoi": "10.1063/5.0016475"
+    },
+    {
+      "id": "real-047",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 557,
+      "provider": "crossref",
+      "matchedDoi": "10.1007/s10517-026-06632-x"
+    },
+    {
+      "id": "real-048",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 158,
+      "provider": "crossref",
+      "matchedDoi": "10.1016/j.wneu.2023.06.081"
+    },
+    {
+      "id": "real-049",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 197,
+      "provider": "crossref",
+      "matchedDoi": "10.1016/j.egja.2012.11.003"
+    },
+    {
+      "id": "real-050",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 104,
+      "provider": "crossref",
+      "matchedDoi": "10.1016/j.jallcom.2016.07.096"
+    },
+    {
+      "id": "real-051",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 1230,
+      "provider": "crossref",
+      "matchedDoi": "10.7764/rldr.10.129"
+    },
+    {
+      "id": "real-052",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 126,
+      "provider": "crossref",
+      "matchedDoi": "10.1016/j.tourman.2011.02.018"
+    },
+    {
+      "id": "real-053",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 605,
+      "provider": "crossref",
+      "matchedDoi": "10.1016/j.jtice.2024.105627"
+    },
+    {
+      "id": "real-054",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 646,
+      "provider": "crossref",
+      "matchedDoi": "10.1016/j.ijid.2018.11.249"
+    },
+    {
+      "id": "real-055",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 90,
+      "provider": "crossref",
+      "matchedDoi": "10.53511/pharmkaz.2025.90.66.009"
+    },
+    {
+      "id": "real-056",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 90,
+      "provider": "crossref",
+      "matchedDoi": "10.1007/s10995-015-1698-x"
+    },
+    {
+      "id": "real-057",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 86,
+      "provider": "crossref",
+      "matchedDoi": "10.1111/jcmm.14669"
+    },
+    {
+      "id": "real-058",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 90,
+      "provider": "crossref",
+      "matchedDoi": "10.32473/edis-ss645-2015"
+    },
+    {
+      "id": "real-059",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 83,
+      "provider": "crossref",
+      "matchedDoi": "10.1353/hyp.2003.0030"
+    },
+    {
+      "id": "real-060",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 90,
+      "provider": "crossref",
+      "matchedDoi": "10.1002/elan.201400545"
+    },
+    {
+      "id": "real-061",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 91,
+      "provider": "crossref",
+      "matchedDoi": "10.1017/s1752756200019165"
+    },
+    {
+      "id": "real-062",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 677,
+      "provider": "crossref",
+      "matchedDoi": "10.1016/j.phrs.2022.106483"
+    },
+    {
+      "id": "real-063",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 3183,
+      "provider": "crossref",
+      "matchedDoi": "10.1017/s0252921100017863"
+    },
+    {
+      "id": "real-064",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 263,
+      "provider": "crossref",
+      "matchedDoi": "10.1246/nikkashi1948.92.659"
+    },
+    {
+      "id": "real-065",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 105,
+      "provider": "crossref",
+      "matchedDoi": "10.1016/s0143-4004(96)90178-2"
+    },
+    {
+      "id": "real-066",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 1660,
+      "provider": "crossref",
+      "matchedDoi": "10.1017/s0266467402002468"
+    },
+    {
+      "id": "real-067",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 594,
+      "provider": "crossref",
+      "matchedDoi": "10.1016/j.jas.2009.06.006"
+    },
+    {
+      "id": "real-068",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 124,
+      "provider": "crossref",
+      "matchedDoi": "10.1378/chest.1081447"
+    },
+    {
+      "id": "real-069",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 90,
+      "provider": "crossref",
+      "matchedDoi": "10.1360/03yd0340"
+    },
+    {
+      "id": "real-070",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 469,
+      "provider": "crossref",
+      "matchedDoi": "10.1002/emp2.12378"
+    },
+    {
+      "id": "real-071",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 91,
+      "provider": "crossref",
+      "matchedDoi": "10.1007/bf01718546"
+    },
+    {
+      "id": "real-072",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 98,
+      "provider": "crossref",
+      "matchedDoi": "10.1093/nar/gkg535"
+    },
+    {
+      "id": "real-073",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 87,
+      "provider": "crossref",
+      "matchedDoi": "10.2143/cill.13.3.2016822"
+    },
+    {
+      "id": "real-074",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 87,
+      "provider": "crossref",
+      "matchedDoi": "10.3724/sp.j.1011.2012.01185"
+    },
+    {
+      "id": "real-075",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 86,
+      "provider": "crossref",
+      "matchedDoi": "10.56842/jp-ipa.v7i2.893"
+    },
+    {
+      "id": "real-076",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 89,
+      "provider": "crossref",
+      "matchedDoi": "10.1002/aic.690020103"
+    },
+    {
+      "id": "real-077",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 90,
+      "provider": "crossref",
+      "matchedDoi": "10.1080/13504851.2012.748173"
+    },
+    {
+      "id": "real-078",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 100,
+      "provider": "crossref",
+      "matchedDoi": "10.20546/ijcmas.2019.811.265"
+    },
+    {
+      "id": "real-079",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 681,
+      "provider": "crossref",
+      "matchedDoi": "10.4103/jmedsci.jmedsci_236_24"
+    },
+    {
+      "id": "real-080",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 199,
+      "provider": "crossref",
+      "matchedDoi": "10.32631/vca.2025.1.66"
+    },
+    {
+      "id": "real-081",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 118,
+      "provider": "crossref",
+      "matchedDoi": "10.18231/j.ctppc.2025.005"
+    },
+    {
+      "id": "real-082",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 593,
+      "provider": "crossref",
+      "matchedDoi": "10.1002/chin.200528031"
+    },
+    {
+      "id": "real-083",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 93,
+      "provider": "crossref",
+      "matchedDoi": "10.1109/tmag.2007.893322"
+    },
+    {
+      "id": "real-084",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 102,
+      "provider": "crossref",
+      "matchedDoi": "10.31790/inspilip.v6i1.274"
+    },
+    {
+      "id": "real-085",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 620,
+      "provider": "crossref",
+      "matchedDoi": "10.7567/1347-4065/ab65b0"
+    },
+    {
+      "id": "real-086",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 300,
+      "provider": "crossref",
+      "matchedDoi": "10.33855/0905-032-001-077"
+    },
+    {
+      "id": "real-087",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 798,
+      "provider": "crossref",
+      "matchedDoi": "10.37376/jols.vi18.2388"
+    },
+    {
+      "id": "real-088",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 1893,
+      "provider": "crossref",
+      "matchedDoi": "10.53999/2297-000-003-008"
+    },
+    {
+      "id": "real-089",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 85,
+      "provider": "crossref",
+      "matchedDoi": "10.54241/2065-000-005-003"
+    },
+    {
+      "id": "real-090",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 513,
+      "provider": "crossref",
+      "matchedDoi": "10.66045/alqurtas.v10i28.1860"
+    },
+    {
+      "id": "real-091",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 1693,
+      "provider": "crossref",
+      "matchedDoi": "10.51840/2115-000-004-005"
+    },
+    {
+      "id": "real-092",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 109,
+      "provider": "crossref",
+      "matchedDoi": "10.37172/1901-005-001-010"
+    },
+    {
+      "id": "real-093",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 93,
+      "provider": "crossref",
+      "matchedDoi": "10.35156/1193-011-001-006"
+    },
+    {
+      "id": "real-094",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 181,
+      "provider": "crossref",
+      "matchedDoi": "10.37136/0504-000-020-004"
+    },
+    {
+      "id": "real-095",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 95,
+      "provider": "crossref",
+      "matchedDoi": "10.33705/0114-000-006-005"
+    },
+    {
+      "id": "real-096",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 102,
+      "provider": "crossref",
+      "matchedDoi": "10.37170/1986-007-004-003"
+    },
+    {
+      "id": "real-097",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 105,
+      "provider": "crossref",
+      "matchedDoi": "10.34118/0136-000-055-007"
+    },
+    {
+      "id": "real-098",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 97,
+      "provider": "crossref",
+      "matchedDoi": "10.38170/1993-000-002-004"
+    },
+    {
+      "id": "real-099",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 99,
+      "provider": "crossref",
+      "matchedDoi": "10.46217/1065-011-001-035"
+    },
+    {
+      "id": "real-100",
+      "kind": "real",
+      "expected": "verified",
+      "status": "verified",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 1,
+        "yearMatch": true,
+        "firstAuthorMatch": true,
+        "containerMatch": true
+      },
+      "durationMs": 200,
+      "provider": "crossref",
+      "matchedDoi": "10.37376/jofoa.vi23.2929"
+    },
+    {
+      "id": "fab-doi-01",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "not_found",
+      "pass": true,
+      "reasons": ["DOI_NOT_FOUND", "PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": false,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 5215
+    },
+    {
+      "id": "fab-doi-02",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "not_found",
+      "pass": true,
+      "reasons": ["DOI_NOT_FOUND", "PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": false,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 7040
+    },
+    {
+      "id": "fab-doi-03",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "not_found",
+      "pass": true,
+      "reasons": ["DOI_NOT_FOUND", "PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": false,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 2883
+    },
+    {
+      "id": "fab-doi-04",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "not_found",
+      "pass": true,
+      "reasons": ["DOI_NOT_FOUND", "PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": false,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 5874
+    },
+    {
+      "id": "fab-doi-05",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "not_found",
+      "pass": true,
+      "reasons": ["DOI_NOT_FOUND", "PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": false,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 5984
+    },
+    {
+      "id": "fab-doi-06",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "not_found",
+      "pass": true,
+      "reasons": ["DOI_NOT_FOUND", "PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": false,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 3093
+    },
+    {
+      "id": "fab-doi-07",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "not_found",
+      "pass": true,
+      "reasons": ["DOI_NOT_FOUND", "PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": false,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 3043
+    },
+    {
+      "id": "fab-doi-08",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "not_found",
+      "pass": true,
+      "reasons": ["DOI_NOT_FOUND", "PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": false,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 5914
+    },
+    {
+      "id": "fab-doi-09",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "not_found",
+      "pass": true,
+      "reasons": ["DOI_NOT_FOUND", "PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": false,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 2996
+    },
+    {
+      "id": "fab-doi-10",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "not_found",
+      "pass": true,
+      "reasons": ["DOI_NOT_FOUND", "PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": false,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 5936
+    },
+    {
+      "id": "fab-doi-11",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "not_found",
+      "pass": true,
+      "reasons": ["DOI_NOT_FOUND", "PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": false,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 2950
+    },
+    {
+      "id": "fab-doi-12",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "not_found",
+      "pass": true,
+      "reasons": ["DOI_NOT_FOUND", "PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": false,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 3014
+    },
+    {
+      "id": "fab-doi-13",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "not_found",
+      "pass": true,
+      "reasons": ["DOI_NOT_FOUND", "PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": false,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 2972
+    },
+    {
+      "id": "fab-doi-14",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "not_found",
+      "pass": true,
+      "reasons": ["DOI_NOT_FOUND", "PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": false,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 6066
+    },
+    {
+      "id": "fab-doi-15",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "not_found",
+      "pass": true,
+      "reasons": ["DOI_NOT_FOUND", "PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": false,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 3035
+    },
+    {
+      "id": "fab-doi-16",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "not_found",
+      "pass": true,
+      "reasons": ["DOI_NOT_FOUND", "PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": false,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 6028
+    },
+    {
+      "id": "fab-doi-17",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "not_found",
+      "pass": true,
+      "reasons": ["DOI_NOT_FOUND", "PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": false,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 6009
+    },
+    {
+      "id": "fab-doi-18",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "not_found",
+      "pass": true,
+      "reasons": ["DOI_NOT_FOUND", "PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": false,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 3007
+    },
+    {
+      "id": "fab-doi-19",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "not_found",
+      "pass": true,
+      "reasons": ["DOI_NOT_FOUND", "PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": false,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 3020
+    },
+    {
+      "id": "fab-doi-20",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "not_found",
+      "pass": true,
+      "reasons": ["DOI_NOT_FOUND", "PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": false,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 6074
+    },
+    {
+      "id": "fab-doi-21",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "not_found",
+      "pass": true,
+      "reasons": ["DOI_NOT_FOUND", "PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": false,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 2992
+    },
+    {
+      "id": "fab-doi-22",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "not_found",
+      "pass": true,
+      "reasons": ["DOI_NOT_FOUND", "PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": false,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 2988
+    },
+    {
+      "id": "fab-doi-23",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "not_found",
+      "pass": true,
+      "reasons": ["DOI_NOT_FOUND", "PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": false,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 5990
+    },
+    {
+      "id": "fab-doi-24",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "not_found",
+      "pass": true,
+      "reasons": ["DOI_NOT_FOUND", "PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": false,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 6015
+    },
+    {
+      "id": "fab-doi-25",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "not_found",
+      "pass": true,
+      "reasons": ["DOI_NOT_FOUND", "PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": false,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 2991
+    },
+    {
+      "id": "fab-title-01",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "unverifiable",
+      "pass": false,
+      "reasons": ["PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": null,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 2935
+    },
+    {
+      "id": "fab-title-02",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "unverifiable",
+      "pass": false,
+      "reasons": ["PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": null,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 3001
+    },
+    {
+      "id": "fab-title-03",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "unverifiable",
+      "pass": false,
+      "reasons": ["PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": null,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 3020
+    },
+    {
+      "id": "fab-title-04",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "unverifiable",
+      "pass": false,
+      "reasons": ["PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": null,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 2970
+    },
+    {
+      "id": "fab-title-05",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "unverifiable",
+      "pass": false,
+      "reasons": ["PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": null,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 3004
+    },
+    {
+      "id": "fab-title-06",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "unverifiable",
+      "pass": false,
+      "reasons": ["PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": null,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 3027
+    },
+    {
+      "id": "fab-title-07",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "unverifiable",
+      "pass": false,
+      "reasons": ["PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": null,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 2995
+    },
+    {
+      "id": "fab-title-08",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "unverifiable",
+      "pass": false,
+      "reasons": ["PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": null,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 3078
+    },
+    {
+      "id": "fab-title-09",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "unverifiable",
+      "pass": false,
+      "reasons": ["PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": null,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 3028
+    },
+    {
+      "id": "fab-title-10",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "unverifiable",
+      "pass": false,
+      "reasons": ["PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": null,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 3133
+    },
+    {
+      "id": "fab-title-11",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "unverifiable",
+      "pass": false,
+      "reasons": ["PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": null,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 6244
+    },
+    {
+      "id": "fab-title-12",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "unverifiable",
+      "pass": false,
+      "reasons": ["PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": null,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 3013
+    },
+    {
+      "id": "fab-title-13",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "unverifiable",
+      "pass": false,
+      "reasons": ["PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": null,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 8964
+    },
+    {
+      "id": "fab-title-14",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "unverifiable",
+      "pass": false,
+      "reasons": ["PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": null,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 2907
+    },
+    {
+      "id": "fab-title-15",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "unverifiable",
+      "pass": false,
+      "reasons": ["PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": null,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 2667
+    },
+    {
+      "id": "fab-title-16",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "unverifiable",
+      "pass": false,
+      "reasons": ["PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": null,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 3112
+    },
+    {
+      "id": "fab-title-17",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "unverifiable",
+      "pass": false,
+      "reasons": ["PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": null,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 3086
+    },
+    {
+      "id": "fab-title-18",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "unverifiable",
+      "pass": false,
+      "reasons": ["PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": null,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 3044
+    },
+    {
+      "id": "fab-title-19",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "unverifiable",
+      "pass": false,
+      "reasons": ["PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": null,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 2927
+    },
+    {
+      "id": "fab-title-20",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "unverifiable",
+      "pass": false,
+      "reasons": ["PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": null,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 2981
+    },
+    {
+      "id": "fab-title-21",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "unverifiable",
+      "pass": false,
+      "reasons": ["PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": null,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 2895
+    },
+    {
+      "id": "fab-title-22",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "unverifiable",
+      "pass": false,
+      "reasons": ["PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": null,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 3039
+    },
+    {
+      "id": "fab-title-23",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "unverifiable",
+      "pass": false,
+      "reasons": ["PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": null,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 3065
+    },
+    {
+      "id": "fab-title-24",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "unverifiable",
+      "pass": false,
+      "reasons": ["PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": null,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 8905
+    },
+    {
+      "id": "fab-title-25",
+      "kind": "fabricated",
+      "expected": "not_found",
+      "status": "unverifiable",
+      "pass": false,
+      "reasons": ["PROVIDER_UNAVAILABLE"],
+      "checks": {
+        "doiResolves": null,
+        "titleSimilarity": null,
+        "yearMatch": null,
+        "firstAuthorMatch": null,
+        "containerMatch": null
+      },
+      "durationMs": 7365
+    },
+    {
+      "id": "mis-01",
+      "kind": "mismatched",
+      "expected": "mismatch",
+      "status": "mismatch",
+      "pass": true,
+      "reasons": [
+        "DOI_RESOLVED",
+        "TITLE_MISMATCH",
+        "YEAR_MISMATCH",
+        "FIRST_AUTHOR_MISMATCH",
+        "CONTAINER_MISMATCH"
+      ],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 0.245,
+        "yearMatch": false,
+        "firstAuthorMatch": false,
+        "containerMatch": false
+      },
+      "durationMs": 86,
+      "provider": "crossref",
+      "matchedDoi": "10.5902/1983465913930"
+    },
+    {
+      "id": "mis-02",
+      "kind": "mismatched",
+      "expected": "mismatch",
+      "status": "mismatch",
+      "pass": true,
+      "reasons": [
+        "DOI_RESOLVED",
+        "TITLE_MISMATCH",
+        "YEAR_MISMATCH",
+        "FIRST_AUTHOR_MISMATCH",
+        "CONTAINER_MISMATCH"
+      ],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 0.191,
+        "yearMatch": false,
+        "firstAuthorMatch": false,
+        "containerMatch": false
+      },
+      "durationMs": 88,
+      "provider": "crossref",
+      "matchedDoi": "10.1016/j.psep.2022.01.083"
+    },
+    {
+      "id": "mis-03",
+      "kind": "mismatched",
+      "expected": "mismatch",
+      "status": "mismatch",
+      "pass": true,
+      "reasons": [
+        "DOI_RESOLVED",
+        "TITLE_MISMATCH",
+        "YEAR_MISMATCH",
+        "FIRST_AUTHOR_MISMATCH",
+        "CONTAINER_MISMATCH"
+      ],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 0.22,
+        "yearMatch": false,
+        "firstAuthorMatch": false,
+        "containerMatch": false
+      },
+      "durationMs": 94,
+      "provider": "crossref",
+      "matchedDoi": "10.21500/22563202.2765"
+    },
+    {
+      "id": "mis-04",
+      "kind": "mismatched",
+      "expected": "mismatch",
+      "status": "mismatch",
+      "pass": true,
+      "reasons": [
+        "DOI_RESOLVED",
+        "TITLE_MISMATCH",
+        "YEAR_MISMATCH",
+        "FIRST_AUTHOR_MISMATCH",
+        "CONTAINER_MISMATCH"
+      ],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 0.151,
+        "yearMatch": false,
+        "firstAuthorMatch": false,
+        "containerMatch": false
+      },
+      "durationMs": 91,
+      "provider": "crossref",
+      "matchedDoi": "10.1016/j.jcat.2017.04.021"
+    },
+    {
+      "id": "mis-05",
+      "kind": "mismatched",
+      "expected": "mismatch",
+      "status": "mismatch",
+      "pass": true,
+      "reasons": [
+        "DOI_RESOLVED",
+        "TITLE_MISMATCH",
+        "YEAR_MISMATCH",
+        "FIRST_AUTHOR_MISMATCH",
+        "CONTAINER_MISMATCH"
+      ],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 0.258,
+        "yearMatch": false,
+        "firstAuthorMatch": false,
+        "containerMatch": false
+      },
+      "durationMs": 92,
+      "provider": "crossref",
+      "matchedDoi": "10.26512/ser_social.v15i32.13036"
+    },
+    {
+      "id": "mis-06",
+      "kind": "mismatched",
+      "expected": "mismatch",
+      "status": "mismatch",
+      "pass": true,
+      "reasons": [
+        "DOI_RESOLVED",
+        "TITLE_MISMATCH",
+        "YEAR_MISMATCH",
+        "FIRST_AUTHOR_MISMATCH",
+        "CONTAINER_MISMATCH"
+      ],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 0.219,
+        "yearMatch": false,
+        "firstAuthorMatch": false,
+        "containerMatch": false
+      },
+      "durationMs": 112,
+      "provider": "crossref",
+      "matchedDoi": "10.1080/0967828x.2022.2027634"
+    },
+    {
+      "id": "mis-07",
+      "kind": "mismatched",
+      "expected": "mismatch",
+      "status": "mismatch",
+      "pass": true,
+      "reasons": [
+        "DOI_RESOLVED",
+        "TITLE_MISMATCH",
+        "YEAR_MISMATCH",
+        "FIRST_AUTHOR_MISMATCH",
+        "CONTAINER_MISMATCH"
+      ],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 0.245,
+        "yearMatch": false,
+        "firstAuthorMatch": false,
+        "containerMatch": false
+      },
+      "durationMs": 433,
+      "provider": "crossref",
+      "matchedDoi": "10.1525/curh.1928.27.5.645"
+    },
+    {
+      "id": "mis-08",
+      "kind": "mismatched",
+      "expected": "mismatch",
+      "status": "mismatch",
+      "pass": true,
+      "reasons": [
+        "DOI_RESOLVED",
+        "TITLE_MISMATCH",
+        "YEAR_MISMATCH",
+        "FIRST_AUTHOR_MISMATCH",
+        "CONTAINER_MISMATCH"
+      ],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 0.247,
+        "yearMatch": false,
+        "firstAuthorMatch": false,
+        "containerMatch": false
+      },
+      "durationMs": 583,
+      "provider": "crossref",
+      "matchedDoi": "10.1002/jps.10288"
+    },
+    {
+      "id": "mis-09",
+      "kind": "mismatched",
+      "expected": "mismatch",
+      "status": "mismatch",
+      "pass": true,
+      "reasons": [
+        "DOI_RESOLVED",
+        "TITLE_MISMATCH",
+        "YEAR_MISMATCH",
+        "FIRST_AUTHOR_MISMATCH",
+        "CONTAINER_MISMATCH"
+      ],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 0.264,
+        "yearMatch": false,
+        "firstAuthorMatch": false,
+        "containerMatch": false
+      },
+      "durationMs": 95,
+      "provider": "crossref",
+      "matchedDoi": "10.26618/exposure.v14i1.15869"
+    },
+    {
+      "id": "mis-10",
+      "kind": "mismatched",
+      "expected": "mismatch",
+      "status": "mismatch",
+      "pass": true,
+      "reasons": [
+        "DOI_RESOLVED",
+        "TITLE_MISMATCH",
+        "YEAR_MISMATCH",
+        "FIRST_AUTHOR_MISMATCH",
+        "CONTAINER_MISMATCH"
+      ],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 0.204,
+        "yearMatch": false,
+        "firstAuthorMatch": false,
+        "containerMatch": false
+      },
+      "durationMs": 90,
+      "provider": "crossref",
+      "matchedDoi": "10.1111/j.1469-7998.1954.tb07807.x"
+    },
+    {
+      "id": "mis-11",
+      "kind": "mismatched",
+      "expected": "mismatch",
+      "status": "mismatch",
+      "pass": true,
+      "reasons": [
+        "DOI_RESOLVED",
+        "TITLE_MISMATCH",
+        "YEAR_MISMATCH",
+        "FIRST_AUTHOR_MISMATCH",
+        "CONTAINER_MISMATCH"
+      ],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 0.269,
+        "yearMatch": false,
+        "firstAuthorMatch": false,
+        "containerMatch": false
+      },
+      "durationMs": 95,
+      "provider": "crossref",
+      "matchedDoi": "10.1109/jsen.2025.3602686"
+    },
+    {
+      "id": "mis-12",
+      "kind": "mismatched",
+      "expected": "mismatch",
+      "status": "mismatch",
+      "pass": true,
+      "reasons": [
+        "DOI_RESOLVED",
+        "TITLE_MISMATCH",
+        "YEAR_MISMATCH",
+        "FIRST_AUTHOR_MISMATCH",
+        "CONTAINER_MISMATCH"
+      ],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 0.258,
+        "yearMatch": false,
+        "firstAuthorMatch": false,
+        "containerMatch": false
+      },
+      "durationMs": 85,
+      "provider": "crossref",
+      "matchedDoi": "10.1007/s11229-011-9899-3"
+    },
+    {
+      "id": "mis-13",
+      "kind": "mismatched",
+      "expected": "mismatch",
+      "status": "mismatch",
+      "pass": true,
+      "reasons": [
+        "DOI_RESOLVED",
+        "TITLE_MISMATCH",
+        "YEAR_MISMATCH",
+        "FIRST_AUTHOR_MISMATCH",
+        "CONTAINER_MISMATCH"
+      ],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 0.218,
+        "yearMatch": false,
+        "firstAuthorMatch": false,
+        "containerMatch": false
+      },
+      "durationMs": 82,
+      "provider": "crossref",
+      "matchedDoi": "10.1177/107769907405100210"
+    },
+    {
+      "id": "mis-14",
+      "kind": "mismatched",
+      "expected": "mismatch",
+      "status": "mismatch",
+      "pass": true,
+      "reasons": [
+        "DOI_RESOLVED",
+        "TITLE_MISMATCH",
+        "YEAR_MISMATCH",
+        "FIRST_AUTHOR_MISMATCH",
+        "CONTAINER_MISMATCH"
+      ],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 0.247,
+        "yearMatch": false,
+        "firstAuthorMatch": false,
+        "containerMatch": false
+      },
+      "durationMs": 90,
+      "provider": "crossref",
+      "matchedDoi": "10.1016/s0022-3476(78)80462-4"
+    },
+    {
+      "id": "mis-15",
+      "kind": "mismatched",
+      "expected": "mismatch",
+      "status": "mismatch",
+      "pass": true,
+      "reasons": [
+        "DOI_RESOLVED",
+        "TITLE_MISMATCH",
+        "YEAR_MISMATCH",
+        "FIRST_AUTHOR_MISMATCH",
+        "CONTAINER_MISMATCH"
+      ],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 0.246,
+        "yearMatch": false,
+        "firstAuthorMatch": false,
+        "containerMatch": false
+      },
+      "durationMs": 87,
+      "provider": "crossref",
+      "matchedDoi": "10.1016/j.jtho.2019.08.2105"
+    },
+    {
+      "id": "mis-16",
+      "kind": "mismatched",
+      "expected": "mismatch",
+      "status": "mismatch",
+      "pass": true,
+      "reasons": [
+        "DOI_RESOLVED",
+        "TITLE_MISMATCH",
+        "YEAR_MISMATCH",
+        "FIRST_AUTHOR_MISMATCH",
+        "CONTAINER_MISMATCH"
+      ],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 0.219,
+        "yearMatch": false,
+        "firstAuthorMatch": false,
+        "containerMatch": false
+      },
+      "durationMs": 92,
+      "provider": "crossref",
+      "matchedDoi": "10.1107/s1600536805023469"
+    },
+    {
+      "id": "mis-17",
+      "kind": "mismatched",
+      "expected": "mismatch",
+      "status": "mismatch",
+      "pass": true,
+      "reasons": [
+        "DOI_RESOLVED",
+        "TITLE_MISMATCH",
+        "YEAR_MISMATCH",
+        "FIRST_AUTHOR_MISMATCH",
+        "CONTAINER_MISMATCH"
+      ],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 0.237,
+        "yearMatch": false,
+        "firstAuthorMatch": false,
+        "containerMatch": false
+      },
+      "durationMs": 99,
+      "provider": "crossref",
+      "matchedDoi": "10.1111/bph.12321"
+    },
+    {
+      "id": "mis-18",
+      "kind": "mismatched",
+      "expected": "mismatch",
+      "status": "mismatch",
+      "pass": true,
+      "reasons": [
+        "DOI_RESOLVED",
+        "TITLE_MISMATCH",
+        "YEAR_MISMATCH",
+        "FIRST_AUTHOR_MISMATCH",
+        "CONTAINER_MISMATCH"
+      ],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 0.213,
+        "yearMatch": false,
+        "firstAuthorMatch": false,
+        "containerMatch": false
+      },
+      "durationMs": 94,
+      "provider": "crossref",
+      "matchedDoi": "10.1159/000168909"
+    },
+    {
+      "id": "mis-19",
+      "kind": "mismatched",
+      "expected": "mismatch",
+      "status": "mismatch",
+      "pass": true,
+      "reasons": [
+        "DOI_RESOLVED",
+        "TITLE_MISMATCH",
+        "YEAR_MISMATCH",
+        "FIRST_AUTHOR_MISMATCH",
+        "CONTAINER_MISMATCH"
+      ],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 0.254,
+        "yearMatch": false,
+        "firstAuthorMatch": false,
+        "containerMatch": false
+      },
+      "durationMs": 638,
+      "provider": "crossref",
+      "matchedDoi": "10.52034/lanstts.v0i12.233"
+    },
+    {
+      "id": "mis-20",
+      "kind": "mismatched",
+      "expected": "mismatch",
+      "status": "mismatch",
+      "pass": true,
+      "reasons": [
+        "DOI_RESOLVED",
+        "TITLE_MISMATCH",
+        "YEAR_MISMATCH",
+        "FIRST_AUTHOR_MISMATCH",
+        "CONTAINER_MISMATCH"
+      ],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 0.229,
+        "yearMatch": false,
+        "firstAuthorMatch": false,
+        "containerMatch": false
+      },
+      "durationMs": 91,
+      "provider": "crossref",
+      "matchedDoi": "10.3905/jai.2009.11.4.024"
+    },
+    {
+      "id": "mis-21",
+      "kind": "mismatched",
+      "expected": "mismatch",
+      "status": "mismatch",
+      "pass": true,
+      "reasons": [
+        "DOI_RESOLVED",
+        "TITLE_MISMATCH",
+        "YEAR_MISMATCH",
+        "FIRST_AUTHOR_MISMATCH",
+        "CONTAINER_MISMATCH"
+      ],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 0.281,
+        "yearMatch": false,
+        "firstAuthorMatch": false,
+        "containerMatch": false
+      },
+      "durationMs": 86,
+      "provider": "crossref",
+      "matchedDoi": "10.37136/1003-000-043-070"
+    },
+    {
+      "id": "mis-22",
+      "kind": "mismatched",
+      "expected": "mismatch",
+      "status": "mismatch",
+      "pass": true,
+      "reasons": [
+        "DOI_RESOLVED",
+        "TITLE_MISMATCH",
+        "YEAR_MISMATCH",
+        "FIRST_AUTHOR_MISMATCH",
+        "CONTAINER_MISMATCH"
+      ],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 0.3,
+        "yearMatch": false,
+        "firstAuthorMatch": false,
+        "containerMatch": false
+      },
+      "durationMs": 90,
+      "provider": "crossref",
+      "matchedDoi": "10.35217/0048-024-095-002"
+    },
+    {
+      "id": "mis-23",
+      "kind": "mismatched",
+      "expected": "mismatch",
+      "status": "mismatch",
+      "pass": true,
+      "reasons": ["DOI_RESOLVED", "TITLE_MISMATCH", "FIRST_AUTHOR_MISMATCH", "CONTAINER_MISMATCH"],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 0.311,
+        "yearMatch": true,
+        "firstAuthorMatch": false,
+        "containerMatch": false
+      },
+      "durationMs": 85,
+      "provider": "crossref",
+      "matchedDoi": "10.35157/0578-012-004-037"
+    },
+    {
+      "id": "mis-24",
+      "kind": "mismatched",
+      "expected": "mismatch",
+      "status": "mismatch",
+      "pass": true,
+      "reasons": [
+        "DOI_RESOLVED",
+        "TITLE_MISMATCH",
+        "YEAR_MISMATCH",
+        "FIRST_AUTHOR_MISMATCH",
+        "CONTAINER_MISMATCH"
+      ],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 0.308,
+        "yearMatch": false,
+        "firstAuthorMatch": false,
+        "containerMatch": false
+      },
+      "durationMs": 89,
+      "provider": "crossref",
+      "matchedDoi": "10.37144/0298-004-014-004"
+    },
+    {
+      "id": "mis-25",
+      "kind": "mismatched",
+      "expected": "mismatch",
+      "status": "mismatch",
+      "pass": true,
+      "reasons": [
+        "DOI_RESOLVED",
+        "TITLE_MISMATCH",
+        "YEAR_MISMATCH",
+        "FIRST_AUTHOR_MISMATCH",
+        "CONTAINER_MISMATCH"
+      ],
+      "checks": {
+        "doiResolves": true,
+        "titleSimilarity": 0.24,
+        "yearMatch": false,
+        "firstAuthorMatch": false,
+        "containerMatch": false
+      },
+      "durationMs": 89,
+      "provider": "crossref",
+      "matchedDoi": "10.35553/1699-023-032-034"
+    }
+  ]
+}
