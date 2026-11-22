@@ -9,6 +9,7 @@ import { afterAll, beforeAll, describe, expect, inject, it } from 'vitest';
 import { z } from 'zod';
 
 import { backupDatabase, restoreDatabase } from '../../src/backup';
+import { loadMigrations } from '../../src/migrator';
 import { createDatabase } from '../../src/client';
 import type { Database } from '../../src/client';
 import { seedReferenceData } from '../../src/seed';
@@ -49,7 +50,7 @@ describe('backup and restore', () => {
 
   it('restores everything into an empty server and proves it', async () => {
     const manifest = await backupDatabase(inject('adminUrl'), directory);
-    expect(manifest.migrations.at(-1)).toBe('0007_project_ai_consent');
+    expect(manifest.migrations).toEqual((await loadMigrations()).map((m) => m.tag));
     expect(Object.values(manifest.tables).reduce((a, b) => a + b, 0)).toBeGreaterThan(20);
     const roles = await readFile(path.join(directory, 'roles.sql'), 'utf8');
     expect(roles).toContain('CREATE ROLE bahith_app');
