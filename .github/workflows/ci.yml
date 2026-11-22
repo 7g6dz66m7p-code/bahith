@@ -72,8 +72,8 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - uses: astral-sh/setup-uv@v6
-      # Local OCR for the document worker (Arabic + English traineddata).
-      - run: sudo apt-get update -qq && sudo apt-get install -y -qq tesseract-ocr tesseract-ocr-ara tesseract-ocr-eng
+      # Local OCR for the document worker; pg_dump/pg_restore 16 for the backup test.
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq tesseract-ocr tesseract-ocr-ara tesseract-ocr-eng postgresql-client-16
       - run: pnpm install --frozen-lockfile
       # Real Postgres 16 + pgvector, Redis and MinIO containers, and the real Python
       # worker for the document pipeline test; includes the isolation tests.
