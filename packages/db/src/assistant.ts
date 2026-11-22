@@ -128,7 +128,12 @@ export async function startAssistantRun(
       )
       .orderBy(desc(subscriptions.createdAt))
       .limit(1);
-    const limit = plan?.limits[AI_REQUESTS_METRIC];
+    // A workspace without a subscription is on the free plan (the catalogue's 'free' row).
+    const limits =
+      plan?.limits ??
+      (await tx.select({ limits: plans.limits }).from(plans).where(eq(plans.code, 'free')))[0]
+        ?.limits;
+    const limit = limits?.[AI_REQUESTS_METRIC];
     if (limit === undefined || !Number.isInteger(limit) || limit < 0) {
       throw new AssistantError('AI_QUOTA_NOT_CONFIGURED');
     }

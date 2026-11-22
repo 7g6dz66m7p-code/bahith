@@ -22,7 +22,8 @@
     "rollback": "tsx src/cli/rollback.ts",
     "seed": "tsx src/cli/seed.ts",
     "backup": "tsx src/cli/backup.ts",
-    "restore": "tsx src/cli/restore.ts"
+    "restore": "tsx src/cli/restore.ts",
+    "plan-limits": "tsx src/cli/plan-limits.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.4",

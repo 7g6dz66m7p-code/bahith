@@ -180,6 +180,29 @@ describe('assistant: consent, quota and grounded records', () => {
     expect(next.conversationId).toBe(saved.conversationId);
   });
 
+  it('a workspace without a subscription uses the free plan limits', async () => {
+    await admin.query('DELETE FROM subscriptions WHERE workspace_id = $1', [b.workspaceId]);
+    const ctxB = { userId: b.userId, workspaceId: b.workspaceId, projectId: b.projectId };
+    await setProjectAiConsent(database, ctxB, true);
+    const free = await admin.query(`SELECT limits FROM plans WHERE code = 'free'`);
+    try {
+      await admin.query(`UPDATE plans SET limits = '{}'::jsonb WHERE code = 'free'`);
+      await expect(startAssistantRun(database, ctxB, run)).rejects.toEqual(
+        new AssistantError('AI_QUOTA_NOT_CONFIGURED'),
+      );
+      await admin.query(
+        `UPDATE plans SET limits = '{"ai_requests_per_month": 1}'::jsonb WHERE code = 'free'`,
+      );
+      expect((await startAssistantRun(database, ctxB, run)).limit).toBe(1);
+    } finally {
+      await admin.query(`UPDATE plans SET limits = $1::jsonb WHERE code = 'free'`, [
+        JSON.stringify(
+          z.object({ limits: z.record(z.string(), z.number()) }).parse(free.rows[0]).limits,
+        ),
+      ]);
+    }
+  });
+
   it('cannot cite a passage of another workspace or act in another project', async () => {
     const { runId } = await startAssistantRun(
       database,

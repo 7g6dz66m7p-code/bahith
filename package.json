@@ -26,7 +26,8 @@
     "prepare": "husky",
     "storage:init": "pnpm --filter @bahith/jobs exec tsx src/init-storage.ts",
     "db:backup": "pnpm --filter @bahith/db run backup",
-    "db:restore": "pnpm --filter @bahith/db run restore"
+    "db:restore": "pnpm --filter @bahith/db run restore",
+    "db:plan-limits": "pnpm --filter @bahith/db run plan-limits"
   },
   "devDependencies": {
     "husky": "^9.1.7",
