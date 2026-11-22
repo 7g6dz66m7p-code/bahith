@@ -205,6 +205,15 @@ export async function seedWorkspace(
           })
           .returning({ id: schema.documentVersions.id }),
       );
+      await tx.insert(schema.documentComments).values({
+        workspaceId,
+        documentId: document.id,
+        kind: 'comment',
+        anchor: { versionNumber: 1, from: 1, to: 2, quote: 'x' },
+        body: `ملاحظة ${label}`,
+        authorId: user.id,
+        authorName: `Workspace ${label}`,
+      });
       await tx.insert(schema.citations).values({
         workspaceId,
         documentId: document.id,

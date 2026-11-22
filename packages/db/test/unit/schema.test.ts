@@ -38,6 +38,7 @@ describe('database schema', () => {
         'audit_log',
         'chunks',
         'citations',
+        'document_comments',
         'claim_evidence',
         'claims',
         'conversations',

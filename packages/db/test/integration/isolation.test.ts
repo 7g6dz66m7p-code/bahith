@@ -127,8 +127,9 @@ describe('workspace isolation (row-level security)', () => {
 
       // The database and the Drizzle schema agree on which tables are tenant tables…
       expect(rows.map((row) => row.table)).toEqual(tenantTableNames);
-      // …and the list is the one Phase 1 specifies (memberships + 19 research tables).
-      expect(tenantTableNames).toHaveLength(20);
+      // …and the list is the one Phase 1 specifies (memberships + 20 research tables).
+      // 20 research tables: the 19 of Phase 1 and document_comments (draft review).
+      expect(tenantTableNames).toHaveLength(21);
       for (const row of rows) {
         expect(row, row.table).toMatchObject({ enabled: true, forced: true });
         expect(row.policies, row.table).toBeGreaterThan(0);
@@ -276,6 +277,16 @@ describe('workspace isolation (row-level security)', () => {
               .insert(schema.memberships)
               .values({ workspaceId: b.workspaceId, userId: a.userId, role: 'owner' }),
           ),
+        () =>
+          database.withWorkspace(a.workspaceId, (tx) =>
+            tx.insert(schema.documentComments).values({
+              workspaceId: b.workspaceId,
+              documentId: b.documentId,
+              kind: 'comment',
+              anchor: { versionNumber: 1, from: 1, to: 2, quote: 'x' },
+              body: 'intruder',
+            }),
+          ),
       ];
       for (const attempt of attempts) {
         expect(await pgErrorCode(attempt)).toBe(PG_INSUFFICIENT_PRIVILEGE);
@@ -307,6 +318,16 @@ describe('workspace isolation (row-level security)', () => {
               workspaceId: a.workspaceId,
               documentId: a.documentId,
               sourceId: b.sourceId,
+            }),
+          ),
+        () =>
+          database.withWorkspace(a.workspaceId, (tx) =>
+            tx.insert(schema.documentComments).values({
+              workspaceId: a.workspaceId,
+              documentId: b.documentId,
+              kind: 'comment',
+              anchor: { versionNumber: 1, from: 1, to: 2, quote: 'x' },
+              body: 'intruder',
             }),
           ),
         () =>

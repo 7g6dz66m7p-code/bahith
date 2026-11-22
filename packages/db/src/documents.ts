@@ -1,7 +1,7 @@
 import { and, desc, eq, inArray, max } from 'drizzle-orm';
 import { z } from 'zod';
 
-import type { Database } from './client';
+import type { Database, Tx } from './client';
 import {
   auditLog,
   chunks,
@@ -155,8 +155,9 @@ export async function listDocuments(
   });
 }
 
-async function requireDocument(
-  tx: Parameters<Parameters<typeof withSanadProject>[3]>[0],
+/** The document, if it belongs to the context's project; optionally row-locked. */
+export async function requireDocument(
+  tx: Tx,
   context: SanadProjectContext,
   documentId: string,
   lock: boolean,
@@ -260,51 +261,70 @@ export async function saveDocument(
   if (!z.uuid().safeParse(documentId).success) throw new SanadError('SANAD_INVALID_INPUT');
   const parsed = saveDocumentSchema.safeParse(input);
   if (!parsed.success) throw new SanadError('SANAD_INVALID_INPUT');
-  const { content, baseVersion, kind } = parsed.data;
-  return withSanadProject(database, context, true, async (tx) => {
-    // The row lock serialises concurrent saves of one document.
-    await requireDocument(tx, context, documentId, true);
-    const [latest] = await tx
-      .select({ version: documentVersions.version, content: documentVersions.content })
-      .from(documentVersions)
-      .where(
-        and(
-          eq(documentVersions.workspaceId, context.workspaceId),
-          eq(documentVersions.documentId, documentId),
-        ),
-      )
-      .orderBy(desc(documentVersions.version))
-      .limit(1);
-    const current = latest?.version ?? 0;
-    if (baseVersion !== current) throw new SanadError('SANAD_VERSION_CONFLICT');
-    if (latest !== undefined && canonicalJson(latest.content) === canonicalJson(content)) {
-      return { version: current, unchanged: true };
-    }
-    const version = current + 1;
-    await tx.insert(documentVersions).values({
-      workspaceId: context.workspaceId,
-      documentId,
-      version,
-      kind,
-      content,
-      createdBy: context.userId,
-    });
-    await tx
-      .update(documents)
-      .set({ updatedAt: new Date() })
-      .where(and(eq(documents.workspaceId, context.workspaceId), eq(documents.id, documentId)));
-    if (kind === 'manual') {
-      await tx.insert(auditLog).values({
-        workspaceId: context.workspaceId,
-        actorUserId: context.userId,
-        action: 'document.version_saved',
-        entityType: 'document',
-        entityId: documentId,
-        metadata: { version },
-      });
-    }
-    return { version, unchanged: false };
+  return withSanadProject(database, context, true, (tx) =>
+    saveVersionInTx(tx, context, documentId, parsed.data),
+  );
+}
+
+/**
+ * The save path itself, inside a transaction whose caller already holds write access
+ * (saveDocument, or accepting a review suggestion). Same rules as saveDocument.
+ */
+export async function saveVersionInTx(
+  tx: Tx,
+  context: SanadProjectContext,
+  documentId: string,
+  input: z.output<typeof saveDocumentSchema>,
+): Promise<{ version: number; unchanged: boolean }> {
+  const { content, baseVersion, kind } = input;
+  // The row lock serialises concurrent saves of one document.
+  await requireDocument(tx, context, documentId, true);
+  const latest = await readLatestVersion(tx, context, documentId);
+  const current = latest?.version ?? 0;
+  if (baseVersion !== current) throw new SanadError('SANAD_VERSION_CONFLICT');
+  if (latest !== undefined && canonicalJson(latest.content) === canonicalJson(content)) {
+    return { version: current, unchanged: true };
+  }
+  const version = current + 1;
+  await tx.insert(documentVersions).values({
+    workspaceId: context.workspaceId,
+    documentId,
+    version,
+    kind,
+    content,
+    createdBy: context.userId,
   });
+  await tx
+    .update(documents)
+    .set({ updatedAt: new Date() })
+    .where(and(eq(documents.workspaceId, context.workspaceId), eq(documents.id, documentId)));
+  if (kind === 'manual') {
+    await tx.insert(auditLog).values({
+      workspaceId: context.workspaceId,
+      actorUserId: context.userId,
+      action: 'document.version_saved',
+      entityType: 'document',
+      entityId: documentId,
+      metadata: { version },
+    });
+  }
+  return { version, unchanged: false };
+}
+
+/** The latest stored version of a document (its number and content). */
+export async function readLatestVersion(tx: Tx, context: SanadProjectContext, documentId: string) {
+  const [latest] = await tx
+    .select({ version: documentVersions.version, content: documentVersions.content })
+    .from(documentVersions)
+    .where(
+      and(
+        eq(documentVersions.workspaceId, context.workspaceId),
+        eq(documentVersions.documentId, documentId),
+      ),
+    )
+    .orderBy(desc(documentVersions.version))
+    .limit(1);
+  return latest;
 }
 
 export const citationRefSchema = z.strictObject({

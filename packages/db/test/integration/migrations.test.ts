@@ -46,7 +46,7 @@ describe('migrations', () => {
     const all = await loadMigrations();
     expect(await migrateUp(client)).toEqual(all.map((m) => m.tag));
 
-    expect(await listNames(client, TABLES)).toHaveLength(28 + 1); // + schema_migrations
+    expect(await listNames(client, TABLES)).toHaveLength(29 + 1); // + schema_migrations
     expect(await listNames(client, EXTENSIONS)).toEqual(['vector']);
     expect(await listNames(client, ROLES)).toEqual([
       'bahith_app',
@@ -100,6 +100,33 @@ describe('migrations', () => {
   async function reapply(tags: string[]): Promise<void> {
     expect(await migrateUp(client)).toEqual(tags);
   }
+
+  it('rolls back the draft review table and its enums on their own', async () => {
+    const table = `SELECT tablename AS name FROM pg_tables WHERE tablename = 'document_comments'`;
+    const enums = `SELECT typname AS name FROM pg_type
+                   WHERE typname IN ('document_comment_kind', 'document_comment_status') ORDER BY 1`;
+    const policy = `SELECT policyname AS name FROM pg_policies WHERE tablename = 'document_comments'`;
+    const forced = `SELECT relforcerowsecurity::text AS name FROM pg_class
+                    WHERE oid = 'document_comments'::regclass`;
+    const grants = `SELECT privilege_type AS name FROM information_schema.role_table_grants
+                    WHERE table_name = 'document_comments' AND grantee = 'bahith_app' ORDER BY 1`;
+    expect(await listNames(client, table)).toEqual(['document_comments']);
+    expect(await listNames(client, enums)).toEqual([
+      'document_comment_kind',
+      'document_comment_status',
+    ]);
+    expect(await listNames(client, policy)).toEqual(['document_comments_tenant_isolation']);
+    expect(await listNames(client, forced)).toEqual(['true']);
+    expect(await listNames(client, grants)).toEqual(['INSERT', 'SELECT', 'UPDATE']);
+    const tags = await rollBackThrough('0008_document_review');
+    expect(tags).toEqual(['0008_document_review']);
+    expect(await listNames(client, table)).toEqual([]);
+    expect(await listNames(client, enums)).toEqual([]);
+    expect(await listNames(client, TABLES)).toHaveLength(28 + 1);
+    await reapply(tags);
+    expect(await listNames(client, policy)).toEqual(['document_comments_tenant_isolation']);
+    expect(await listNames(client, grants)).toEqual(['INSERT', 'SELECT', 'UPDATE']);
+  });
 
   it('rolls back the project AI consent columns on their own', async () => {
     const consent = `SELECT column_name AS name FROM information_schema.columns
@@ -183,6 +210,6 @@ describe('migrations', () => {
     expect(await rollbackLast(client)).toEqual([]);
 
     expect(await migrateUp(client)).toEqual(all.map((m) => m.tag));
-    expect(await listNames(client, TABLES)).toHaveLength(28 + 1);
+    expect(await listNames(client, TABLES)).toHaveLength(29 + 1);
   });
 });

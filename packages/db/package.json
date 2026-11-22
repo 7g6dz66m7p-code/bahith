@@ -9,7 +9,8 @@
     "./orm": "./src/orm.ts",
     "./migrator": "./src/migrator.ts",
     "./testing": "./src/testing.ts",
-    "./backup": "./src/backup.ts"
+    "./backup": "./src/backup.ts",
+    "./review-anchor": "./src/review-anchor.ts"
   },
   "scripts": {
     "lint": "eslint .",

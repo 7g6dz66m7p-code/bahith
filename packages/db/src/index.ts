@@ -11,8 +11,8 @@ export { DbError } from './errors';
 export type { DbErrorCode } from './errors';
 export { arabicTsQuery } from './search';
 export * as schema from './schema/index';
-export { withSanadProject } from './sanad/access';
-export type { SanadProjectContext } from './sanad/access';
+export { canReview, canWriteContent, withSanadProject } from './sanad/access';
+export type { MembershipRole, SanadAccess, SanadProjectContext } from './sanad/access';
 export { SanadError } from './sanad/errors';
 export type { SanadErrorCode } from './sanad/errors';
 export { ingestExtraction } from './sanad/ingest';
@@ -74,3 +74,15 @@ export {
   startAssistantRun,
 } from './assistant';
 export type { AssistantErrorCode, ProjectAiConsent } from './assistant';
+export {
+  acceptSuggestion,
+  acceptSuggestionSchema,
+  addComment,
+  addCommentSchema,
+  addSuggestion,
+  addSuggestionSchema,
+  listComments,
+  rejectSuggestion,
+  resolveComment,
+} from './review';
+export type { AcceptedSuggestion, ReviewComment, ReviewContext } from './review';

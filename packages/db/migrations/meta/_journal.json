@@ -57,6 +57,13 @@
       "when": 1795267258638,
       "tag": "0007_project_ai_consent",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1795268211231,
+      "tag": "0008_document_review",
+      "breakpoints": true
     }
   ]
 }

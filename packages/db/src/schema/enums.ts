@@ -69,6 +69,17 @@ export const exportStatusEnum = pgEnum('export_status', [
   'failed',
 ]);
 
+/** A review note on a draft: a plain comment, or a suggested replacement of the quote. */
+export const documentCommentKindEnum = pgEnum('document_comment_kind', ['comment', 'suggestion']);
+
+/** `accepted` / `rejected` apply to suggestions only; comments are `open` or `resolved`. */
+export const documentCommentStatusEnum = pgEnum('document_comment_status', [
+  'open',
+  'resolved',
+  'accepted',
+  'rejected',
+]);
+
 export const subscriptionStatusEnum = pgEnum('subscription_status', [
   'active',
   'trialing',

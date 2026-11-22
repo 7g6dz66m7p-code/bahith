@@ -15,17 +15,41 @@ export const sanadContextSchema = z.object({
 /** userId must come from a trusted authenticated server, never from an HTTP body. */
 export type SanadProjectContext = z.infer<typeof sanadContextSchema>;
 
+export type MembershipRole = (typeof memberships.$inferSelect)['role'];
+
+/**
+ * What the caller is about to do. `read`: any member. `write` (changing research content):
+ * owners and editors. `review` (commenting on and suggesting changes to a draft): owners,
+ * editors and supervisors; a supervisor reviews but never writes content directly.
+ */
+export type SanadAccess = 'read' | 'review' | 'write';
+
+const ALLOWED_ROLES: Record<SanadAccess, readonly MembershipRole[]> = {
+  read: ['owner', 'editor', 'viewer', 'supervisor'],
+  review: ['owner', 'editor', 'supervisor'],
+  write: ['owner', 'editor'],
+};
+
+/** Whether a role may change research content (save drafts, accept suggestions, ...). */
+export const canWriteContent = (role: MembershipRole): boolean =>
+  ALLOWED_ROLES.write.includes(role);
+
+/** Whether a role may comment on and suggest changes to a draft. */
+export const canReview = (role: MembershipRole): boolean => ALLOWED_ROLES.review.includes(role);
+
 /**
  * Authorizes membership and project access inside the same transaction as the work.
  * Shared row locks prevent membership revocation or project deletion mid-operation.
  * withWorkspace itself only binds RLS context; it does not authorize the caller.
+ * `write` is the access level (`true` = 'write', `false` = 'read'); `fn` gets the role.
  */
 export async function withSanadProject<T>(
   database: Database,
   context: SanadProjectContext,
-  write: boolean,
-  fn: (tx: Tx) => Promise<T>,
+  write: boolean | SanadAccess,
+  fn: (tx: Tx, role: MembershipRole) => Promise<T>,
 ): Promise<T> {
+  const access: SanadAccess = write === true ? 'write' : write === false ? 'read' : write;
   const parsed = sanadContextSchema.safeParse(context);
   if (!parsed.success) {
     throw new SanadError('SANAD_INVALID_INPUT', 'Expected a user, workspace, and project UUID.');
@@ -39,7 +63,7 @@ export async function withSanadProject<T>(
         .from(memberships)
         .where(and(eq(memberships.workspaceId, workspaceId), eq(memberships.userId, userId)))
         .for('share');
-      if (member === undefined || (write && member.role !== 'owner' && member.role !== 'editor')) {
+      if (member === undefined || !ALLOWED_ROLES[access].includes(member.role)) {
         throw new SanadError(
           'SANAD_FORBIDDEN',
           'The acting user is not permitted to perform this operation.',
@@ -56,7 +80,7 @@ export async function withSanadProject<T>(
           'The project is unavailable in this workspace.',
         );
       }
-      return fn(tx);
+      return fn(tx, member.role);
     },
     { userId },
   );
