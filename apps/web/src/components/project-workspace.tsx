@@ -6,6 +6,7 @@ import type { SubmitEvent } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { AssistantPanel } from '@/components/assistant-panel';
+import { FilePicker } from '@/components/file-picker';
 import { ReferencesPanel } from '@/components/references-panel';
 import { Link, useRouter } from '@/i18n/navigation';
 
@@ -234,11 +235,9 @@ export function ProjectWorkspace({
               <label className="block space-y-2" htmlFor="source-file">
                 <span className="font-medium">{t('uploadLabel')}</span>
               </label>
-              <input
+              <FilePicker
                 id="source-file"
-                ref={fileInput}
-                className="field"
-                type="file"
+                inputRef={fileInput}
                 name="file"
                 accept=".pdf,.docx,.txt,.png,.jpg,.jpeg,.tif,.tiff,application/pdf,text/plain,image/png,image/jpeg,image/tiff,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                 aria-describedby="source-file-hint"

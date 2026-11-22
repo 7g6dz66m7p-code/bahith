@@ -5,6 +5,8 @@ import { useLocale, useTranslations } from 'next-intl';
 import type { SubmitEvent } from 'react';
 import { useCallback, useState } from 'react';
 
+import { FilePicker } from '@/components/file-picker';
+
 const ERROR_KEYS = {
   SCHOLARLY_NOT_CONFIGURED: 'errorNotConfigured',
   VERIFICATION_UNAVAILABLE: 'errorUnavailable',
@@ -225,12 +227,10 @@ export function ReferencesPanel({
               {t('importLabel')}
             </label>
             <div className="flex gap-2">
-              <input
+              <FilePicker
                 id="reference-import"
                 name="file"
-                type="file"
                 accept=".bib,.ris,.txt,application/x-bibtex,application/x-research-info-systems"
-                className="field min-w-0 flex-1"
               />
               <button className="btn" type="submit" disabled={busy !== null}>
                 {t(busy === 'import' ? 'importing' : 'import')}

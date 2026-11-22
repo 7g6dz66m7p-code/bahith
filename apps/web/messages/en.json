@@ -351,5 +351,9 @@
     "errorTimeout": "The model took too long to answer. Try again.",
     "errorProvider": "The AI provider could not answer. Nothing was saved; try again later.",
     "errorGeneric": "Something went wrong. Try again."
+  },
+  "FilePicker": {
+    "choose": "Choose a file",
+    "none": "No file chosen"
   }
 }

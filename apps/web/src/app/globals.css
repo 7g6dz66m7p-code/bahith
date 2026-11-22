@@ -98,10 +98,10 @@ button:disabled {
   .btn,
   .btn-secondary,
   .tool-button {
+    /* Never colours: a theme switch must not pass through low-contrast states. */
     transition:
       transform 120ms ease,
-      box-shadow 120ms ease,
-      background-color 120ms ease;
+      box-shadow 120ms ease;
   }
   .btn:not(:disabled):hover {
     transform: translateY(-1px);
@@ -260,4 +260,10 @@ button:disabled {
 }
 .support-unsupported {
   color: var(--danger);
+}
+
+/* Localized file picker: the hidden input's focus is shown on its visible button. */
+.file-picker:focus-within label {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
 }
