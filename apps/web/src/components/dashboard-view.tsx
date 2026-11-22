@@ -257,9 +257,12 @@ export function DashboardView({ name, workspaces, projects }: DashboardData & { 
               <p className="muted leading-relaxed">{t('emptyProjectsDescription')}</p>
             </div>
           ) : (
-            <ul className="grid gap-4 sm:grid-cols-2">
-              {visibleProjects.map((project) => (
-                <li className="surface min-w-0 space-y-4 p-6" key={project.id}>
+            <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {visibleProjects.map((project, index) => (
+                <li
+                  className={`surface min-w-0 space-y-4 p-6 ${index === 0 ? 'sm:col-span-2' : ''}`}
+                  key={project.id}
+                >
                   <h3 className="break-words text-xl font-semibold" dir="auto">
                     {project.title}
                   </h3>

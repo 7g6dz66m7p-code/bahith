@@ -83,3 +83,43 @@ test('responsive sign-in and dashboard are accessible in light and dark modes', 
     });
   }
 });
+
+test('the project page with library, assistant and references panels is accessible', async ({
+  page,
+}, testInfo) => {
+  const locale = localeFor(testInfo.project.name);
+  const messages = catalogs[locale];
+  await registerAndVerify(page, locale, locale === 'ar' ? 'باحث إتاحة المشروع' : 'Project a11y');
+  const { workspaces } = (await (await page.request.get('/api/projects')).json()) as {
+    workspaces: { id: string }[];
+  };
+  const workspaceId = workspaces[0]?.id ?? '';
+  const created = (await (
+    await page.request.post('/api/projects', {
+      headers: { origin: 'http://localhost:3100' },
+      data: {
+        workspaceId,
+        title: locale === 'ar' ? 'مشروع الإتاحة' : 'Accessibility project',
+        language: locale,
+      },
+    })
+  ).json()) as { project: { id: string } };
+  for (const width of [360, 1440]) {
+    await test.step(`${width}px light and dark`, async () => {
+      await page.setViewportSize({ width, height: 1000 });
+      await page.goto(`/${locale}/workspaces/${workspaceId}/projects/${created.project.id}`);
+      await expect(page.getByRole('heading', { name: messages.Assistant.title })).toBeVisible();
+      await expectAccessible(page);
+      await page.screenshot({
+        path: testInfo.outputPath(`project-${locale}-${width}-light.png`),
+        fullPage: true,
+      });
+      const appearance = page.getByRole('button', {
+        name: new RegExp(`^${messages.Theme.label}:`),
+      });
+      while ((await appearance.textContent()) !== messages.Theme.dark) await appearance.click();
+      await expectAccessible(page);
+      while ((await appearance.textContent()) !== messages.Theme.system) await appearance.click();
+    });
+  }
+});
