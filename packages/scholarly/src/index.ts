@@ -33,7 +33,13 @@ export {
   type HttpRequest,
   type HttpResponse,
 } from './http/client';
-export { DEFAULT_HOST_POLICY, HOST_POLICIES, type HostPolicy } from './http/policies';
+export {
+  CROSSREF_LIST_POOL,
+  DEFAULT_HOST_POLICY,
+  HOST_POLICIES,
+  ROUTE_POLICIES,
+  type HostPolicy,
+} from './http/policies';
 export {
   DailyQuota,
   defaultSleep,

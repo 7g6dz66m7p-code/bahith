@@ -38,6 +38,8 @@ export interface HttpRequest {
   provider: ProviderId;
   url: URL;
   headers?: Record<string, string>;
+  /** Limiter pool for a separately metered route (e.g. CROSSREF_LIST_POOL). Default: the host. */
+  rateLimitPool?: string;
   /** TTL for caching a 2xx body. Omit to skip caching. */
   cacheTtlMs?: number;
   /** TTL for caching a 404/410 (negative cache). Omit to skip. */
@@ -152,7 +154,7 @@ export class HttpClient {
       }
     }
 
-    const limiter = this.limiter.forHost(request.url.host);
+    const limiter = this.limiter.forHost(request.rateLimitPool ?? request.url.host);
     for (let attempt = 0; ; attempt += 1) {
       const release = await limiter.acquire(request.signal);
       let outcome: Attempt;

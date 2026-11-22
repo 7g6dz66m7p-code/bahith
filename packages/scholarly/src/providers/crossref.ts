@@ -4,6 +4,7 @@ import { requireContactEmail } from '../config';
 import { ScholarlyError } from '../errors';
 import type { CslDate, ScholarlyRecord, SearchResult } from '../types';
 import type { HttpResponse } from '../http/client';
+import { CROSSREF_LIST_POOL } from '../http/policies';
 import { cslDate, cslItem, cslName, cslType, firstString, names, record } from '../util/csl';
 import { normalizeDoi } from '../util/ids';
 import { cleanText } from '../util/text';
@@ -185,6 +186,7 @@ export class CrossrefClient {
         provider: PROVIDER,
         url: this.url('/works', { [field]: text, rows: String(rows), select: SELECT_FIELDS }),
         headers: baseHeaders(this.ctx.config),
+        rateLimitPool: CROSSREF_LIST_POOL,
         cacheTtlMs: CACHE_TTL.search,
         ...(options.signal === undefined ? {} : { signal: options.signal }),
       },

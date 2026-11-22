@@ -13,6 +13,11 @@ export interface HostPolicy {
   dailyLimit?: number;
   /** The client refuses to call without SCHOLARLY_CONTACT_EMAIL. */
   requiresContactEmail: boolean;
+  /**
+   * Limiter pool name, for a route the service meters separately from the rest of the host.
+   * Omitted: the policy is the host's default pool (keyed by `host`).
+   */
+  pool?: string;
 }
 
 /**
@@ -93,6 +98,31 @@ export const HOST_POLICIES: Record<ProviderId, HostPolicy> = {
     ratePerSecond: 10,
     burst: 10,
     dailyLimit: 100_000,
+    requiresContactEmail: true,
+  },
+};
+
+/** Limiter pool of Crossref list queries (`/works?query…`, `/works?sample…`). */
+export const CROSSREF_LIST_POOL = 'api.crossref.org/list';
+
+/**
+ * Routes a service meters separately from its host's default pool. A request opts in with
+ * `HttpRequest.rateLimitPool`.
+ */
+export const ROUTE_POLICIES: Record<string, HostPolicy> = {
+  // Crossref meters list queries in a separate pool: live headers on search responses read
+  // `x-api-pool: polite-array`, `x-rate-limit-limit: 3`, `x-rate-limit-interval: 1s`. In practice
+  // (2026-11-21) back-to-back searches at about 2 req/s already drew HTTP 429 without
+  // Retry-After about half the time, while one search per second drew none in 24 tries, and an
+  // evaluation run with list queries sharing the 10 req/s single-record pool got 102 429s in
+  // about 300 requests. One per second, one at a time, is therefore the observed safe rate.
+  crossrefList: {
+    provider: 'crossref',
+    host: 'api.crossref.org',
+    pool: CROSSREF_LIST_POOL,
+    ratePerSecond: 1,
+    burst: 1,
+    maxConcurrent: 1,
     requiresContactEmail: true,
   },
 };

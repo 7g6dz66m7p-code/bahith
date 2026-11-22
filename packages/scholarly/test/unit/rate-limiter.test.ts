@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { isScholarlyError } from '../../src/errors';
-import { HOST_POLICIES } from '../../src/http/policies';
+import type { FetchLike } from '../../src/http/client';
+import { CROSSREF_LIST_POOL, HOST_POLICIES } from '../../src/http/policies';
 import {
   DailyQuota,
   HostLimiter,
@@ -9,6 +10,8 @@ import {
   Semaphore,
   TokenBucket,
 } from '../../src/http/rate-limiter';
+import { CrossrefClient } from '../../src/providers/crossref';
+import { fixture, TEST_CONFIG, testHttp, toResponse } from '../helpers/fixtures';
 
 describe('TokenBucket (fake timers)', () => {
   beforeEach(() => {
@@ -141,5 +144,39 @@ describe('DailyQuota and HostLimiter', () => {
     expect(HOST_POLICIES.crossref.requiresContactEmail).toBe(true);
     expect(HOST_POLICIES.openalex.requiresContactEmail).toBe(true);
     expect(HOST_POLICIES.unpaywall.requiresContactEmail).toBe(true);
+  });
+});
+
+describe('Crossref list queries (separate pool)', () => {
+  it('gives list queries their own pool of one request per second', () => {
+    const registry = new RateLimiterRegistry();
+    const list = registry.forHost(CROSSREF_LIST_POOL);
+    expect(list).not.toBe(registry.forHost('api.crossref.org'));
+    expect(list.policy.ratePerSecond).toBe(1);
+    expect(list.policy.burst).toBe(1);
+    expect(list.policy.maxConcurrent).toBe(1);
+  });
+
+  it('spaces searches one second apart without slowing DOI lookups', async () => {
+    // Recorded responses; the manual clock records every limiter wait.
+    const fetchImpl: FetchLike = (input) => {
+      const name = new URL(input).pathname.startsWith('/works/')
+        ? 'crossref-work-nature14539'
+        : 'crossref-search-real-title';
+      return Promise.resolve(toResponse(fixture(name)));
+    };
+    const { http, clock } = testHttp(fetchImpl);
+    const crossref = new CrossrefClient({ http, config: TEST_CONFIG });
+    const start = clock.state.now;
+
+    await crossref.searchWorks('Deep learning LeCun 2015');
+    await crossref.getWork('10.1038/nature14539');
+    await crossref.getWork('10.1038/nature14539');
+    expect(clock.state.now - start).toBe(0);
+
+    await crossref.searchWorks('Deep learning LeCun 2015');
+    expect(clock.state.now - start).toBe(1000);
+    await crossref.searchWorks('Deep learning LeCun 2015');
+    expect(clock.state.now - start).toBe(2000);
   });
 });

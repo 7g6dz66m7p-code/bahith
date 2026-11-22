@@ -1,5 +1,5 @@
 import { ScholarlyError } from '../errors';
-import { DEFAULT_HOST_POLICY, HOST_POLICIES, type HostPolicy } from './policies';
+import { DEFAULT_HOST_POLICY, HOST_POLICIES, ROUTE_POLICIES, type HostPolicy } from './policies';
 
 export type Clock = () => number;
 export type Sleep = (ms: number, signal?: AbortSignal) => Promise<void>;
@@ -184,19 +184,25 @@ export class HostLimiter {
   }
 }
 
-/** One limiter per host, created on first use from HOST_POLICIES. Share one per process. */
+/**
+ * One limiter per pool (a host's default pool is keyed by the host name; separately metered
+ * routes by `HostPolicy.pool`), created on first use. Share one registry per process.
+ */
 export class RateLimiterRegistry {
   private readonly limiters = new Map<string, HostLimiter>();
   private readonly policiesByHost: Map<string, HostPolicy>;
 
   constructor(
-    policies: Record<string, HostPolicy> = HOST_POLICIES,
+    policies: Record<string, HostPolicy> = { ...HOST_POLICIES, ...ROUTE_POLICIES },
     private readonly now: Clock = Date.now,
     private readonly sleep: Sleep = defaultSleep,
   ) {
-    this.policiesByHost = new Map(Object.values(policies).map((policy) => [policy.host, policy]));
+    this.policiesByHost = new Map(
+      Object.values(policies).map((policy) => [policy.pool ?? policy.host, policy]),
+    );
   }
 
+  /** Limiter for a host's default pool, or for a pool name such as CROSSREF_LIST_POOL. */
   forHost(host: string): HostLimiter {
     let limiter = this.limiters.get(host);
     if (limiter === undefined) {
