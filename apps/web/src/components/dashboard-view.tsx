@@ -41,6 +41,7 @@ const roleKey = {
 
 export function DashboardView({ name, workspaces, projects }: DashboardData & { name: string }) {
   const t = useTranslations('Dashboard');
+  const members = useTranslations('Members');
   const locale = useLocale();
   const router = useRouter();
   const writable = workspaces.filter(
@@ -176,6 +177,14 @@ export function DashboardView({ name, workspaces, projects }: DashboardData & { 
             </div>
           )}
           {selected ? <p className="muted text-sm">{t(roleKey[selected.role])}</p> : null}
+          {selected ? (
+            <Link
+              className="text-sm underline underline-offset-4"
+              href={`/workspaces/${selected.id}/members`}
+            >
+              {members('manage')}
+            </Link>
+          ) : null}
           {!canCreate && workspaces.length > 0 ? (
             <p className="muted text-sm">{t('readonlyWorkspace')}</p>
           ) : null}

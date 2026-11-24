@@ -130,3 +130,28 @@ export function totpCode(secret: string): string {
     .toString()
     .padStart(6, '0');
 }
+
+/** The first link in a local Mailpit message to `email` whose link contains `fragment`. */
+export async function readMailLink(email: string, fragment: string): Promise<string> {
+  const base = await mailUrl();
+  let result: string | undefined;
+  await expect(async () => {
+    const list = z
+      .object({
+        messages: z.array(
+          z.object({ ID: z.string(), To: z.array(z.object({ Address: z.string() })) }),
+        ),
+      })
+      .parse(await (await fetch(`${base}/api/v1/messages`)).json());
+    for (const message of list.messages.filter((m) => m.To.some((to) => to.Address === email))) {
+      const body = z
+        .object({ Text: z.string() })
+        .parse(await (await fetch(`${base}/api/v1/message/${message.ID}`)).json());
+      const link = body.Text.match(/https?:\/\/\S+/gu)?.find((url) => url.includes(fragment));
+      if (link !== undefined) result = link;
+    }
+    expect(result).toBeDefined();
+  }).toPass({ timeout: 15_000 });
+  if (result === undefined) throw new Error('Expected a local email with the link');
+  return result;
+}
