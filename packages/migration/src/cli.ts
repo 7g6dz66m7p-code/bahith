@@ -5,6 +5,7 @@ import { dryRun } from './planner';
 import { buildReport, writeReport } from './report';
 import type { LegacySource } from './source';
 import { JsonDumpSource } from './sources/json';
+import { MysqlLegacySource } from './sources/mysql';
 import { PostgresLegacySource } from './sources/postgres';
 
 /**
@@ -15,7 +16,7 @@ import { PostgresLegacySource } from './sources/postgres';
  * history). Output contains counts, legacy ids and reason codes only.
  */
 const USAGE =
-  'usage: dry-run --source=json:<path>|postgres --mapping=<path> --out=<dir> [--since=<ISO date>]\n';
+  'usage: dry-run --source=json:<path>|postgres|mysql --mapping=<path> --out=<dir> [--since=<ISO date>]\n';
 
 async function main(argv: string[]): Promise<number> {
   const { values } = parseArgs({
@@ -43,6 +44,13 @@ async function main(argv: string[]): Promise<number> {
       return 2;
     }
     source = new PostgresLegacySource({ connectionString: url, mapping });
+  } else if (values.source === 'mysql') {
+    const url = process.env['LEGACY_DATABASE_URL'];
+    if (url === undefined || !url.startsWith('mysql://')) {
+      process.stderr.write('LEGACY_DATABASE_URL must be a mysql:// URL (read-only copy)\n');
+      return 2;
+    }
+    source = new MysqlLegacySource({ connectionString: url, mapping });
   } else {
     process.stderr.write(USAGE);
     return 2;

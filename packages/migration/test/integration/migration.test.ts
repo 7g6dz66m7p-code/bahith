@@ -1,6 +1,6 @@
 import { createDatabase, schema } from '@bahith/db';
 import type { Database } from '@bahith/db';
-import { eq } from 'drizzle-orm';
+import { eq } from '@bahith/db/orm';
 import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { inject } from 'vitest';

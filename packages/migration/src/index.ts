@@ -17,3 +17,7 @@ export {
 } from './executor';
 export type { ApplyOptions, ApplySummary, ApplyTargets } from './executor';
 export * from './telegram';
+export { buildMysqlSelect, MysqlLegacySource } from './sources/mysql';
+export type { MysqlLegacySourceOptions } from './sources/mysql';
+export { inspectDatabase, inspectDump, loadDumpIntoContainer, renderDumpReport } from './inspect';
+export type { DumpColumn, DumpReport, DumpTable } from './inspect';

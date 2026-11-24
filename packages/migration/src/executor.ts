@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 
 import type { Database } from '@bahith/db';
 import { schema, withWorkspaceMember } from '@bahith/db';
-import { and, eq, sql } from 'drizzle-orm';
+import { and, eq, sql } from '@bahith/db/orm';
 import type pg from 'pg';
 
 import type { CanonicalSubscription, Entity } from './canonical';
