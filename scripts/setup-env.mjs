@@ -9,7 +9,12 @@ import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const examplePath = path.join(root, '.env.example');
-const envPath = path.join(root, '.env');
+// --staging writes .env.staging for docker-compose.staging.yml: services are reached by
+// their compose names, the app is served on STAGING_WEB_PORT, and every secret is new.
+const staging = process.argv.includes('--staging');
+const envPath = path.join(root, staging ? '.env.staging' : '.env');
+const host = (service) => (staging ? service : 'localhost');
+const inside = (port, internal) => (staging ? internal : port);
 
 /** URL-safe random secret (hex), so it can be embedded in connection strings as is. */
 const secret = () => randomBytes(24).toString('hex');
@@ -42,25 +47,25 @@ set(
   'DATABASE_ADMIN_URL',
   () =>
     `postgresql://${env.get('POSTGRES_USER')}:${env.get('POSTGRES_PASSWORD')}` +
-    `@localhost:${env.get('POSTGRES_PORT')}/${env.get('POSTGRES_DB')}`,
+    `@${host('postgres')}:${inside(env.get('POSTGRES_PORT'), '5432')}/${env.get('POSTGRES_DB')}`,
 );
 set(
   'DATABASE_URL',
   () =>
     `postgresql://bahith_app:${secret()}` +
-    `@localhost:${env.get('POSTGRES_PORT')}/${env.get('POSTGRES_DB')}`,
+    `@${host('postgres')}:${inside(env.get('POSTGRES_PORT'), '5432')}/${env.get('POSTGRES_DB')}`,
 );
 set(
   'AUTH_DATABASE_URL',
   () =>
     `postgresql://bahith_auth:${secret()}` +
-    `@localhost:${env.get('POSTGRES_PORT')}/${env.get('POSTGRES_DB')}`,
+    `@${host('postgres')}:${inside(env.get('POSTGRES_PORT'), '5432')}/${env.get('POSTGRES_DB')}`,
 );
 set('BETTER_AUTH_SECRET', secret);
-set('BETTER_AUTH_URL', () => 'http://localhost:3000');
+set('BETTER_AUTH_URL', () => (staging ? 'http://localhost:3200' : 'http://localhost:3000'));
 set('GOOGLE_CLIENT_ID', () => '');
 set('GOOGLE_CLIENT_SECRET', () => '');
-set('SMTP_HOST', () => 'localhost');
+set('SMTP_HOST', () => host('mailpit'));
 set('SMTP_PORT', () => '1025');
 set('SMTP_SECURE', () => 'false');
 set('SMTP_FROM', () => 'no-reply@bahith.local');
@@ -70,13 +75,17 @@ set('MAILPIT_HTTP_PORT', () => '8025');
 
 set('REDIS_PASSWORD', secret);
 set('REDIS_PORT', () => '6379');
-set('REDIS_URL', () => `redis://:${env.get('REDIS_PASSWORD')}@localhost:${env.get('REDIS_PORT')}`);
+set(
+  'REDIS_URL',
+  () =>
+    `redis://:${env.get('REDIS_PASSWORD')}@${host('redis')}:${inside(env.get('REDIS_PORT'), '6379')}`,
+);
 
 set('MINIO_PORT', () => '9000');
 set('MINIO_CONSOLE_PORT', () => '9001');
-set('S3_ENDPOINT', () => `http://localhost:${env.get('MINIO_PORT')}`);
+set('S3_ENDPOINT', () => `http://${host('minio')}:${inside(env.get('MINIO_PORT'), '9000')}`);
 set('S3_REGION', () => 'us-east-1');
-set('S3_BUCKET', () => 'bahith-dev');
+set('S3_BUCKET', () => (staging ? 'bahith-staging' : 'bahith-dev'));
 set('S3_ACCESS_KEY_ID', () => `bahith-${randomBytes(4).toString('hex')}`);
 set('S3_SECRET_ACCESS_KEY', secret);
 set('S3_FORCE_PATH_STYLE', () => 'true');
@@ -84,6 +93,8 @@ set('S3_FORCE_PATH_STYLE', () => 'true');
 // Left empty on purpose: the project owner chooses providers and models (Phase 3).
 set('AI_CHAT_MODEL', () => '');
 set('AI_EMBEDDING_MODEL', () => '');
+set('AI_CHAT_FALLBACK_MODEL', () => '');
+set('AI_MODEL_PRICES_JSON', () => '');
 set('AI_RERANK_MODEL', () => '');
 set('ANTHROPIC_API_KEY', () => '');
 set('OPENAI_API_KEY', () => '');
@@ -93,6 +104,16 @@ set('SCHOLARLY_CONTACT_EMAIL', () => '');
 set('OPENALEX_API_KEY', () => '');
 set('SEMANTIC_SCHOLAR_API_KEY', () => '');
 set('NCBI_API_KEY', () => '');
+
+// Left empty on purpose: owner decisions (admins, payments, SMS, legacy data, Telegram).
+set('PLATFORM_ADMIN_EMAILS', () => '');
+set('PAYMENTS_PROVIDER', () => '');
+set('PAYMENTS_LIVE_AUTHORIZED', () => '');
+set('SMS_PROVIDER', () => '');
+set('SMS_CAPTURE_DIR', () => '');
+set('LEGACY_DATABASE_URL', () => '');
+set('TELEGRAM_BOT_TOKEN', () => '');
+set('TELEGRAM_AUTH_MAX_AGE_SECONDS', () => '');
 
 // Keep the comments and order of .env.example; fail if the two lists ever drift apart.
 const exampleNames = [...parse(readFileSync(examplePath, 'utf8')).keys()];
@@ -124,6 +145,8 @@ const extraBlock =
 
 writeFileSync(envPath, output + extraBlock, { mode: 0o600 });
 process.stdout.write(
-  `${existing.size > 0 ? 'Updated' : 'Created'} .env (${env.size} variables; existing values kept).\n` +
-    'Next: docker compose up -d --wait && pnpm db:migrate && pnpm db:seed && pnpm dev\n',
+  `${existing.size > 0 ? 'Updated' : 'Created'} ${path.basename(envPath)} (${env.size} variables; existing values kept).\n` +
+    (staging
+      ? 'Next: docker compose -f docker-compose.staging.yml --env-file .env.staging up -d --build --wait\n'
+      : 'Next: docker compose up -d --wait && pnpm db:migrate && pnpm db:seed && pnpm dev\n'),
 );

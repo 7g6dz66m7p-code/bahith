@@ -9,6 +9,7 @@
   },
   "scripts": {
     "bootstrap": "node scripts/setup-env.mjs",
+    "staging:env": "node scripts/setup-env.mjs --staging",
     "dev": "turbo run dev",
     "build": "turbo run build",
     "lint": "turbo run lint",

@@ -1,0 +1,12 @@
+**/node_modules
+**/.next
+**/.turbo
+**/.venv
+**/__pycache__
+**/test-results
+**/playwright-report
+.git
+.env
+.env.*
+!.env.example
+*.bundle

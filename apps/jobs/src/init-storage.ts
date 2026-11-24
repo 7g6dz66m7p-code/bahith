@@ -13,7 +13,14 @@ if (existsSync(rootEnv)) process.loadEnvFile(rootEnv);
 
 const config = parseStorageConfig(process.env);
 const host = config.endpoint === undefined ? '' : new URL(config.endpoint).hostname;
-if (!['localhost', '127.0.0.1', '::1'].includes(host)) {
+// The staging stack's own MinIO is reached by its compose name; pass --staging for it.
+const allowed = [
+  'localhost',
+  '127.0.0.1',
+  '::1',
+  ...(process.argv.includes('--staging') ? ['minio'] : []),
+];
+if (!allowed.includes(host)) {
   process.stderr.write('error: storage:init only creates buckets on a local endpoint.\n');
   process.exit(1);
 }
