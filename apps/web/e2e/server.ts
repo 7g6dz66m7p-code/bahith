@@ -12,7 +12,12 @@ import { GenericContainer, Wait } from 'testcontainers';
 
 const require = createRequire(import.meta.url);
 const appDir = path.resolve(import.meta.dirname, '..');
-const runtimeFile = path.join(appDir, '.next', 'e2e-runtime.json');
+const port = Number(process.env.BAHITH_TEST_PORT ?? '3100');
+if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error('Invalid test port');
+const baseUrl = `http://localhost:${port}`;
+const runtimeFile = path.resolve(
+  process.env.BAHITH_TEST_RUNTIME_FILE ?? path.join(appDir, '.next', 'e2e-runtime.json'),
+);
 const database = await startTestDatabase();
 const mail = await new GenericContainer('axllent/mailpit:v1.33.1')
   .withExposedPorts(1025, 8025)
@@ -57,7 +62,7 @@ const env = {
   DATABASE_URL: database.appUrl,
   AUTH_DATABASE_URL: database.authUrl,
   BETTER_AUTH_SECRET: crypto.randomUUID() + crypto.randomUUID(),
-  BETTER_AUTH_URL: 'http://localhost:3100',
+  BETTER_AUTH_URL: baseUrl,
   SMTP_HOST: mail.getHost(),
   SMTP_PORT: String(mail.getMappedPort(1025)),
   SMTP_SECURE: 'false',
@@ -125,12 +130,13 @@ try {
     await writeFile(
       runtimeFile,
       JSON.stringify({
+        baseUrl,
         mailUrl: `http://${mail.getHost()}:${mail.getMappedPort(8025)}`,
         authUrl: database.authUrl,
       }),
       { mode: 0o600 },
     );
-    process.exitCode = await next(['start', '--port', '3100']);
+    process.exitCode = await next(['start', '--port', String(port)]);
   }
 } finally {
   await cleanup();

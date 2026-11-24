@@ -16,6 +16,7 @@ describe('dependency health probes', () => {
   let redisContainer: StartedRedisContainer;
   let database: Database;
   let redis: Redis;
+  const cleanups: (() => void | Promise<unknown>)[] = [];
 
   const newRedis = (url: string) => {
     const client = new Redis(url, {
@@ -29,18 +30,19 @@ describe('dependency health probes', () => {
   };
 
   beforeAll(async () => {
-    [postgres, redisContainer] = await Promise.all([
-      startTestDatabase(),
-      new RedisContainer('redis:7-alpine').start(),
-    ]);
+    // Assign each acquired resource so teardown also works after partial setup.
+    postgres = await startTestDatabase();
+    cleanups.push(() => postgres.stop());
+    redisContainer = await new RedisContainer('redis:7-alpine').start();
+    cleanups.push(() => redisContainer.stop());
     database = createDatabase({ connectionString: postgres.appUrl });
+    cleanups.push(() => database.close());
     redis = newRedis(redisContainer.getConnectionUrl());
+    cleanups.push(() => redis.disconnect());
   });
 
   afterAll(async () => {
-    redis.disconnect();
-    await database.close();
-    await Promise.all([postgres.stop(), redisContainer.stop()]);
+    for (const cleanup of cleanups.reverse()) await cleanup();
   });
 
   it('reports ok when Postgres and Redis are reachable', async () => {
