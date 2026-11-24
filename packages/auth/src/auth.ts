@@ -1,7 +1,7 @@
 import { createDatabase, schema } from '@bahith/db';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
-import { twoFactor } from 'better-auth/plugins';
+import { phoneNumber, twoFactor } from 'better-auth/plugins';
 import { z } from 'zod';
 
 import type { AuthConfig } from './config';
@@ -9,10 +9,14 @@ import { AuthConfigError } from './config';
 import type { AuthMailTransport } from './mail';
 import { createAuthMailTransport } from './mail';
 import { enforceSocialSecondFactor } from './oauth-policy';
+import type { SmsSender } from './sms';
+import { createSmsSender, isE164, SmsUnavailableError } from './sms';
 
 export interface CreateBahithAuthOptions {
   /** Trusted server dependency, never a browser-supplied transport. */
   mailTransport?: AuthMailTransport;
+  /** SMS delivery for phone OTP; defaults to the environment's configured sender (or none). */
+  smsSender?: SmsSender | null;
 }
 
 /**
@@ -27,6 +31,10 @@ export function createBahithAuth(config: AuthConfig, options: CreateBahithAuthOp
     options.mailTransport ?? (config.smtp ? createAuthMailTransport(config.smtp) : undefined);
   if (mail === undefined) throw new AuthConfigError(['SMTP_HOST', 'SMTP_FROM']);
   const database = createDatabase({ connectionString: config.databaseUrl });
+  const sms =
+    options.smsSender === undefined
+      ? createSmsSender(process.env, config.baseUrl)
+      : options.smsSender;
 
   const auth = betterAuth({
     appName: 'BAHITH',
@@ -114,6 +122,9 @@ export function createBahithAuth(config: AuthConfig, options: CreateBahithAuthOp
         '/sign-up/email': { window: 60, max: 5 },
         '/request-password-reset': { window: 60, max: 3 },
         '/send-verification-email': { window: 60, max: 3 },
+        // Each OTP costs an SMS and invites abuse: few sends, few attempts.
+        '/phone-number/send-otp': { window: 600, max: 3 },
+        '/phone-number/verify': { window: 600, max: 10 },
       },
     },
     ...(config.google
@@ -141,19 +152,49 @@ export function createBahithAuth(config: AuthConfig, options: CreateBahithAuthOp
     plugins: [
       {
         id: 'bahith-origin-guard',
-        onRequest(request) {
+        async onRequest(request) {
+          // The phone plugin is used only to attach and verify a phone on a signed-in
+          // account. Signing in or resetting a password by SMS alone would bypass the
+          // password and the second factor, so those routes are closed.
+          const route = new URL(request.url).pathname.replace(/^.*\/api\/auth/u, '');
+          if (
+            route === '/sign-in/phone-number' ||
+            route.startsWith('/phone-number/request-password-reset') ||
+            route.startsWith('/phone-number/reset-password')
+          ) {
+            return { response: Response.json({ code: 'AUTH_ROUTE_DISABLED' }, { status: 404 }) };
+          }
+          if (route === '/phone-number/verify' && request.method === 'POST') {
+            const body = (await request
+              .clone()
+              .json()
+              .catch(() => null)) as {
+              updatePhoneNumber?: unknown;
+            } | null;
+            if (body?.updatePhoneNumber !== true) {
+              return { response: Response.json({ code: 'AUTH_ROUTE_DISABLED' }, { status: 404 }) };
+            }
+          }
           if (
             !['GET', 'HEAD', 'OPTIONS'].includes(request.method) &&
             request.headers.get('origin') !== config.baseUrl
           ) {
-            return Promise.resolve({
-              response: Response.json({ code: 'AUTH_INVALID_ORIGIN' }, { status: 403 }),
-            });
+            return { response: Response.json({ code: 'AUTH_INVALID_ORIGIN' }, { status: 403 }) };
           }
-          return Promise.resolve();
+          return undefined;
         },
       },
       twoFactor({ issuer: 'BAHITH', skipVerificationOnEnable: false }),
+      phoneNumber({
+        otpLength: 6,
+        expiresIn: 300,
+        allowedAttempts: 5,
+        phoneNumberValidator: (value) => isE164(value),
+        async sendOTP({ phoneNumber: number, code }) {
+          if (sms === null) throw new SmsUnavailableError();
+          await sms.sendOtp(number, code);
+        },
+      }),
     ],
   });
 

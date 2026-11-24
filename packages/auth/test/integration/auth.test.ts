@@ -32,6 +32,7 @@ function totp(secret: string): string {
 describe('real Better Auth sessions, email verification, recovery and TOTP', () => {
   let database: TestDatabase;
   let service: BahithAuthService;
+  const sms: { phoneNumber: string; code: string }[] = [];
   const messages: AuthMailMessage[] = [];
   const jar = new Map<string, string>();
   const email = `auth-${crypto.randomUUID()}@example.test`;
@@ -81,6 +82,14 @@ describe('real Better Auth sessions, email verification, recovery and TOTP', () 
         mailTransport: {
           send(message) {
             messages.push(message);
+            return Promise.resolve();
+          },
+        },
+        // Test double for SMS delivery (no real messages are sent in tests).
+        smsSender: {
+          id: 'test',
+          sendOtp(phoneNumber, code) {
+            sms.push({ phoneNumber, code });
             return Promise.resolve();
           },
         },
@@ -182,6 +191,42 @@ describe('real Better Auth sessions, email verification, recovery and TOTP', () 
     ).toBeGreaterThanOrEqual(400);
     expect((await request('/two-factor/verify-totp', { code })).status).toBe(200);
     expect(await (await request('/get-session')).json()).toMatchObject({ user: { id: userId } });
+  });
+
+  it('verifies a phone number by OTP for the signed-in user only; SMS-only sign-in is closed', async () => {
+    const phone = '+9647701234567';
+    expect((await request('/phone-number/send-otp', { phoneNumber: '0770123' })).status).toBe(400);
+    expect((await request('/phone-number/send-otp', { phoneNumber: phone })).status).toBe(200);
+    const code = sms.at(-1)?.code ?? '';
+    expect(code).toMatch(/^\d{6}$/u);
+    const wrong = code === '000000' ? '111111' : '000000';
+    expect(
+      (
+        await request('/phone-number/verify', {
+          phoneNumber: phone,
+          code: wrong,
+          updatePhoneNumber: true,
+        })
+      ).status,
+    ).toBe(400);
+    // Verifying without attaching to the current session (a phone sign-in) is refused.
+    expect((await request('/phone-number/verify', { phoneNumber: phone, code })).status).toBe(404);
+    expect((await request('/sign-in/phone-number', { phoneNumber: phone, password })).status).toBe(
+      404,
+    );
+    expect(
+      (await request('/phone-number/request-password-reset', { phoneNumber: phone })).status,
+    ).toBe(404);
+    expect(
+      (await request('/phone-number/verify', { phoneNumber: phone, code, updatePhoneNumber: true }))
+        .status,
+    ).toBe(200);
+    const session = z
+      .object({ user: z.object({ phoneNumber: z.string(), phoneNumberVerified: z.boolean() }) })
+      .parse(await (await request('/get-session')).json());
+    expect(session.user).toEqual(
+      expect.objectContaining({ phoneNumber: phone, phoneNumberVerified: true }),
+    );
   });
 
   it('signs out and makes the former cookie unusable immediately', async () => {

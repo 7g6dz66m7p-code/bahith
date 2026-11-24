@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm';
 import {
   boolean,
+  check,
   index,
   pgPolicy,
   pgTable,
@@ -27,11 +28,19 @@ export const users = pgTable(
     image: text('image'),
     locale: localeEnum('locale').notNull().default('ar'),
     twoFactorEnabled: boolean('two_factor_enabled').notNull().default(false),
+    /** E.164 phone number, verified by OTP (Better Auth phone-number plugin). */
+    phoneNumber: text('phone_number'),
+    phoneNumberVerified: boolean('phone_number_verified').notNull().default(false),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
   (t) => [
     uniqueIndex('users_email_lower_key').on(sql`lower(${t.email})`),
+    uniqueIndex('users_phone_number_key').on(t.phoneNumber),
+    check(
+      'users_phone_number_e164',
+      sql`${t.phoneNumber} is null or ${t.phoneNumber} ~ '^\\+[1-9][0-9]{6,14}$'`,
+    ),
     pgPolicy('users_self_select', {
       as: 'permissive',
       for: 'select',

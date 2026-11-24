@@ -101,12 +101,22 @@ describe('migrations', () => {
     expect(await migrateUp(client)).toEqual(tags);
   }
 
+  it('rolls back the phone number columns on their own', async () => {
+    const cols = `SELECT column_name AS name FROM information_schema.columns
+                  WHERE table_name = 'users' AND column_name LIKE 'phone_number%' ORDER BY 1`;
+    expect(await listNames(client, cols)).toEqual(['phone_number', 'phone_number_verified']);
+    const tags = await rollBackThrough('0011_phone_number');
+    expect(tags).toEqual(['0011_phone_number']);
+    expect(await listNames(client, cols)).toEqual([]);
+    await reapply(tags);
+  });
+
   it('rolls back the platform admin functions on their own', async () => {
     const fns = `SELECT proname AS name FROM pg_proc WHERE pronamespace = 'app'::regnamespace
                  AND proname IN ('platform_stats', 'set_plan_limit') ORDER BY 1`;
     expect(await listNames(client, fns)).toEqual(['platform_stats', 'set_plan_limit']);
     const tags = await rollBackThrough('0010_platform_admin');
-    expect(tags).toEqual(['0010_platform_admin']);
+    expect(tags).toEqual(['0010_platform_admin', '0011_phone_number']);
     expect(await listNames(client, fns)).toEqual([]);
     await reapply(tags);
     expect(await listNames(client, fns)).toEqual(['platform_stats', 'set_plan_limit']);
@@ -122,7 +132,11 @@ describe('migrations', () => {
     expect(await listNames(client, forced)).toEqual(['true']);
     expect(await listNames(client, grants)).toEqual(['INSERT', 'SELECT', 'UPDATE']);
     const tags = await rollBackThrough('0009_workspace_invitations');
-    expect(tags).toEqual(['0009_workspace_invitations', '0010_platform_admin']);
+    expect(tags).toEqual([
+      '0009_workspace_invitations',
+      '0010_platform_admin',
+      '0011_phone_number',
+    ]);
     expect(await listNames(client, table)).toEqual([]);
     await reapply(tags);
     expect(await listNames(client, grants)).toEqual(['INSERT', 'SELECT', 'UPDATE']);
