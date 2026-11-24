@@ -16,3 +16,9 @@ export async function readCapturedCode(phoneNumber: string): Promise<string> {
   if (last === undefined) throw new Error('No SMS captured for this number');
   return last.code;
 }
+
+/**
+ * Test-only Telegram bot token, generated per e2e run by the server harness (never a real
+ * bot). The spec signs Login Widget data with it exactly as Telegram would.
+ */
+export const TELEGRAM_TEST_TOKEN_FILE = path.join(SMS_CAPTURE_DIR, 'telegram-test-token');

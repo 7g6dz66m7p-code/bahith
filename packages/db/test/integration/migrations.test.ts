@@ -46,7 +46,7 @@ describe('migrations', () => {
     const all = await loadMigrations();
     expect(await migrateUp(client)).toEqual(all.map((m) => m.tag));
 
-    expect(await listNames(client, TABLES)).toHaveLength(36 + 1); // + schema_migrations
+    expect(await listNames(client, TABLES)).toHaveLength(37 + 1); // + schema_migrations
     expect(await listNames(client, EXTENSIONS)).toEqual(['vector']);
     expect(await listNames(client, ROLES)).toEqual([
       'bahith_app',
@@ -101,6 +101,27 @@ describe('migrations', () => {
     expect(await migrateUp(client)).toEqual(tags);
   }
 
+  it('rolls back Telegram links and users.legacy_id on their own', async () => {
+    const table = `SELECT tablename AS name FROM pg_tables WHERE tablename = 'telegram_links'`;
+    const legacy = `SELECT column_name AS name FROM information_schema.columns
+                    WHERE table_name = 'users' AND column_name = 'legacy_id'`;
+    const grants = `SELECT grantee || ':' || privilege_type AS name
+                    FROM information_schema.role_table_grants
+                    WHERE table_name = 'telegram_links'
+                      AND grantee IN ('bahith_app', 'bahith_auth') ORDER BY 1`;
+    // Only the authentication connection; links are replaced, never edited.
+    const expectedGrants = ['bahith_auth:DELETE', 'bahith_auth:INSERT', 'bahith_auth:SELECT'];
+    expect(await listNames(client, table)).toEqual(['telegram_links']);
+    expect(await listNames(client, legacy)).toEqual(['legacy_id']);
+    expect(await listNames(client, grants)).toEqual(expectedGrants);
+    const tags = await rollBackThrough('0015_telegram_links');
+    expect(tags).toEqual(['0015_telegram_links']);
+    expect(await listNames(client, table)).toEqual([]);
+    expect(await listNames(client, legacy)).toEqual([]);
+    await reapply(tags);
+    expect(await listNames(client, grants)).toEqual(expectedGrants);
+  });
+
   it('rolls back payments on their own', async () => {
     const tables = `SELECT tablename AS name FROM pg_tables
                     WHERE tablename IN ('payments', 'payment_events') ORDER BY 1`;
@@ -125,7 +146,7 @@ describe('migrations', () => {
     expect(await listNames(client, grants)).toEqual(expectedGrants);
     expect(await listNames(client, priceCols)).toEqual(['currency', 'period_days', 'price_minor']);
     const tags = await rollBackThrough('0014_payments');
-    expect(tags).toEqual(['0014_payments']);
+    expect(tags[0]).toBe('0014_payments');
     expect(await listNames(client, tables)).toEqual([]);
     expect(await listNames(client, priceCols)).toEqual([]);
     expect(await listNames(client, TABLES)).toHaveLength(34 + 1);
@@ -347,6 +368,6 @@ describe('migrations', () => {
     expect(await rollbackLast(client)).toEqual([]);
 
     expect(await migrateUp(client)).toEqual(all.map((m) => m.tag));
-    expect(await listNames(client, TABLES)).toHaveLength(36 + 1);
+    expect(await listNames(client, TABLES)).toHaveLength(37 + 1);
   });
 });

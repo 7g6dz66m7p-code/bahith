@@ -2,6 +2,7 @@ import { sql } from 'drizzle-orm';
 import {
   bigint,
   boolean,
+  check,
   index,
   integer,
   pgPolicy,
@@ -128,3 +129,29 @@ export const authSchema = {
   twoFactor: twoFactors,
   rateLimit: authRateLimits,
 };
+
+/**
+ * Telegram account ↔ BAHITH user. Written only after a Telegram signature (Login Widget
+ * or Mini App) is verified for a signed-in user, or by the legacy migration. Identity
+ * data: reachable by the authentication connection only. One Telegram id per user.
+ */
+export const telegramLinks = pgTable(
+  'telegram_links',
+  {
+    telegramUserId: text('telegram_user_id').primaryKey(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    source: text('source').notNull(),
+    linkedAt: timestamp('linked_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique('telegram_links_user_id_key').on(t.userId),
+    check('telegram_links_id_digits', sql`${t.telegramUserId} ~ '^[1-9][0-9]{0,19}$'`),
+    check(
+      'telegram_links_source_valid',
+      sql`${t.source} IN ('legacy_migration', 'login_widget', 'web_app')`,
+    ),
+    authPolicy('telegram_links'),
+  ],
+);

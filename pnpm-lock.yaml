@@ -90,6 +90,9 @@ importers:
       '@bahith/export':
         specifier: workspace:*
         version: link:../../packages/export
+      '@bahith/migration':
+        specifier: workspace:*
+        version: link:../../packages/migration
       '@bahith/pipeline':
         specifier: workspace:*
         version: link:../../packages/pipeline

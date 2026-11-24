@@ -20,6 +20,7 @@ const GLOBAL_TABLES = new Set([
   'verifications',
   'two_factors',
   'auth_rate_limits',
+  'telegram_links',
 ]);
 /** The tenant root: isolated by its own id rather than by a workspace_id column. */
 const TENANT_ROOT = 'workspaces';
@@ -53,6 +54,8 @@ describe('database schema', () => {
         'memberships',
         'messages',
         'notifications',
+        'payment_events',
+        'payments',
         'plans',
         'project_sources',
         'projects',
@@ -60,6 +63,7 @@ describe('database schema', () => {
         'sources',
         'sessions',
         'subscriptions',
+        'telegram_links',
         'usage_counters',
         'users',
         'workspace_invitations',

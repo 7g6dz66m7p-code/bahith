@@ -19,6 +19,7 @@
     "@bahith/citations": "workspace:*",
     "@bahith/db": "workspace:*",
     "@bahith/export": "workspace:*",
+    "@bahith/migration": "workspace:*",
     "@bahith/pipeline": "workspace:*",
     "@bahith/scholarly": "workspace:*",
     "@fontsource-variable/noto-naskh-arabic": "5.3.0",

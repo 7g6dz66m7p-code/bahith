@@ -152,3 +152,10 @@ export type {
   ReconciliationReport,
   VerifiedPaymentEvent,
 } from './payments';
+export {
+  getTelegramLink,
+  linkTelegramToUser,
+  TelegramLinkError,
+  unlinkTelegram,
+} from './telegram-links';
+export type { TelegramLinkSource } from './telegram-links';

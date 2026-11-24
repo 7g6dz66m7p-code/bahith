@@ -164,17 +164,33 @@ describe('private identity role and atomic personal workspace provisioning', () 
               EXISTS(SELECT 1 FROM pg_attribute a WHERE a.attrelid = c.oid AND a.attname = 'workspace_id' AND NOT a.attisdropped) AS has_workspace
        FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
        WHERE n.nspname = 'public' AND c.relname = ANY($1::text[]) ORDER BY c.relname`,
-      [['users', 'sessions', 'accounts', 'verifications', 'two_factors', 'auth_rate_limits']],
+      [
+        [
+          'users',
+          'sessions',
+          'accounts',
+          'verifications',
+          'two_factors',
+          'auth_rate_limits',
+          'telegram_links',
+        ],
+      ],
     );
     expect(result.rows).toEqual(
-      ['accounts', 'auth_rate_limits', 'sessions', 'two_factors', 'users', 'verifications'].map(
-        (name) => ({
-          name,
-          enabled: true,
-          forced: true,
-          has_workspace: false,
-        }),
-      ),
+      [
+        'accounts',
+        'auth_rate_limits',
+        'sessions',
+        'telegram_links',
+        'two_factors',
+        'users',
+        'verifications',
+      ].map((name) => ({
+        name,
+        enabled: true,
+        forced: true,
+        has_workspace: false,
+      })),
     );
   });
 
@@ -263,6 +279,7 @@ describe('private identity role and atomic personal workspace provisioning', () 
       'verifications',
       'two_factors',
       'auth_rate_limits',
+      'telegram_links',
     ]) {
       expect(
         await errorCode(() => app.db.execute(sql`SELECT * FROM ${sql.identifier(table)}`)),

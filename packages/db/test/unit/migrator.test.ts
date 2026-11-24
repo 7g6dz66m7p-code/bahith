@@ -46,6 +46,7 @@ describe('loadMigrations', () => {
       '0012_notifications',
       '0013_library_organisation',
       '0014_payments',
+      '0015_telegram_links',
     ]);
     for (const migration of migrations) {
       expect(migration.downSql.trim(), migration.tag).not.toBe('');

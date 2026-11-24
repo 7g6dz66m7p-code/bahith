@@ -10,7 +10,7 @@ import { seedReferenceData, startTestDatabase } from '@bahith/db/testing';
 import { createStorage } from '@bahith/pipeline';
 import { GenericContainer, Wait } from 'testcontainers';
 
-import { SMS_CAPTURE_DIR } from './sms';
+import { SMS_CAPTURE_DIR, TELEGRAM_TEST_TOKEN_FILE } from './sms';
 
 const require = createRequire(import.meta.url);
 const appDir = path.resolve(import.meta.dirname, '..');
@@ -55,6 +55,8 @@ try {
   await admin.close();
 }
 await mkdir(SMS_CAPTURE_DIR, { recursive: true, mode: 0o700 });
+const telegramTestToken = `${Date.now()}:e2e-${crypto.randomUUID()}`;
+await writeFile(TELEGRAM_TEST_TOKEN_FILE, telegramTestToken, { mode: 0o600 });
 const env = {
   ...process.env,
   DATABASE_URL: database.appUrl,
@@ -81,6 +83,8 @@ const env = {
   // Phone OTP codes go to a local file (localhost only); no real SMS is sent in e2e.
   SMS_PROVIDER: 'capture',
   SMS_CAPTURE_DIR: SMS_CAPTURE_DIR,
+  TELEGRAM_BOT_TOKEN: telegramTestToken,
+  TELEGRAM_AUTH_MAX_AGE_SECONDS: '3600',
   PAYMENTS_LIVE_AUTHORIZED: '',
   ANTHROPIC_API_KEY: '',
   OPENAI_API_KEY: '',

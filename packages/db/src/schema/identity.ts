@@ -31,12 +31,17 @@ export const users = pgTable(
     /** E.164 phone number, verified by OTP (Better Auth phone-number plugin). */
     phoneNumber: text('phone_number'),
     phoneNumberVerified: boolean('phone_number_verified').notNull().default(false),
+    /** Id of the account on the legacy platform, kept for traceability of the migration. */
+    legacyId: text('legacy_id'),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
   (t) => [
     uniqueIndex('users_email_lower_key').on(sql`lower(${t.email})`),
     uniqueIndex('users_phone_number_key').on(t.phoneNumber),
+    uniqueIndex('users_legacy_id_key')
+      .on(t.legacyId)
+      .where(sql`${t.legacyId} is not null`),
     check(
       'users_phone_number_e164',
       sql`${t.phoneNumber} is null or ${t.phoneNumber} ~ '^\\+[1-9][0-9]{6,14}$'`,
