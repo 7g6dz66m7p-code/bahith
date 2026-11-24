@@ -5,8 +5,11 @@ import { redirect } from '@/i18n/navigation';
 import { getAuth } from './auth';
 
 export async function requireSession(locale: 'ar' | 'en') {
+  // Read the request headers first: this marks the page as dynamic before any auth
+  // configuration is needed, so a build without runtime secrets never prerenders it.
+  const requestHeaders = await headers();
   const session = await getAuth()
-    .api.getSession({ headers: await headers() })
+    .api.getSession({ headers: requestHeaders })
     .catch(() => {
       // Next may log rendering failures; discard private driver/token diagnostics.
       throw new Error('AUTH_UNAVAILABLE');
