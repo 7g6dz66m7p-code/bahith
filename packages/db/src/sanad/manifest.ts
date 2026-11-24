@@ -99,8 +99,12 @@ export function parseExtractionManifest(input: unknown): ExtractionManifest {
   if (manifest.units.reduce((sum, unit) => sum + codePointLength(unit.content), 0) > 20_000_000)
     invalid();
   const failed = new Set(manifest.failures.map((failure) => failure.unitIndex));
+  if (failed.size !== manifest.failures.length) invalid();
   const paged = isPagedMimeType(manifest.mimeType);
-  for (const unit of manifest.units) {
+  for (const [index, unit] of manifest.units.entries()) {
+    // The extractor emits every unit, including failed/empty pages, in original
+    // order. Reject gaps or page aliases rather than persisting invented locators.
+    if (unit.index !== index) invalid();
     if (failed.has(unit.index) && unit.content.length > 0) invalid();
     // OCR text only exists for page images, and always comes with its method label.
     if (unit.method === 'ocr' && (!paged || unit.kind !== 'page')) invalid();
@@ -108,13 +112,13 @@ export function parseExtractionManifest(input: unknown): ExtractionManifest {
     if (manifest.mimeType.startsWith('image/') && unit.content.length > 0 && unit.method !== 'ocr')
       invalid();
     if (paged) {
-      if (unit.kind !== 'page' || unit.page === null) invalid();
+      if (unit.kind !== 'page' || unit.page !== index + 1) invalid();
     } else if (unit.page !== null || unit.kind === 'page') invalid();
   }
   for (const failure of manifest.failures) {
     if (!paged && failure.page !== null) invalid();
     const unit = unitMap.get(failure.unitIndex);
-    if (unit !== undefined && unit.page !== failure.page) invalid();
+    if (unit === undefined || unit.page !== failure.page) invalid();
   }
   const codePoints = new Map<number, string[]>();
   for (const [index, chunk] of manifest.chunks.entries()) {

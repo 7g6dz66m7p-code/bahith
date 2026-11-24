@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 
-import { and, asc, eq } from 'drizzle-orm';
+import { and, asc, eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
 
 import type { Database } from '../client';
@@ -35,6 +35,9 @@ export interface IngestExtractionInput extends SanadProjectContext {
  * Trusted internal boundary, not an HTTP handler. The caller authenticates userId and
  * obtains the manifest from the extractor operating on the registered file bytes.
  * Writes are atomic and retries are idempotent. New bytes require a new file record.
+ * A replay without embeddings preserves the published vectors. A replay supplying
+ * embeddings must match the stored model and vectors at pgvector float32 precision;
+ * adding/replacing vectors is a distinct indexing operation, never an ingestion retry.
  */
 export async function ingestExtraction(database: Database, input: IngestExtractionInput) {
   if (!z.uuid().safeParse(input.fileId).success) throw new SanadError('SANAD_INVALID_INPUT');
@@ -80,13 +83,36 @@ export async function ingestExtraction(database: Database, input: IngestExtracti
         throw new SanadError('SANAD_VERSION_CONFLICT');
       }
       const stored = await tx
-        .select({ id: chunks.id, index: chunks.chunkIndex })
+        .select({
+          id: chunks.id,
+          index: chunks.chunkIndex,
+          // Ordinary extraction retries do not need to transfer large vectors.
+          embedding: embeddings === undefined ? sql<null>`null` : chunks.embedding,
+          embeddingModel: embeddings === undefined ? sql<null>`null` : chunks.embeddingModel,
+        })
         .from(chunks)
         .where(and(eq(chunks.workspaceId, input.workspaceId), eq(chunks.fileId, input.fileId)))
         .orderBy(asc(chunks.chunkIndex));
       if (
         stored.length !== file.extraction.chunkCount ||
         stored.some((chunk, index) => chunk.index !== index)
+      ) {
+        throw new SanadError('SANAD_VERSION_CONFLICT');
+      }
+      if (
+        embeddings !== undefined &&
+        stored.some((chunk, index) => {
+          const supplied = embeddings.vectors[index];
+          return (
+            chunk.embeddingModel !== embeddings.model ||
+            chunk.embedding === null ||
+            supplied === undefined ||
+            chunk.embedding.length !== supplied.length ||
+            chunk.embedding.some(
+              (value, dimension) => Math.fround(value) !== Math.fround(supplied[dimension] ?? NaN),
+            )
+          );
+        })
       ) {
         throw new SanadError('SANAD_VERSION_CONFLICT');
       }

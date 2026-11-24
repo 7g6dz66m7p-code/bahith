@@ -139,6 +139,18 @@ export interface QuotationMatch {
   charEnd: number;
 }
 
+/** Validates one authorized evidence projection and rejects ambiguous chunk ids. */
+export function parseQuotationEvidence(input: unknown): Map<string, QuotationEvidence> {
+  const parsed = z.array(evidenceSchema).max(200).safeParse(input);
+  if (!parsed.success) throw new SanadVerifyError('SANAD_VERIFY_INVALID_INPUT');
+  const evidence = new Map<string, QuotationEvidence>();
+  for (const item of parsed.data) {
+    if (evidence.has(item.chunkId)) throw new SanadVerifyError('SANAD_DUPLICATE_EVIDENCE');
+    evidence.set(item.chunkId, item);
+  }
+  return evidence;
+}
+
 /**
  * Binds a verbatim quotation to an allow-listed stored passage. This proves only
  * that the exact string occurs in that passage; it does not prove that the source
@@ -150,16 +162,10 @@ export interface QuotationMatch {
  */
 export function verifyQuotation(request: unknown, allowedEvidence: unknown): QuotationMatch {
   const parsedRequest = quotationRequestSchema.safeParse(request);
-  const parsedEvidence = z.array(evidenceSchema).max(200).safeParse(allowedEvidence);
-  if (!parsedRequest.success || !parsedEvidence.success) {
+  if (!parsedRequest.success) {
     throw new SanadVerifyError('SANAD_VERIFY_INVALID_INPUT');
   }
-  const seen = new Set<string>();
-  for (const evidence of parsedEvidence.data) {
-    if (seen.has(evidence.chunkId)) throw new SanadVerifyError('SANAD_DUPLICATE_EVIDENCE');
-    seen.add(evidence.chunkId);
-  }
-  const evidence = parsedEvidence.data.find((item) => item.chunkId === parsedRequest.data.chunkId);
+  const evidence = parseQuotationEvidence(allowedEvidence).get(parsedRequest.data.chunkId);
   if (evidence === undefined) throw new SanadVerifyError('SANAD_UNKNOWN_CHUNK');
   const { quote } = parsedRequest.data;
   if (quote.trim().length === 0) throw new SanadVerifyError('SANAD_VERIFY_INVALID_INPUT');

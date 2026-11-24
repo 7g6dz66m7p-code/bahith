@@ -11,6 +11,7 @@ import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, inject, it } from 'vitest';
 import { z } from 'zod';
 
+import { bindSanadAnswer } from '../../../ai/src/sanad/answer';
 import { verifyQuotation } from '../../../ai/src/sanad/verify';
 import type { Database } from '../../src/client';
 import { createDatabase } from '../../src/client';
@@ -217,6 +218,99 @@ describe('SANAD ingestion and source version preservation', () => {
     expect(found.results[0]?.lexicalRank).toBeNull();
   });
 
+  it('replays matching embeddings using pgvector precision and preserves vectors when omitted', async () => {
+    const fileId = await registerFile();
+    // Artificial software-test vector. Decimal components exercise float32 storage.
+    const vector = Array.from({ length: schema.EMBEDDING_DIMENSIONS }, (_, index) =>
+      index === 0 ? 0.1 : 0,
+    );
+    const input = {
+      ...context(),
+      fileId,
+      manifest: manifestFor('idempotent vector replay fixture'),
+      embeddings: { model: 'fixture-replay-model', vectors: [vector] },
+    };
+    const original = await ingestExtraction(database, input);
+    expect(await ingestExtraction(database, input)).toEqual({ ...original, reused: true });
+    const equivalentVector = vector.map((value) => (value === 0 ? 0 : value + Number.EPSILON));
+    expect(
+      await ingestExtraction(database, {
+        ...input,
+        embeddings: { ...input.embeddings, vectors: [equivalentVector] },
+      }),
+    ).toEqual({ ...original, reused: true });
+    expect(
+      await ingestExtraction(database, { ...context(), fileId, manifest: input.manifest }),
+    ).toEqual({ ...original, reused: true });
+    const found = await retrieve(database, {
+      ...context(),
+      query: 'unmatchedterm',
+      queryEmbedding: { model: input.embeddings.model, values: vector },
+    });
+    expect(found.results.map((row) => row.chunkId)).toEqual(original.chunkIds);
+  });
+
+  it('rejects adding vectors on extraction replay instead of silently claiming ingestion success', async () => {
+    const fileId = await registerFile();
+    const input = { ...context(), fileId, manifest: manifestFor('lexical replay fixture') };
+    const original = await ingestExtraction(database, input);
+    const vector = Array.from({ length: schema.EMBEDDING_DIMENSIONS }, (_, index) =>
+      index === 0 ? 1 : 0,
+    );
+    await expect(
+      ingestExtraction(database, {
+        ...input,
+        embeddings: { model: 'fixture-new-model', vectors: [vector] },
+      }),
+    ).rejects.toMatchObject({ code: 'SANAD_VERSION_CONFLICT' });
+    const [stored] = await database.withWorkspace(a.workspaceId, (tx) =>
+      tx.select().from(schema.chunks).where(eq(schema.chunks.fileId, fileId)),
+    );
+    expect(stored).toMatchObject({
+      id: original.chunkIds[0],
+      embedding: null,
+      embeddingModel: null,
+    });
+    expect(await ingestExtraction(database, input)).toEqual({ ...original, reused: true });
+  });
+
+  it.each(['model', 'vector'])(
+    'rejects a changed embedding %s on replay and retains the original',
+    async (change) => {
+      const fileId = await registerFile();
+      const vector = Array.from({ length: schema.EMBEDDING_DIMENSIONS }, (_, index) =>
+        index === 0 ? 1 : 0,
+      );
+      const input = {
+        ...context(),
+        fileId,
+        manifest: manifestFor(`conflicting ${change} replay fixture`),
+        embeddings: { model: 'fixture-original-model', vectors: [vector] },
+      };
+      const original = await ingestExtraction(database, input);
+      await expect(
+        ingestExtraction(database, {
+          ...input,
+          embeddings: {
+            model: change === 'model' ? 'fixture-changed-model' : input.embeddings.model,
+            vectors: [
+              change === 'vector' ? vector.map((_, index) => (index === 1 ? 1 : 0)) : vector,
+            ],
+          },
+        }),
+      ).rejects.toMatchObject({ code: 'SANAD_VERSION_CONFLICT' });
+      const [stored] = await database.withWorkspace(a.workspaceId, (tx) =>
+        tx.select().from(schema.chunks).where(eq(schema.chunks.fileId, fileId)),
+      );
+      expect(stored).toMatchObject({
+        id: original.chunkIds[0],
+        embeddingModel: input.embeddings.model,
+        embedding: vector,
+      });
+      expect(await ingestExtraction(database, input)).toEqual({ ...original, reused: true });
+    },
+  );
+
   it.each(['wrong-dimension', 'zero', 'underflow', 'wrong-count'])(
     'rejects an invalid embedding batch without publishing chunks: %s',
     async (reason) => {
@@ -407,7 +501,7 @@ describe('SANAD ingestion and source version preservation', () => {
         const evidence = response.results.find((row) => row.fileId === fileId);
         expect(evidence?.chunkId).toBe(ingested.chunkIds[0]);
         if (evidence === undefined) throw new Error('fixture evidence missing');
-        const match = verifyQuotation({ chunkId: evidence.chunkId, quote }, [
+        const allowed = [
           {
             chunkId: evidence.chunkId,
             sourceId: evidence.sourceId,
@@ -419,7 +513,8 @@ describe('SANAD ingestion and source version preservation', () => {
             pageEnd: evidence.pageEnd,
             sourceVerificationStatus: evidence.verificationStatus,
           },
-        ]);
+        ];
+        const match = verifyQuotation({ chunkId: evidence.chunkId, quote }, allowed);
         expect(match).toMatchObject({
           status: 'exact_quote_match',
           reviewStatus: 'needs_human_review',
@@ -428,6 +523,19 @@ describe('SANAD ingestion and source version preservation', () => {
           fileId,
           fileSha256,
         });
+        const answer = bindSanadAnswer(
+          {
+            statements: [
+              {
+                text: 'Software test statement, not a scientific result.',
+                classification: 'evidence_linked',
+                citations: [{ chunkId: evidence.chunkId, quote }],
+              },
+            ],
+          },
+          allowed,
+        );
+        expect(answer.statements[0]?.citations).toEqual([match]);
         const stored = await database.withWorkspace(a.workspaceId, (tx) =>
           tx
             .select()

@@ -120,6 +120,36 @@ describe('SANAD extraction manifest boundary', () => {
     ).toEqual([]);
   });
 
+  it.each([
+    { units: [{ index: 1, kind: 'page', page: 1, content: '', direction: 'auto' }] },
+    { units: [{ index: 0, kind: 'page', page: 2, content: '', direction: 'auto' }] },
+    {
+      units: [
+        { index: 0, kind: 'page', page: 1, content: '', direction: 'auto' },
+        { index: 1, kind: 'page', page: 1, content: '', direction: 'auto' },
+      ],
+    },
+    { failures: [{ unitIndex: 0, page: null, code: 'PDF_PAGE_FAILED' }] },
+    { failures: [{ unitIndex: 1, page: 2, code: 'PDF_PAGE_FAILED' }] },
+    {
+      failures: [
+        { unitIndex: 0, page: 1, code: 'PDF_PAGE_FAILED' },
+        { unitIndex: 0, page: 1, code: 'PDF_PAGE_FAILED' },
+      ],
+    },
+  ])('rejects ambiguous physical pages and failure diagnostics (%#)', (override) => {
+    expect(() =>
+      parseExtractionManifest({
+        ...textManifest(),
+        mimeType: 'application/pdf',
+        units: [{ index: 0, kind: 'page', page: 1, content: '', direction: 'auto' }],
+        chunks: [],
+        failures: [],
+        ...override,
+      }),
+    ).toThrow('SANAD_INVALID_INPUT');
+  });
+
   it('never embeds research content in a validation error', () => {
     expect(() => parseExtractionManifest({ secret: 'private research text' })).toThrow(
       /^SANAD_INVALID_INPUT$/,
