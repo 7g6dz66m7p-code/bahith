@@ -41,6 +41,7 @@ describe('loadMigrations', () => {
       '0007_project_ai_consent',
       '0008_document_review',
       '0009_workspace_invitations',
+      '0010_platform_admin',
     ]);
     for (const migration of migrations) {
       expect(migration.downSql.trim(), migration.tag).not.toBe('');

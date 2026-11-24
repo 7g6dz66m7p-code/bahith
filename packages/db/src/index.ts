@@ -99,3 +99,12 @@ export {
   revokeInvitation,
 } from './members';
 export type { MemberEntry, MemberErrorCode, MemberRole, WorkspaceActor } from './members';
+export {
+  getPlatformStats,
+  getWorkspaceUsage,
+  listPlans,
+  PlanError,
+  platformStatsSchema,
+  setPlanAiRequestLimit,
+} from './admin';
+export type { PlatformStats, WorkspaceUsage } from './admin';

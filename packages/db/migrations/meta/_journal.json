@@ -71,6 +71,13 @@
       "when": 1795535440590,
       "tag": "0009_workspace_invitations",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1795536453706,
+      "tag": "0010_platform_admin",
+      "breakpoints": true
     }
   ]
 }
