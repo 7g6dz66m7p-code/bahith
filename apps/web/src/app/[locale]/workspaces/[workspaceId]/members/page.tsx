@@ -1,4 +1,4 @@
-import { listInvitations, listMembers, MemberError } from '@bahith/db';
+import { getWorkspaceUsage, listInvitations, listMembers, MemberError } from '@bahith/db';
 import { hasLocale } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
@@ -6,6 +6,7 @@ import { locale as rootLocale } from 'next/root-params';
 import { z } from 'zod';
 
 import { MembersPanel } from '@/components/members-panel';
+import { UsageCard } from '@/components/usage-card';
 import { routing } from '@/i18n/routing';
 import { getDatabase } from '@/server/db';
 import { requireSession } from '@/server/session';
@@ -31,6 +32,7 @@ export default async function MembersPage({
   if (members === null) notFound();
   const owner = members.some((member) => member.isYou && member.role === 'owner');
   const invitations = owner ? await listInvitations(database, actor) : [];
+  const usage = await getWorkspaceUsage(database, actor);
   const t = await getTranslations('Members');
   return (
     <main className="app-shell mx-auto min-h-dvh w-full max-w-4xl space-y-6 px-5 py-7 sm:px-8">
@@ -38,6 +40,7 @@ export default async function MembersPage({
         <h1 className="text-3xl font-bold">{t('title')}</h1>
         <p className="muted leading-relaxed">{t('description')}</p>
       </header>
+      <UsageCard workspaceId={workspaceId.data} usage={usage} isOwner={owner} />
       <MembersPanel
         workspaceId={workspaceId.data}
         locale={locale}

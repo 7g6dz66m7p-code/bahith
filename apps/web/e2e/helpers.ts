@@ -91,10 +91,15 @@ export async function readVerificationUrl(email: string): Promise<string> {
 }
 
 /** Real HTTP signup + SMTP verification + cookie session, for tests unrelated to form entry. */
-export async function registerAndVerify(page: Page, locale: 'ar' | 'en', name = 'باحث الاختبار') {
+export async function registerAndVerify(
+  page: Page,
+  locale: 'ar' | 'en',
+  name = 'باحث الاختبار',
+  email = `browser-${crypto.randomUUID()}@example.test`,
+) {
   const identity = {
     name,
-    email: `browser-${crypto.randomUUID()}@example.test`,
+    email,
     password: `BrowserFixture-${crypto.randomUUID()}`,
   };
   const signup = await page.request.post('/api/auth/sign-up/email', {

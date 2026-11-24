@@ -72,6 +72,10 @@ const env = {
   // No AI provider in e2e: the assistant must say it is not configured (never fake it).
   AI_CHAT_MODEL: '',
   AI_EMBEDDING_MODEL: '',
+  // Fixed test administrators (admin.spec.ts registers them); payments stay off.
+  PLATFORM_ADMIN_EMAILS: 'e2e-admin-ar@example.test,e2e-admin-en@example.test',
+  PAYMENTS_PROVIDER: '',
+  PAYMENTS_LIVE_AUTHORIZED: '',
   ANTHROPIC_API_KEY: '',
   OPENAI_API_KEY: '',
   NEXT_TELEMETRY_DISABLED: '1',

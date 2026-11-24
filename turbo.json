@@ -28,7 +28,9 @@
     "OPENALEX_API_KEY",
     "SEMANTIC_SCHOLAR_API_KEY",
     "NCBI_API_KEY",
-    "NODE_USE_ENV_PROXY"
+    "NODE_USE_ENV_PROXY",
+    "PLATFORM_ADMIN_EMAILS",
+    "PAYMENTS_*"
   ],
   "tasks": {
     "build": {

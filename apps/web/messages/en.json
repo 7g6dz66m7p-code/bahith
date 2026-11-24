@@ -468,5 +468,35 @@
     "errorExpired": "This invitation has expired. Ask for a new one.",
     "errorMismatch": "This invitation is for another email. Sign in with the address it was sent to.",
     "errorGeneric": "Something went wrong. Try again."
+  },
+  "Admin": {
+    "title": "Platform administration",
+    "description": "Aggregate numbers only — no research content, names or email addresses.",
+    "users": "Users",
+    "verifiedUsers": "Verified email",
+    "workspaces": "Workspaces",
+    "projects": "Projects",
+    "sources": "Sources",
+    "chunks": "Passages",
+    "embeddedChunks": "Embedded passages",
+    "documents": "Drafts",
+    "aiRequestsThisMonth": "AI requests this month",
+    "files": "Files by status",
+    "runs": "Agent runs this month",
+    "plans": "Plans and quotas",
+    "plansHelp": "Set the monthly AI requests of each plan. No value = no AI (closed by default).",
+    "limitFor": "Monthly limit for {plan}",
+    "notSet": "not set",
+    "save": "Save",
+    "saved": "Limit saved.",
+    "error": "Could not save. Check the value."
+  },
+  "Usage": {
+    "title": "Plan and usage",
+    "plan": "Plan: {plan}",
+    "used": "AI requests this month: {used} of {limit}",
+    "unlimited": "no allowance set yet (AI is off)",
+    "upgrade": "Upgrade plan",
+    "paymentsDisabled": "Payments are not enabled on the platform yet. No transaction was made."
   }
 }
