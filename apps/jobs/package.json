@@ -12,6 +12,7 @@
     "test:integration": "vitest run --config vitest.integration.config.ts"
   },
   "dependencies": {
+    "@bahith/ai": "workspace:*",
     "@bahith/db": "workspace:*",
     "@bahith/pipeline": "workspace:*",
     "bullmq": "^6.7.6",

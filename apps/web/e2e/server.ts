@@ -71,6 +71,7 @@ const env = {
   SCHOLARLY_CONTACT_EMAIL: '',
   // No AI provider in e2e: the assistant must say it is not configured (never fake it).
   AI_CHAT_MODEL: '',
+  AI_EMBEDDING_MODEL: '',
   ANTHROPIC_API_KEY: '',
   OPENAI_API_KEY: '',
   NEXT_TELEMETRY_DISABLED: '1',

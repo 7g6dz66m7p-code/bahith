@@ -13,6 +13,8 @@ export const EXTRACT_QUEUE = 'bahith-documents';
 export const INGEST_QUEUE = 'bahith-ingest';
 export const EXTRACT_JOB = 'sanad.extract';
 export const INGEST_JOB = 'sanad.ingest';
+export const EMBED_QUEUE = 'bahith-embed';
+export const EMBED_JOB = 'sanad.embed';
 
 const context = {
   /** Authenticated user who uploaded the file; re-authorized at ingestion time. */
@@ -52,3 +54,12 @@ export const ingestJobSchema = z.discriminatedUnion('outcome', [
 ]);
 
 export type IngestJob = z.infer<typeof ingestJobSchema>;
+
+/** Embed a project's passages that have no vector for the configured model yet. */
+export const embedJobSchema = z.strictObject({
+  userId: z.uuid(),
+  workspaceId: z.uuid(),
+  projectId: z.uuid(),
+});
+
+export type EmbedJob = z.infer<typeof embedJobSchema>;

@@ -2,6 +2,9 @@ import type { AnswerPassage, GroundedAnswer } from '@bahith/ai';
 import {
   AiCallError,
   AiConfigError,
+  embedTexts,
+  loadEmbeddingModelRef,
+  resolveEmbeddingModel,
   AiProviderError,
   loadChatModelRef,
   MAX_ANSWER_PASSAGES,
@@ -17,6 +20,20 @@ import {
   saveAssistantExchange,
   startAssistantRun,
 } from '@bahith/db';
+
+/** The configured embedding model, or null (lexical-only retrieval). */
+function embeddingModelFromEnv() {
+  try {
+    const ref = loadEmbeddingModelRef(process.env);
+    if (ref === null) return null;
+    return { model: resolveEmbeddingModel(ref, process.env), modelId: ref.model };
+  } catch (error) {
+    if (error instanceof AiConfigError || error instanceof AiProviderError) {
+      throw new AssistantRequestError('AI_NOT_CONFIGURED', 503);
+    }
+    throw error;
+  }
+}
 
 /** The configured chat model as "provider:model", or null — shown to the user before consent. */
 export function configuredChatModel(): string | null {
@@ -94,10 +111,67 @@ export async function askAssistant(
     throw error;
   }
 
+  const startRun = async (): Promise<string> => {
+    try {
+      return (
+        await startAssistantRun(database, context, {
+          agent: 'grounded-answer',
+          promptVersion: 'grounded-answer@1',
+          provider: label.slice(0, label.indexOf(':')),
+          model: label.slice(label.indexOf(':') + 1),
+        })
+      ).runId;
+    } catch (error) {
+      if (error instanceof AssistantError && error.code in STATUS) {
+        throw new AssistantRequestError(error.code, STATUS[error.code] ?? 400);
+      }
+      throw error;
+    }
+  };
+  const fail = async (id: string, error: unknown): Promise<never> => {
+    const code = error instanceof AiCallError ? error.code : 'AI_PROVIDER_ERROR';
+    await finishAssistantRun(database, context, id, {
+      status: 'failed',
+      inputTokens: null,
+      outputTokens: null,
+      latencyMs: null,
+      errorCode: code,
+    });
+    throw new AssistantRequestError(
+      code,
+      code === 'AI_TIMEOUT'
+        ? 504
+        : code === 'AI_PROVIDER_QUOTA' || code === 'AI_PROVIDER_AUTH'
+          ? 503
+          : 502,
+    );
+  };
+
+  // Semantic search when an embedding model is configured: the question is embedded
+  // inside the same counted run (consent and quota are checked before that call).
+  let runId: string | null = null;
+  let queryEmbedding: { model: string; values: number[] } | undefined;
+  const embedding = embeddingModelFromEnv();
+  if (embedding !== null) {
+    runId = await startRun();
+    try {
+      const batch = await embedTexts({
+        model: embedding.model,
+        modelId: embedding.modelId,
+        values: [input.question],
+      });
+      const values = batch.vectors[0];
+      if (values !== undefined) queryEmbedding = { model: embedding.modelId, values };
+    } catch (error) {
+      return fail(runId, error);
+    }
+  }
+
   const retrieved = await retrieve(database, {
     ...context,
     query: input.question,
     limit: MAX_ANSWER_PASSAGES,
+    ...(queryEmbedding === undefined ? {} : { queryEmbedding }),
   });
   const passages: AnswerPassage[] = retrieved.results.map((item) => ({
     chunkId: item.chunkId,
@@ -113,6 +187,15 @@ export async function askAssistant(
   }));
   const empty = { unknownPassages: 0, unverifiedQuotes: 0, downgraded: 0, strippedCitations: 0 };
   if (passages.length === 0) {
+    if (runId !== null) {
+      await finishAssistantRun(database, context, runId, {
+        status: 'succeeded',
+        inputTokens: null,
+        outputTokens: 0,
+        latencyMs: null,
+        errorCode: null,
+      });
+    }
     return {
       status: 'abstained',
       reason: 'NO_EVIDENCE',
@@ -122,21 +205,7 @@ export async function askAssistant(
       diagnostics: empty,
     };
   }
-
-  let runId: string;
-  try {
-    ({ runId } = await startAssistantRun(database, context, {
-      agent: 'grounded-answer',
-      promptVersion: 'grounded-answer@1',
-      provider: label.slice(0, label.indexOf(':')),
-      model: label.slice(label.indexOf(':') + 1),
-    }));
-  } catch (error) {
-    if (error instanceof AssistantError && error.code in STATUS) {
-      throw new AssistantRequestError(error.code, STATUS[error.code] ?? 400);
-    }
-    throw error;
-  }
+  runId ??= await startRun();
 
   let run;
   try {
@@ -147,22 +216,7 @@ export async function askAssistant(
       passages,
     });
   } catch (error) {
-    const code = error instanceof AiCallError ? error.code : 'AI_PROVIDER_ERROR';
-    await finishAssistantRun(database, context, runId, {
-      status: 'failed',
-      inputTokens: null,
-      outputTokens: null,
-      latencyMs: null,
-      errorCode: code,
-    });
-    throw new AssistantRequestError(
-      code,
-      code === 'AI_TIMEOUT'
-        ? 504
-        : code === 'AI_PROVIDER_QUOTA' || code === 'AI_PROVIDER_AUTH'
-          ? 503
-          : 502,
-    );
+    return fail(runId, error);
   }
   await finishAssistantRun(database, context, runId, {
     status: 'succeeded',

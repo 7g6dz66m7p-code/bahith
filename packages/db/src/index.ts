@@ -86,3 +86,4 @@ export {
   resolveComment,
 } from './review';
 export type { AcceptedSuggestion, ReviewComment, ReviewContext } from './review';
+export { countEmbeddedChunks, listChunksToEmbed, storeChunkEmbeddings } from './embeddings';

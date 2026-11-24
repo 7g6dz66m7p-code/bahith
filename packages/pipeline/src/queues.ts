@@ -1,8 +1,11 @@
 import { Queue } from 'bullmq';
 import { Redis } from 'ioredis';
 
-import type { ExtractJob, IngestJob } from './contracts';
+import type { EmbedJob, ExtractJob, IngestJob } from './contracts';
 import {
+  EMBED_JOB,
+  EMBED_QUEUE,
+  embedJobSchema,
   EXTRACT_JOB,
   EXTRACT_QUEUE,
   extractJobSchema,
@@ -30,12 +33,14 @@ export function createRedisConnection(url: string): Redis {
 export interface PipelineQueues {
   enqueueExtraction(job: ExtractJob): Promise<void>;
   enqueueIngestion(job: IngestJob): Promise<void>;
+  enqueueEmbedding(job: EmbedJob): Promise<void>;
   close(): Promise<void>;
 }
 
 export function createPipelineQueues(connection: Redis): PipelineQueues {
   const extract = new Queue(EXTRACT_QUEUE, { connection, defaultJobOptions });
   const ingest = new Queue(INGEST_QUEUE, { connection, defaultJobOptions });
+  const embed = new Queue(EMBED_QUEUE, { connection, defaultJobOptions });
   return {
     async enqueueExtraction(job) {
       const parsed = extractJobSchema.safeParse(job);
@@ -48,8 +53,14 @@ export function createPipelineQueues(connection: Redis): PipelineQueues {
       if (!parsed.success) throw new PipelineError('PIPELINE_INVALID_PAYLOAD');
       await ingest.add(INGEST_JOB, parsed.data, { jobId: `ingest-${parsed.data.fileId}` });
     },
+    async enqueueEmbedding(job) {
+      const parsed = embedJobSchema.safeParse(job);
+      if (!parsed.success) throw new PipelineError('PIPELINE_INVALID_PAYLOAD');
+      // No fixed id: a run only embeds what is still missing, so a repeat is cheap.
+      await embed.add(EMBED_JOB, parsed.data);
+    },
     async close() {
-      await Promise.all([extract.close(), ingest.close()]);
+      await Promise.all([extract.close(), ingest.close(), embed.close()]);
     },
   };
 }

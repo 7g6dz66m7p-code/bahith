@@ -35,3 +35,11 @@ export type {
   GroundedSentence,
 } from './agents/grounded-answer';
 export { escapeSourceText, GROUNDED_ANSWER_PROMPT_VERSION } from './prompts/grounded-answer';
+export {
+  EMBEDDING_BATCH_SIZE,
+  EMBEDDING_DIMENSIONS,
+  embedTexts,
+  loadEmbeddingModelRef,
+  resolveEmbeddingModel,
+} from './embeddings';
+export type { EmbeddingBatch } from './embeddings';

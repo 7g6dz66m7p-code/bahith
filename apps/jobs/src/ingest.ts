@@ -10,6 +10,8 @@ import { errorCode, log } from './log';
 const MAX_MANIFEST_BYTES = 120 * 1024 * 1024;
 
 export interface IngestDependencies {
+  /** Called after a file became ready (e.g. to queue embedding of its passages). */
+  onReady?: (context: { userId: string; workspaceId: string; projectId: string }) => Promise<void>;
   database: Database;
   storage: ObjectStorage;
 }
@@ -24,7 +26,7 @@ export type IngestOutcome =
  * Permanent problems end the job without retries (UnrecoverableError); anything else
  * is thrown so BullMQ retries with backoff.
  */
-export function createIngestHandler({ database, storage }: IngestDependencies) {
+export function createIngestHandler({ database, storage, onReady }: IngestDependencies) {
   return async (data: unknown): Promise<IngestOutcome> => {
     const parsed = ingestJobSchema.safeParse(data);
     if (!parsed.success) throw new UnrecoverableError('PIPELINE_INVALID_PAYLOAD');
@@ -89,6 +91,12 @@ export function createIngestHandler({ database, storage }: IngestDependencies) {
         chunkCount: result.chunkIds.length,
         reused: result.reused,
       });
+      if (result.status === 'ready' && onReady !== undefined) {
+        // Best effort: the source is usable lexically even if queuing embedding fails.
+        await onReady(context).catch((error: unknown) => {
+          log.warn('sanad.embed_enqueue_failed', { ...ids, code: errorCode(error) });
+        });
+      }
       return {
         status: result.status === 'ready' ? 'ready' : 'failed',
         chunkCount: result.chunkIds.length,

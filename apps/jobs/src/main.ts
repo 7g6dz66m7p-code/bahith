@@ -4,8 +4,11 @@ import { fileURLToPath } from 'node:url';
 
 import { createDatabase, markFileFailed } from '@bahith/db';
 import {
+  createPipelineQueues,
   createRedisConnection,
   createStorage,
+  EMBED_JOB,
+  EMBED_QUEUE,
   EXTRACT_QUEUE,
   extractJobSchema,
   INGEST_JOB,
@@ -15,6 +18,7 @@ import {
 import { Queue, QueueEvents, Worker } from 'bullmq';
 import { z } from 'zod';
 
+import { createEmbedHandler, embedderFromEnv } from './embed';
 import { createIngestHandler } from './ingest';
 import { errorCode, log } from './log';
 
@@ -35,7 +39,25 @@ function main(): void {
   const database = createDatabase({ connectionString: parsed.data.DATABASE_URL });
   const storage = createStorage(parseStorageConfig(process.env));
   const connection = createRedisConnection(parsed.data.REDIS_URL);
-  const handle = createIngestHandler({ database, storage });
+  const queues = createPipelineQueues(connection);
+  const handle = createIngestHandler({
+    database,
+    storage,
+    onReady: (context) => queues.enqueueEmbedding(context),
+  });
+  const handleEmbed = createEmbedHandler({ database, embedder: embedderFromEnv(process.env) });
+  const embedWorker = new Worker(
+    EMBED_QUEUE,
+    async (job) => {
+      if (job.name !== EMBED_JOB) throw new Error('UNKNOWN_JOB');
+      return handleEmbed(job.data);
+    },
+    // One project at a time: runs only embed what is still missing.
+    { connection: connection.duplicate(), concurrency: 1 },
+  );
+  embedWorker.on('failed', (job, error) => {
+    log.error('jobs.embed_failed', { jobId: job?.id ?? null, code: errorCode(error) });
+  });
 
   const worker = new Worker(
     INGEST_QUEUE,
@@ -81,7 +103,13 @@ function main(): void {
   log.info('jobs.started', { queue: INGEST_QUEUE });
   const stop = async () => {
     log.info('jobs.stopping');
-    await Promise.allSettled([worker.close(), extractEvents.close(), extractQueue.close()]);
+    await Promise.allSettled([
+      worker.close(),
+      embedWorker.close(),
+      queues.close(),
+      extractEvents.close(),
+      extractQueue.close(),
+    ]);
     connection.disconnect();
     await database.close();
     process.exit(0);

@@ -1,4 +1,7 @@
 export {
+  EMBED_JOB,
+  EMBED_QUEUE,
+  embedJobSchema,
   EXTRACT_JOB,
   EXTRACT_QUEUE,
   extractJobSchema,
@@ -6,7 +9,7 @@ export {
   INGEST_QUEUE,
   ingestJobSchema,
 } from './contracts';
-export type { ExtractJob, IngestJob } from './contracts';
+export type { EmbedJob, ExtractJob, IngestJob } from './contracts';
 export { PipelineError } from './errors';
 export type { PipelineErrorCode } from './errors';
 export { fileObjectKey, isWorkspaceKey, manifestObjectKey } from './keys';

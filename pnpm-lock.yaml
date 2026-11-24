@@ -23,6 +23,9 @@ importers:
 
   apps/jobs:
     dependencies:
+      '@bahith/ai':
+        specifier: workspace:*
+        version: link:../../packages/ai
       '@bahith/db':
         specifier: workspace:*
         version: link:../../packages/db
