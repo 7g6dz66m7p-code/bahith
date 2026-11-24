@@ -130,8 +130,9 @@ describe('workspace isolation (row-level security)', () => {
       // …and the list is the one Phase 1 specifies (memberships + 20 research tables).
       // 25 research tables: the 19 of Phase 1, document_comments (draft review),
       // workspace_invitations (members), notifications, and collections,
-      // collection_sources and highlights (library organisation).
-      expect(tenantTableNames).toHaveLength(26);
+      // collection_sources and highlights (library organisation), payments and
+      // payment_events (billing).
+      expect(tenantTableNames).toHaveLength(28);
       for (const row of rows) {
         expect(row, row.table).toMatchObject({ enabled: true, forced: true });
         expect(row.policies, row.table).toBeGreaterThan(0);
@@ -326,6 +327,18 @@ describe('workspace isolation (row-level security)', () => {
               quote: 'ا',
             }),
           ),
+        () =>
+          database.withWorkspace(a.workspaceId, (tx) =>
+            tx.insert(schema.paymentEvents).values({
+              workspaceId: b.workspaceId,
+              paymentId: b.paymentId,
+              provider: 'fixture',
+              eventId: 'intruder',
+              kind: 'succeeded',
+              outcome: 'applied',
+              occurredAt: new Date(),
+            }),
+          ),
       ];
       for (const attempt of attempts) {
         expect(await pgErrorCode(attempt)).toBe(PG_INSUFFICIENT_PRIVILEGE);
@@ -430,6 +443,18 @@ describe('workspace isolation (row-level security)', () => {
               charStart: 0,
               charEnd: 1,
               quote: 'ا',
+            }),
+          ),
+        () =>
+          database.withWorkspace(a.workspaceId, (tx) =>
+            tx.insert(schema.paymentEvents).values({
+              workspaceId: a.workspaceId,
+              paymentId: b.paymentId,
+              provider: 'fixture',
+              eventId: 'cross-workspace',
+              kind: 'succeeded',
+              outcome: 'applied',
+              occurredAt: new Date(),
             }),
           ),
       ];

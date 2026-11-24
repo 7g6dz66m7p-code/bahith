@@ -134,3 +134,21 @@ export {
   updateHighlightSchema,
 } from './collections';
 export type { CollectionEntry, HighlightColor, HighlightEntry } from './collections';
+export {
+  applyVerifiedPaymentEvent,
+  attachProviderPaymentId,
+  createPendingPayment,
+  listPaymentsForReconciliation,
+  PaymentError,
+  reconcilePayments,
+  verifiedPaymentEventSchema,
+} from './payments';
+export type {
+  LocalPaymentRecord,
+  PaymentErrorCode,
+  PaymentEventResult,
+  PendingPayment,
+  ProviderPaymentRecord,
+  ReconciliationReport,
+  VerifiedPaymentEvent,
+} from './payments';

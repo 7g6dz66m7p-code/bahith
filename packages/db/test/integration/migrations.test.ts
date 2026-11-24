@@ -46,7 +46,7 @@ describe('migrations', () => {
     const all = await loadMigrations();
     expect(await migrateUp(client)).toEqual(all.map((m) => m.tag));
 
-    expect(await listNames(client, TABLES)).toHaveLength(34 + 1); // + schema_migrations
+    expect(await listNames(client, TABLES)).toHaveLength(36 + 1); // + schema_migrations
     expect(await listNames(client, EXTENSIONS)).toEqual(['vector']);
     expect(await listNames(client, ROLES)).toEqual([
       'bahith_app',
@@ -100,6 +100,38 @@ describe('migrations', () => {
   async function reapply(tags: string[]): Promise<void> {
     expect(await migrateUp(client)).toEqual(tags);
   }
+
+  it('rolls back payments on their own', async () => {
+    const tables = `SELECT tablename AS name FROM pg_tables
+                    WHERE tablename IN ('payments', 'payment_events') ORDER BY 1`;
+    const forced = `SELECT relname || ':' || relforcerowsecurity::text AS name FROM pg_class
+                    WHERE relname IN ('payments', 'payment_events') AND relkind = 'r' ORDER BY 1`;
+    const grants = `SELECT table_name || ':' || privilege_type AS name
+                    FROM information_schema.role_table_grants
+                    WHERE table_name IN ('payments', 'payment_events')
+                      AND grantee = 'bahith_app' ORDER BY 1`;
+    const priceCols = `SELECT column_name AS name FROM information_schema.columns
+                       WHERE table_name = 'plans'
+                         AND column_name IN ('price_minor', 'currency', 'period_days') ORDER BY 1`;
+    // No DELETE on financial records; events are append-only.
+    const expectedGrants = [
+      'payment_events:INSERT',
+      'payment_events:SELECT',
+      'payments:INSERT',
+      'payments:SELECT',
+      'payments:UPDATE',
+    ];
+    expect(await listNames(client, forced)).toEqual(['payment_events:true', 'payments:true']);
+    expect(await listNames(client, grants)).toEqual(expectedGrants);
+    expect(await listNames(client, priceCols)).toEqual(['currency', 'period_days', 'price_minor']);
+    const tags = await rollBackThrough('0014_payments');
+    expect(tags).toEqual(['0014_payments']);
+    expect(await listNames(client, tables)).toEqual([]);
+    expect(await listNames(client, priceCols)).toEqual([]);
+    expect(await listNames(client, TABLES)).toHaveLength(34 + 1);
+    await reapply(tags);
+    expect(await listNames(client, grants)).toEqual(expectedGrants);
+  });
 
   it('rolls back the phone number columns on their own', async () => {
     const cols = `SELECT column_name AS name FROM information_schema.columns
@@ -182,7 +214,7 @@ describe('migrations', () => {
     expect(await listNames(client, grants)).toEqual(expectedGrants);
     expect(await listNames(client, colorEnum)).toEqual(['highlight_color']);
     const tags = await rollBackThrough('0013_library_organisation');
-    expect(tags).toEqual(['0013_library_organisation']);
+    expect(tags[0]).toBe('0013_library_organisation');
     expect(await listNames(client, tables)).toEqual([]);
     expect(await listNames(client, colorEnum)).toEqual([]);
     expect(await listNames(client, TABLES)).toHaveLength(31 + 1);
@@ -315,6 +347,6 @@ describe('migrations', () => {
     expect(await rollbackLast(client)).toEqual([]);
 
     expect(await migrateUp(client)).toEqual(all.map((m) => m.tag));
-    expect(await listNames(client, TABLES)).toHaveLength(34 + 1);
+    expect(await listNames(client, TABLES)).toHaveLength(36 + 1);
   });
 });

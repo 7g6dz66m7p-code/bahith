@@ -124,6 +124,8 @@ export async function startAssistantRun(
         and(
           eq(subscriptions.workspaceId, context.workspaceId),
           inArray(subscriptions.status, ['active', 'trialing']),
+          // A paid period that has ended no longer counts (the free plan applies).
+          sql`(${subscriptions.currentPeriodEnd} IS NULL OR ${subscriptions.currentPeriodEnd} > now())`,
         ),
       )
       .orderBy(desc(subscriptions.createdAt))

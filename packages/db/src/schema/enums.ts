@@ -90,6 +90,13 @@ export const notificationKindEnum = pgEnum('notification_kind', [
   'role_changed',
 ]);
 
+export const paymentStatusEnum = pgEnum('payment_status', [
+  'pending',
+  'succeeded',
+  'failed',
+  'refunded',
+]);
+
 export const subscriptionStatusEnum = pgEnum('subscription_status', [
   'active',
   'trialing',

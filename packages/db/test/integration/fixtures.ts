@@ -26,6 +26,7 @@ export interface WorkspaceFixture {
   documentId: string;
   claimId: string;
   collectionId: string;
+  paymentId: string;
 }
 
 function only<T>(rows: T[]): T {
@@ -274,6 +275,30 @@ export async function seedWorkspace(
       });
 
       await tx.insert(schema.subscriptions).values({ workspaceId, planId });
+      // Test fixture only (provider "fixture"): not a price, not a real payment.
+      const payment = only(
+        await tx
+          .insert(schema.payments)
+          .values({
+            workspaceId,
+            planId,
+            createdBy: user.id,
+            provider: 'fixture',
+            amountMinor: 1,
+            currency: 'XTS',
+            periodDays: 30,
+          })
+          .returning({ id: schema.payments.id }),
+      );
+      await tx.insert(schema.paymentEvents).values({
+        workspaceId,
+        paymentId: payment.id,
+        provider: 'fixture',
+        eventId: `fixture-${payment.id}`,
+        kind: 'failed',
+        outcome: 'ignored',
+        occurredAt: new Date(),
+      });
       await tx.insert(schema.usageCounters).values({
         workspaceId,
         metric: 'chat_messages',
@@ -299,6 +324,7 @@ export async function seedWorkspace(
         documentId: document.id,
         claimId: claim.id,
         collectionId: collection.id,
+        paymentId: payment.id,
       };
     },
     { userId: user.id },
