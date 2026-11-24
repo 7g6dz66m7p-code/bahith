@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import type { SubmitEvent } from 'react';
 import { useState } from 'react';
 
+import { ClaimCheck } from '@/components/claim-check';
 import type { AssistantReply } from '@/server/assistant';
 
 const ERROR_KEYS = {
@@ -243,6 +244,14 @@ export function AssistantPanel({
           <p className="muted text-xs">{t('answeredBy', { model: reply.model })}</p>
         </div>
       )}
+
+      {consent && canWrite ? (
+        <ClaimCheck
+          projectId={projectId}
+          workspaceId={workspaceId}
+          errorText={(code) => t(errorKey(code))}
+        />
+      ) : null}
     </section>
   );
 }

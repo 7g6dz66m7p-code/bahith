@@ -43,3 +43,16 @@ export {
   resolveEmbeddingModel,
 } from './embeddings';
 export type { EmbeddingBatch } from './embeddings';
+export {
+  evidenceJudgeOutputSchema,
+  groundJudgements,
+  summariseEvidence,
+  verifyClaimAgainstPassages,
+} from './agents/evidence-judge';
+export type {
+  ClaimVerification,
+  EvidenceJudgeOutput,
+  EvidenceJudgement,
+  EvidenceStrength,
+} from './agents/evidence-judge';
+export { EVIDENCE_JUDGE_PROMPT_VERSION } from './prompts/evidence-judge';

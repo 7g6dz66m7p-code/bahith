@@ -30,7 +30,7 @@ export function groundedAnswerSystemPrompt(language: 'ar' | 'en'): string {
 }
 
 /** Tag names that structure the prompt; untrusted text must not be able to write them. */
-const PROMPT_TAGS = new Set(['source_document', 'question', 'system', 'instructions']);
+const PROMPT_TAGS = new Set(['source_document', 'question', 'claim', 'system', 'instructions']);
 
 /**
  * Neutralises prompt-structure tags inside untrusted text (passages, titles, questions)

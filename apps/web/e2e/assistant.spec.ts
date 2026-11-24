@@ -53,6 +53,16 @@ test('the assistant asks for consent first and says clearly when no model is con
   await expect(panel.getByRole('alert')).toHaveText(m.errorNotConfigured);
   await expect(panel.getByTestId('assistant-answer')).toHaveCount(0);
 
+  // Checking a claim goes through the same gates and says the same thing.
+  const claimCheck = panel.getByTestId('claim-check');
+  await claimCheck
+    .getByLabel((locale === 'ar' ? ar : en).ClaimCheck.claimLabel)
+    .fill('التعلم المدمج يرفع التحصيل');
+  await claimCheck
+    .getByRole('button', { name: (locale === 'ar' ? ar : en).ClaimCheck.check, exact: true })
+    .click();
+  await expect(claimCheck.getByRole('alert')).toHaveText(m.errorNotConfigured);
+
   // Consent survives a reload and can be withdrawn.
   await page.reload();
   await expect(panel.getByTestId('consent-state')).toBeVisible();

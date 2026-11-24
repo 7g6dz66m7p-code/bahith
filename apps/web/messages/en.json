@@ -405,5 +405,24 @@
   "FilePicker": {
     "choose": "Choose a file",
     "none": "No file chosen"
+  },
+  "ClaimCheck": {
+    "title": "Check a claim",
+    "description": "Write a claim; the model judges each retrieved passage as supporting, contradicting or insufficient, with a verbatim quote. Conflict and evidence strength are computed by code. This is an automated judgement that needs your review.",
+    "claimLabel": "Claim",
+    "check": "Check",
+    "checking": "Checking…",
+    "conflict": "Conflict: some sources support the claim and others contradict it.",
+    "strength": "Evidence strength: {level}",
+    "strong": "strong (two or more independent sources)",
+    "moderate": "moderate (one source)",
+    "limited": "limited (abstracts only)",
+    "none": "no evidence",
+    "contested": "contested",
+    "supports": "Supports",
+    "contradicts": "Contradicts",
+    "insufficient": "Insufficient",
+    "needsReview": "Automated judgement by {model} — review it before relying on it.",
+    "noPassages": "No passages were retrieved for this claim from the project’s sources."
   }
 }

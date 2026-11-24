@@ -139,6 +139,10 @@ test('reference, verification and assistant endpoints refuse outsiders, anonymou
           data: { question: 'q', language: locale },
         }),
     ],
+    [
+      'check claim',
+      (r, h) => r.post(`${base}/claims/verify?${query}`, { headers: h, data: { claim: 'c' } }),
+    ],
   ];
   const other = await browser.newContext({ baseURL: 'http://localhost:3100' });
   const anonymous = await browser.newContext({ baseURL: 'http://localhost:3100' });

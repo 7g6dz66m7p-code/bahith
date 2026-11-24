@@ -3,6 +3,8 @@ import {
   AiCallError,
   AiConfigError,
   embedTexts,
+  EVIDENCE_JUDGE_PROMPT_VERSION,
+  verifyClaimAgainstPassages,
   loadEmbeddingModelRef,
   resolveEmbeddingModel,
   AiProviderError,
@@ -260,4 +262,118 @@ export async function askAssistant(
     })),
     diagnostics: run.answer.diagnostics,
   };
+}
+
+export interface ClaimCheckReply {
+  method: 'model-judgement-v1';
+  reviewStatus: 'needs_human_review';
+  model: string;
+  conflict: boolean;
+  strength: 'strong' | 'moderate' | 'limited' | 'none' | 'contested';
+  judgements: (AssistantEvidence & { verdict: 'supports' | 'contradicts' | 'insufficient' })[];
+}
+
+/**
+ * Checks one claim against this project's passages: a model judges each retrieved
+ * passage (supports / contradicts / insufficient) with a verbatim quote; conflict and
+ * strength are computed by code. Same gates as the assistant: consent, model, quota.
+ */
+export async function checkClaim(
+  database: Database,
+  context: SanadProjectContext,
+  input: { claim: string },
+): Promise<ClaimCheckReply> {
+  if (!(await getProjectAiConsent(database, context)).enabled) {
+    throw new AssistantRequestError('AI_CONSENT_REQUIRED', 409);
+  }
+  let model;
+  let label: string;
+  try {
+    const ref = loadChatModelRef(process.env);
+    model = resolveLanguageModel(ref, process.env);
+    label = `${ref.provider}:${ref.model}`;
+  } catch (error) {
+    if (error instanceof AiConfigError) throw new AssistantRequestError('AI_NOT_CONFIGURED', 503);
+    if (error instanceof AiProviderError) throw new AssistantRequestError(error.code, 503);
+    throw error;
+  }
+  const retrieved = await retrieve(database, { ...context, query: input.claim, limit: 8 });
+  const passages: AnswerPassage[] = retrieved.results.map((item) => ({
+    chunkId: item.chunkId,
+    sourceId: item.sourceId,
+    content: item.content,
+    kind: item.kind,
+    fileId: item.fileId,
+    fileSha256: item.fileSha256,
+    pageStart: item.pageStart,
+    pageEnd: item.pageEnd,
+    sourceVerificationStatus: item.verificationStatus,
+    sourceTitle: item.sourceTitle,
+  }));
+  const base = {
+    method: 'model-judgement-v1' as const,
+    reviewStatus: 'needs_human_review' as const,
+    model: label,
+  };
+  if (passages.length === 0) return { ...base, conflict: false, strength: 'none', judgements: [] };
+
+  let runId: string;
+  try {
+    ({ runId } = await startAssistantRun(database, context, {
+      agent: 'evidence-judge',
+      promptVersion: EVIDENCE_JUDGE_PROMPT_VERSION,
+      provider: label.slice(0, label.indexOf(':')),
+      model: label.slice(label.indexOf(':') + 1),
+    }));
+  } catch (error) {
+    if (error instanceof AssistantError && error.code in STATUS) {
+      throw new AssistantRequestError(error.code, STATUS[error.code] ?? 400);
+    }
+    throw error;
+  }
+  const started = Date.now();
+  try {
+    const { verification, usage } = await verifyClaimAgainstPassages({
+      model,
+      claim: input.claim,
+      passages,
+    });
+    await finishAssistantRun(database, context, runId, {
+      status: 'succeeded',
+      inputTokens: usage.inputTokens,
+      outputTokens: usage.outputTokens,
+      latencyMs: Date.now() - started,
+      errorCode: null,
+    });
+    const byChunk = new Map(passages.map((p) => [p.chunkId, p]));
+    return {
+      ...base,
+      conflict: verification.conflict,
+      strength: verification.strength,
+      judgements: verification.judgements.map((j) => ({
+        chunkId: j.chunkId,
+        sourceId: j.sourceId,
+        sourceTitle: byChunk.get(j.chunkId)?.sourceTitle ?? '',
+        fileId: byChunk.get(j.chunkId)?.fileId ?? null,
+        kind: j.kind,
+        pageStart: j.pageStart,
+        pageEnd: j.pageEnd,
+        quote: j.quote,
+        verdict: j.verdict,
+      })),
+    };
+  } catch (error) {
+    const code = error instanceof AiCallError ? error.code : 'AI_PROVIDER_ERROR';
+    await finishAssistantRun(database, context, runId, {
+      status: 'failed',
+      inputTokens: null,
+      outputTokens: null,
+      latencyMs: Date.now() - started,
+      errorCode: code,
+    });
+    throw new AssistantRequestError(
+      code,
+      code === 'AI_TIMEOUT' ? 504 : code === 'AI_PROVIDER_ERROR' ? 502 : 503,
+    );
+  }
 }
