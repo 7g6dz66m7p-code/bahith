@@ -214,6 +214,17 @@ await withIngestedCorpus(async ({ corpus, app, ctx, sourceOf, extraction }) => {
     '',
     'Not measured (needs an AI provider): answer citation precision, model abstention, semantic retrieval.',
     '',
+    // Ids of the synthetic corpus only, so a failing gate on another machine is diagnosable.
+    `Exact quotes not accepted on their gold page: ${
+      exact
+        .filter((item) => !item.pageCorrect)
+        .map(
+          (item) =>
+            `${item.id} (${item.doc}, ${item.accepted ? `page ${String(item.page)}` : 'rejected'})`,
+        )
+        .join(', ') || 'none'
+    }.`,
+    '',
   ].join('\n');
   await writeFile(path.join(RESULTS_DIR, 'latest.md'), markdown);
   process.stdout.write(markdown);
