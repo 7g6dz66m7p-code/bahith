@@ -8,15 +8,9 @@
 - **GitHub:** الدفع مرفوض (403). الحساب المربوط `ahmbdr10-tech` بلا صلاحية كتابة على `7g6dz66m7p-code/bahith`. البعيد ما زال عند `9d8a20c`. توجد نسخة bundle مُتحقق منها أُرسلت للمالك (`…-4cad1eb.bundle`).
 - **مزود الذكاء الاصطناعي:** مفتاح OpenAI محفوظ سراً شبكياً، لكن الحساب بلا رصيد (`credit_balance_exhausted`).
 
-## عمل جارٍ في worktrees (لم يُدمج بعد)
+## الدمج
 
-| الفرع                              | المحتوى                                                             | الحالة |
-| ---------------------------------- | ------------------------------------------------------------------- | ------ |
-| `worktree-agent-a0cc97dccc96906b3` | الإشعارات (هجرة 0010 لديه)                                          | جارٍ    |
-| `worktree-agent-ac0e5bcb485e43bed` | المجموعات والتظليل وZotero (هجرة 0011 لديه)                         | جارٍ    |
-| `worktree-agent-a000f99bc4379f142` | `packages/migration`: ترحيل القاعدة القديمة (Dry Run) وجسر Telegram | جارٍ    |
-
-**عند الدمج:** على main هجرة `0010_platform_admin` موجودة؛ أعد ترقيم هجرات الوكلاء (احذف ملفات SQL/snapshot/journal المولدة، أعد `drizzle-kit generate` فوق main، أعد إلحاق GRANT/FORCE RLS يدوياً، وحدّث `migrator.test.ts` و`migrations.test.ts` و`isolation.test.ts` و`schema.test.ts`).
+دُمجت أعمال الوكلاء الثلاثة (الإشعارات 0012، المكتبة 0013، `packages/migration`) مع رقم الهاتف 0011 ولوحة الإدارة 0010. كل الاختبارات ناجحة (انظر `TEST_REPORT.md`).
 
 ## أوامر الاستئناف
 
@@ -32,8 +26,8 @@ git push -u origin claude/new-session-tv7vfk   # عند إصلاح الصلاح�
 
 ## المتبقي (بالأولوية)
 
-1. دمج الوكلاء الثلاثة واختبار الكل.
-2. رقم الهاتف الإجباري + OTP (واجهة مزود محايدة، معطلة حتى اختيار مزود SMS).
+1. واجهة إدخال الهاتف وفرض الإلزام (`REQUIRE_PHONE_VERIFICATION`) — الخادم جاهز (0011 + plugin).
+2. تغييرات المخطط التي طلبها محرك الترحيل (`docs/migration/legacy-schema-requests.md`).
 3. الدفع: Webhooks موقعة، تفعيل تلقائي idempotent، مطابقة مالية (مزود غير محدد بعد).
 4. Dockerfiles + Staging + Blue-Green (مزود الاستضافة غير محدد).
 5. Gateway متعدد المزودين (Gemini، fallback، streaming، تتبع التكلفة).
