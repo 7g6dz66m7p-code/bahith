@@ -162,7 +162,7 @@ export function AssistantPanel({
       )}
 
       {consent && canWrite ? (
-        <form className="space-y-3" onSubmit={(event) => void ask(event)}>
+        <form method="post" className="space-y-3" onSubmit={(event) => void ask(event)}>
           <label className="block text-sm font-medium" htmlFor="assistant-question">
             {t('questionLabel')}
           </label>

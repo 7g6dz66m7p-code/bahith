@@ -231,7 +231,7 @@ export function ProjectWorkspace({
           </div>
 
           {project.canWrite ? (
-            <form className="space-y-3" onSubmit={(event) => void upload(event)}>
+            <form method="post" className="space-y-3" onSubmit={(event) => void upload(event)}>
               <label className="block space-y-2" htmlFor="source-file">
                 <span className="font-medium">{t('uploadLabel')}</span>
               </label>
@@ -317,6 +317,7 @@ export function ProjectWorkspace({
             <p className="muted text-sm leading-relaxed">{t('evidenceDescription')}</p>
           </div>
           <form
+            method="post"
             className="flex flex-wrap gap-3"
             role="search"
             onSubmit={(event) => void search(event)}
@@ -416,7 +417,11 @@ export function ProjectWorkspace({
           <p className="muted text-sm">{t('draftsDescription')}</p>
         </div>
         {project.canWrite ? (
-          <form className="flex flex-wrap gap-3" onSubmit={(event) => void createDraft(event)}>
+          <form
+            method="post"
+            className="flex flex-wrap gap-3"
+            onSubmit={(event) => void createDraft(event)}
+          >
             <label className="sr-only" htmlFor="draft-title">
               {t('draftTitle')}
             </label>

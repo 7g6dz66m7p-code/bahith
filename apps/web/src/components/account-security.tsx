@@ -134,6 +134,7 @@ export function AccountSecurity({ twoFactorEnabled }: { twoFactorEnabled: boolea
       ) : null}
       {enrollment === null ? (
         <form
+          method="post"
           className="max-w-md space-y-5"
           onSubmit={(event) => {
             void configure(event);
@@ -200,6 +201,7 @@ export function AccountSecurity({ twoFactorEnabled }: { twoFactorEnabled: boolea
             </ul>
           </section>
           <form
+            method="post"
             className="max-w-md space-y-5"
             onSubmit={(event) => {
               void confirm(event);

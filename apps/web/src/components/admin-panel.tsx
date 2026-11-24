@@ -89,6 +89,7 @@ export function AdminPanel({ stats, plans }: { stats: PlatformStats; plans: Plan
           {plans.map((plan) => (
             <li key={plan.code}>
               <form
+                method="post"
                 className="flex flex-wrap items-end gap-3"
                 onSubmit={(event) => void save(event, plan.code)}
               >

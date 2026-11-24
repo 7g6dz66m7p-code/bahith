@@ -214,6 +214,7 @@ export function DashboardView({ name, workspaces, projects }: DashboardData & { 
           </div>
           {showForm && canCreate ? (
             <form
+              method="post"
               id="new-project-form"
               className="surface space-y-5 p-5 sm:p-6"
               onSubmit={(event) => {

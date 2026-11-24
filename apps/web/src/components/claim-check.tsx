@@ -53,7 +53,7 @@ export function ClaimCheck({
     <div className="space-y-3 border-t border-border pt-5" data-testid="claim-check">
       <h3 className="font-semibold">{t('title')}</h3>
       <p className="muted text-sm leading-relaxed">{t('description')}</p>
-      <form className="space-y-3" onSubmit={(event) => void check(event)}>
+      <form method="post" className="space-y-3" onSubmit={(event) => void check(event)}>
         <label className="block text-sm font-medium" htmlFor="claim-text">
           {t('claimLabel')}
         </label>

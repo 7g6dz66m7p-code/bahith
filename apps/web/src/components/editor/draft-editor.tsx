@@ -530,7 +530,7 @@ export function DraftEditor(props: DraftEditorProps) {
       )}
 
       {panel === 'footnote' ? (
-        <form className="surface flex flex-wrap gap-3 p-4" onSubmit={insertFootnote}>
+        <form method="post" className="surface flex flex-wrap gap-3 p-4" onSubmit={insertFootnote}>
           <label className="sr-only" htmlFor="footnote-text">
             {t('footnoteText')}
           </label>
@@ -556,6 +556,7 @@ export function DraftEditor(props: DraftEditorProps) {
           </h2>
           <p className="muted text-sm">{t('citeHint')}</p>
           <form
+            method="post"
             className="flex flex-wrap gap-3"
             role="search"
             onSubmit={(event) => void searchEvidence(event)}

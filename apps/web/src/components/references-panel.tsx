@@ -203,7 +203,7 @@ export function ReferencesPanel({
 
       {canWrite ? (
         <div className="grid gap-4 md:grid-cols-2">
-          <form className="space-y-2" onSubmit={addDoi}>
+          <form method="post" className="space-y-2" onSubmit={addDoi}>
             <label className="block text-sm font-medium" htmlFor="reference-doi">
               {t('doiLabel')}
             </label>
@@ -222,7 +222,7 @@ export function ReferencesPanel({
               </button>
             </div>
           </form>
-          <form className="space-y-2" onSubmit={importFile}>
+          <form method="post" className="space-y-2" onSubmit={importFile}>
             <label className="block text-sm font-medium" htmlFor="reference-import">
               {t('importLabel')}
             </label>

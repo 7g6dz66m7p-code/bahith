@@ -179,6 +179,7 @@ export function MembersPanel({
             {t('inviteTitle')}
           </h2>
           <form
+            method="post"
             className="grid gap-3 sm:grid-cols-[1fr_12rem_auto] sm:items-end"
             onSubmit={(event) => void invite(event)}
           >

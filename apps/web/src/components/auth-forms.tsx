@@ -143,6 +143,7 @@ export function SignInForm({ googleEnabled = false }: { googleEnabled?: boolean 
   return (
     <>
       <form
+        method="post"
         className="space-y-5"
         onSubmit={(event) => {
           void submit(event);
@@ -234,6 +235,7 @@ export function SignUpForm({ googleEnabled = false }: { googleEnabled?: boolean 
   return (
     <>
       <form
+        method="post"
         className="space-y-5"
         onSubmit={(event) => {
           void submit(event);
@@ -340,6 +342,7 @@ export function EmailRequestForm({ kind }: { kind: 'reset' | 'verification' }) {
   return (
     <>
       <form
+        method="post"
         className="space-y-5"
         onSubmit={(event) => {
           void submit(event);
@@ -408,6 +411,7 @@ export function ResetPasswordForm({ token }: { token: string | null }) {
         </p>
       ) : (
         <form
+          method="post"
           className="space-y-5"
           onSubmit={(event) => {
             void submit(event);
@@ -487,6 +491,7 @@ export function TwoFactorForm() {
   return (
     <>
       <form
+        method="post"
         className="space-y-5"
         onSubmit={(event) => {
           void submit(event);

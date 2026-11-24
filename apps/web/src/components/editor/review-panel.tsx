@@ -192,7 +192,7 @@ export function ReviewPanel(props: ReviewPanelProps) {
       ) : null}
 
       {mode === 'none' || target === null ? null : (
-        <form className="space-y-2" onSubmit={(event) => void submit(event)}>
+        <form method="post" className="space-y-2" onSubmit={(event) => void submit(event)}>
           <p className="muted text-xs">{t('selected')}</p>
           <blockquote className="review-quote text-sm" dir="auto" data-testid="review-target">
             {target.quote}
