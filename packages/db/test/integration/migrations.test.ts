@@ -46,7 +46,7 @@ describe('migrations', () => {
     const all = await loadMigrations();
     expect(await migrateUp(client)).toEqual(all.map((m) => m.tag));
 
-    expect(await listNames(client, TABLES)).toHaveLength(29 + 1); // + schema_migrations
+    expect(await listNames(client, TABLES)).toHaveLength(30 + 1); // + schema_migrations
     expect(await listNames(client, EXTENSIONS)).toEqual(['vector']);
     expect(await listNames(client, ROLES)).toEqual([
       'bahith_app',
@@ -101,6 +101,22 @@ describe('migrations', () => {
     expect(await migrateUp(client)).toEqual(tags);
   }
 
+  it('rolls back workspace invitations on their own', async () => {
+    const table = `SELECT tablename AS name FROM pg_tables WHERE tablename = 'workspace_invitations'`;
+    const forced = `SELECT relforcerowsecurity::text AS name FROM pg_class
+                    WHERE oid = 'workspace_invitations'::regclass`;
+    const grants = `SELECT privilege_type AS name FROM information_schema.role_table_grants
+                    WHERE table_name = 'workspace_invitations' AND grantee = 'bahith_app' ORDER BY 1`;
+    expect(await listNames(client, table)).toEqual(['workspace_invitations']);
+    expect(await listNames(client, forced)).toEqual(['true']);
+    expect(await listNames(client, grants)).toEqual(['INSERT', 'SELECT', 'UPDATE']);
+    const tags = await rollBackThrough('0009_workspace_invitations');
+    expect(tags).toEqual(['0009_workspace_invitations']);
+    expect(await listNames(client, table)).toEqual([]);
+    await reapply(tags);
+    expect(await listNames(client, grants)).toEqual(['INSERT', 'SELECT', 'UPDATE']);
+  });
+
   it('rolls back the draft review table and its enums on their own', async () => {
     const table = `SELECT tablename AS name FROM pg_tables WHERE tablename = 'document_comments'`;
     const enums = `SELECT typname AS name FROM pg_type
@@ -119,7 +135,7 @@ describe('migrations', () => {
     expect(await listNames(client, forced)).toEqual(['true']);
     expect(await listNames(client, grants)).toEqual(['INSERT', 'SELECT', 'UPDATE']);
     const tags = await rollBackThrough('0008_document_review');
-    expect(tags).toEqual(['0008_document_review']);
+    expect(tags).toEqual(['0008_document_review', '0009_workspace_invitations']);
     expect(await listNames(client, table)).toEqual([]);
     expect(await listNames(client, enums)).toEqual([]);
     expect(await listNames(client, TABLES)).toHaveLength(28 + 1);
@@ -210,6 +226,6 @@ describe('migrations', () => {
     expect(await rollbackLast(client)).toEqual([]);
 
     expect(await migrateUp(client)).toEqual(all.map((m) => m.tag));
-    expect(await listNames(client, TABLES)).toHaveLength(29 + 1);
+    expect(await listNames(client, TABLES)).toHaveLength(30 + 1);
   });
 });

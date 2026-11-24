@@ -128,8 +128,9 @@ describe('workspace isolation (row-level security)', () => {
       // The database and the Drizzle schema agree on which tables are tenant tables…
       expect(rows.map((row) => row.table)).toEqual(tenantTableNames);
       // …and the list is the one Phase 1 specifies (memberships + 20 research tables).
-      // 20 research tables: the 19 of Phase 1 and document_comments (draft review).
-      expect(tenantTableNames).toHaveLength(21);
+      // 21 research tables: the 19 of Phase 1, document_comments (draft review) and
+      // workspace_invitations (members).
+      expect(tenantTableNames).toHaveLength(22);
       for (const row of rows) {
         expect(row, row.table).toMatchObject({ enabled: true, forced: true });
         expect(row.policies, row.table).toBeGreaterThan(0);

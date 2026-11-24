@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto';
+
 import { getTableConfig } from 'drizzle-orm/pg-core';
 import { inject } from 'vitest';
 
@@ -213,6 +215,14 @@ export async function seedWorkspace(
         body: `ملاحظة ${label}`,
         authorId: user.id,
         authorName: `Workspace ${label}`,
+      });
+      await tx.insert(schema.workspaceInvitations).values({
+        workspaceId,
+        email: `invitee-${label.toLowerCase()}@example.test`,
+        role: 'viewer',
+        tokenHash: createHash('sha256').update(`${workspaceId}.${label}`).digest('hex'),
+        invitedBy: user.id,
+        expiresAt: new Date(Date.now() + 86_400_000),
       });
       await tx.insert(schema.citations).values({
         workspaceId,

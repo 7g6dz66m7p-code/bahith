@@ -9,3 +9,4 @@ export * from './conversations';
 export * from './documents';
 export * from './review';
 export * from './billing';
+export * from './invitations';

@@ -87,3 +87,15 @@ export {
 } from './review';
 export type { AcceptedSuggestion, ReviewComment, ReviewContext } from './review';
 export { countEmbeddedChunks, listChunksToEmbed, storeChunkEmbeddings } from './embeddings';
+export {
+  acceptInvitation,
+  changeMemberRole,
+  INVITATION_TTL_MS,
+  inviteMember,
+  listInvitations,
+  listMembers,
+  MemberError,
+  removeMember,
+  revokeInvitation,
+} from './members';
+export type { MemberEntry, MemberErrorCode, MemberRole, WorkspaceActor } from './members';

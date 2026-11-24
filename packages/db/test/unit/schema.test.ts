@@ -58,6 +58,7 @@ describe('database schema', () => {
         'subscriptions',
         'usage_counters',
         'users',
+        'workspace_invitations',
         'two_factors',
         'verifications',
         'workspaces',
