@@ -87,7 +87,9 @@ def _recognise(image: Image.Image, languages: str) -> OcrResult:
         data = pytesseract.image_to_data(
             image,
             lang=languages,
-            config="--psm 3",
+            # Tesseract >= 5.5 drops whole Arabic rows as "noise" (dots and hamza are many
+            # small blobs); row-level noise rejection is turned off so titles are not lost.
+            config="--psm 3 -c textord_noise_rejrows=0",
             output_type=pytesseract.Output.DICT,
             timeout=OCR_TIMEOUT_SECONDS,
         )
