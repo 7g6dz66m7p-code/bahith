@@ -3,6 +3,7 @@ import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { locale as rootLocale } from 'next/root-params';
+import { connection } from 'next/server';
 import type { ReactNode } from 'react';
 
 import { ThemeToggle } from '@/components/theme-toggle';
@@ -23,6 +24,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function LocaleLayout({ children }: { children: ReactNode }) {
+  // A static shell cannot carry the unique request nonce required by the script CSP.
+  await connection();
   const locale = await rootLocale();
   if (!hasLocale(routing.locales, locale)) {
     notFound();

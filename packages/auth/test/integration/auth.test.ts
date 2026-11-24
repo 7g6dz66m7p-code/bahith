@@ -128,6 +128,12 @@ describe('real Better Auth sessions, email verification, recovery and TOTP', () 
     expect([200, 302]).toContain(verification.status);
     const login = await request('/sign-in/email', { email, password });
     expect(login.status).toBe(200);
+    const sessionCookie = login.headers
+      .getSetCookie()
+      .find((line) => line.includes('session_token='));
+    expect(sessionCookie).toBeDefined();
+    expect(sessionCookie).toMatch(/;\s*HttpOnly/iu);
+    expect(sessionCookie).toMatch(/;\s*SameSite=Lax/iu);
     const session = z
       .object({ user: z.object({ id: z.uuid(), emailVerified: z.boolean() }) })
       .parse(await (await request('/get-session')).json());
@@ -144,6 +150,38 @@ describe('real Better Auth sessions, email verification, recovery and TOTP', () 
       }),
     );
     expect(response.status).toBe(403);
+  });
+
+  it('marks an actual HTTPS session cookie Secure and HttpOnly', async () => {
+    const secureBase = 'https://bahith.example.test';
+    const secureService = createBahithAuth(
+      {
+        databaseUrl: database.authUrl,
+        baseUrl: secureBase,
+        secret: crypto.randomUUID() + crypto.randomUUID(),
+      },
+      { mailTransport: { send: () => Promise.resolve() } },
+    );
+    try {
+      const response = await secureService.auth.handler(
+        new Request(`${secureBase}/api/auth/sign-in/email`, {
+          method: 'POST',
+          headers: { origin: secureBase, 'content-type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        }),
+      );
+      expect(response.status).toBe(200);
+      const cookie = response.headers
+        .getSetCookie()
+        .find((line) => line.includes('session_token='));
+      expect(cookie).toBeDefined();
+      expect(cookie).toMatch(/^__Secure-bahith\.session_token=/u);
+      expect(cookie).toMatch(/;\s*Secure/iu);
+      expect(cookie).toMatch(/;\s*HttpOnly/iu);
+      expect(cookie).toMatch(/;\s*SameSite=Lax/iu);
+    } finally {
+      await secureService.close();
+    }
   });
 
   it('resets the password through delivered email and revokes previous sessions', async () => {

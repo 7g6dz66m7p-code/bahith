@@ -4,6 +4,8 @@ import path from 'node:path';
 import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
 
+import { baselineSecurityHeaders } from './src/server/security-headers';
+
 // Next.js only reads .env files next to the app; the monorepo keeps a single .env at
 // the repository root. Variables already present in the environment are not overridden.
 const rootEnv = path.resolve(process.cwd(), '../../.env');
@@ -19,6 +21,13 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
   typedRoutes: true,
+  headers() {
+    const secure = process.env.BETTER_AUTH_URL?.startsWith('https://') === true;
+    return [
+      { source: '/:path*', headers: baselineSecurityHeaders(secure) },
+      { source: '/api/:path*', headers: [{ key: 'Cache-Control', value: 'private, no-store' }] },
+    ];
+  },
 };
 
 export default withNextIntl(nextConfig);
