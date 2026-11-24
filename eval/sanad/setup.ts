@@ -1,4 +1,6 @@
 /** Starts a disposable database and ingests the committed corpus through the real extractor. */
+// Must stay the first import: it captures the proxy dispatcher before Testcontainers loads.
+import { restoreProxyDispatcher } from './proxy-dispatcher';
 import { execFile } from 'node:child_process';
 import { createHash, randomUUID } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
@@ -34,6 +36,7 @@ export interface IngestedCorpus {
 export async function withIngestedCorpus<T>(fn: (env: IngestedCorpus) => Promise<T>): Promise<T> {
   const corpus = await loadCorpus();
   const database = await startTestDatabase();
+  restoreProxyDispatcher();
   const admin = createDatabase({ connectionString: database.adminUrl });
   const app = createDatabase({ connectionString: database.appUrl });
   const auth = createDatabase({ connectionString: database.authUrl });

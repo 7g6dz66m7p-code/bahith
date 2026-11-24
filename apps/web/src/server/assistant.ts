@@ -155,7 +155,14 @@ export async function askAssistant(
       latencyMs: null,
       errorCode: code,
     });
-    throw new AssistantRequestError(code, code === 'AI_TIMEOUT' ? 504 : 502);
+    throw new AssistantRequestError(
+      code,
+      code === 'AI_TIMEOUT'
+        ? 504
+        : code === 'AI_PROVIDER_QUOTA' || code === 'AI_PROVIDER_AUTH'
+          ? 503
+          : 502,
+    );
   }
   await finishAssistantRun(database, context, runId, {
     status: 'succeeded',

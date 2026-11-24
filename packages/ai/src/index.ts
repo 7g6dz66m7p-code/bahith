@@ -17,6 +17,7 @@ export {
 export type { AiProviderErrorCode, ProviderId } from './providers';
 export {
   AiCallError,
+  classifyAiError,
   groundAnswer,
   groundedAnswerOutputSchema,
   MAX_ANSWER_PASSAGES,

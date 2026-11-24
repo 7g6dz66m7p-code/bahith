@@ -15,6 +15,8 @@ const ERROR_KEYS = {
   AI_QUOTA_EXCEEDED: 'errorQuotaExceeded',
   AI_TIMEOUT: 'errorTimeout',
   AI_PROVIDER_ERROR: 'errorProvider',
+  AI_PROVIDER_QUOTA: 'errorProviderQuota',
+  AI_PROVIDER_AUTH: 'errorKeyMissing',
   AI_OUTPUT_INVALID: 'errorProvider',
 } as const;
 

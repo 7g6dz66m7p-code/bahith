@@ -1,4 +1,4 @@
-import { APICallError, generateText, NoObjectGeneratedError, Output } from 'ai';
+import { APICallError, generateText, NoObjectGeneratedError, Output, RetryError } from 'ai';
 import type { LanguageModel } from 'ai';
 import { z } from 'zod';
 
@@ -160,7 +160,12 @@ export function groundAnswer(
   return { status: sentences.length === 0 ? 'abstained' : 'answered', sentences, diagnostics };
 }
 
-export type AiCallErrorCode = 'AI_TIMEOUT' | 'AI_PROVIDER_ERROR' | 'AI_OUTPUT_INVALID';
+export type AiCallErrorCode =
+  | 'AI_TIMEOUT'
+  | 'AI_PROVIDER_ERROR'
+  | 'AI_PROVIDER_QUOTA'
+  | 'AI_PROVIDER_AUTH'
+  | 'AI_OUTPUT_INVALID';
 
 /** Classified model-call failure. Never carries prompt, passage or answer text. */
 export class AiCallError extends Error {
@@ -171,6 +176,29 @@ export class AiCallError extends Error {
     super(code);
     this.name = 'AiCallError';
   }
+}
+
+/**
+ * Maps AI SDK failures (also when wrapped in a RetryError after retries) to stable codes.
+ * The provider's message and body are never kept: they can echo request content.
+ */
+export function classifyAiError(error: unknown): unknown {
+  const cause = RetryError.isInstance(error) ? error.lastError : error;
+  if (cause instanceof AiCallError) return cause;
+  if (NoObjectGeneratedError.isInstance(cause)) return new AiCallError('AI_OUTPUT_INVALID');
+  if (APICallError.isInstance(cause)) {
+    const status = cause.statusCode;
+    const body = typeof cause.responseBody === 'string' ? cause.responseBody : '';
+    if (/insufficient_quota|credit_balance_exhausted|billing/u.test(body) || status === 402) {
+      return new AiCallError('AI_PROVIDER_QUOTA', status);
+    }
+    if (status === 401 || status === 403) return new AiCallError('AI_PROVIDER_AUTH', status);
+    return new AiCallError('AI_PROVIDER_ERROR', status);
+  }
+  if (cause instanceof Error && (cause.name === 'AbortError' || cause.name === 'TimeoutError')) {
+    return new AiCallError('AI_TIMEOUT');
+  }
+  return error;
 }
 
 export interface GroundedAnswerRun {
@@ -238,12 +266,6 @@ export async function runGroundedAnswer(input: {
       latencyMs: Date.now() - started,
     };
   } catch (error) {
-    if (NoObjectGeneratedError.isInstance(error)) throw new AiCallError('AI_OUTPUT_INVALID');
-    if (APICallError.isInstance(error))
-      throw new AiCallError('AI_PROVIDER_ERROR', error.statusCode);
-    if (error instanceof Error && (error.name === 'AbortError' || error.name === 'TimeoutError')) {
-      throw new AiCallError('AI_TIMEOUT');
-    }
-    throw error;
+    throw classifyAiError(error);
   }
 }

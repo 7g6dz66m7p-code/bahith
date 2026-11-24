@@ -213,3 +213,27 @@ describe('prompt and providers', () => {
     );
   });
 });
+
+describe('classifyAiError', () => {
+  it('unwraps retries and recognises an exhausted provider balance or bad key', async () => {
+    const { APICallError, RetryError } = await import('ai');
+    const { classifyAiError } = await import('../src/index');
+    const call = (statusCode: number, responseBody: string) =>
+      new APICallError({
+        message: 'x',
+        url: 'https://example.test',
+        requestBodyValues: {},
+        statusCode,
+        responseBody,
+        isRetryable: true,
+      });
+    const quota = call(
+      429,
+      '{"error":{"type":"insufficient_quota","code":"credit_balance_exhausted"}}',
+    );
+    const wrapped = new RetryError({ message: 'm', reason: 'maxRetriesExceeded', errors: [quota] });
+    expect(classifyAiError(wrapped)).toEqual(new AiCallError('AI_PROVIDER_QUOTA', 429));
+    expect(classifyAiError(call(401, '{}'))).toEqual(new AiCallError('AI_PROVIDER_AUTH', 401));
+    expect(classifyAiError(call(500, '{}'))).toEqual(new AiCallError('AI_PROVIDER_ERROR', 500));
+  });
+});

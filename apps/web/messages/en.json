@@ -399,7 +399,8 @@
     "errorQuotaExceeded": "This month’s AI request allowance is used up.",
     "errorTimeout": "The model took too long to answer. Try again.",
     "errorProvider": "The AI provider could not answer. Nothing was saved; try again later.",
-    "errorGeneric": "Something went wrong. Try again."
+    "errorGeneric": "Something went wrong. Try again.",
+    "errorProviderQuota": "The AI provider account has no remaining credit or hit its limit. Nothing was saved; ask the administrator."
   },
   "FilePicker": {
     "choose": "Choose a file",
