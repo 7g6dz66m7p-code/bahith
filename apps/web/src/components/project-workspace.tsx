@@ -1,6 +1,12 @@
 'use client';
 
-import type { DocumentSummary, LibraryEntry, SourceMetadata } from '@bahith/db';
+import type {
+  CollectionEntry,
+  DocumentSummary,
+  HighlightEntry,
+  LibraryEntry,
+  SourceMetadata,
+} from '@bahith/db';
 import { useLocale, useTranslations } from 'next-intl';
 import type { SubmitEvent } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -8,6 +14,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { AssistantPanel } from '@/components/assistant-panel';
 import { FilePicker } from '@/components/file-picker';
 import { NotificationBell } from '@/components/notification-bell';
+import { HighlightablePassage, HighlightsPanel } from '@/components/highlights';
+import {
+  CollectionsToolbar,
+  SourceCollections,
+  useCollections,
+} from '@/components/library-collections';
 import { ReferencesPanel } from '@/components/references-panel';
 import { Link, useRouter } from '@/i18n/navigation';
 
@@ -69,6 +81,8 @@ export function ProjectWorkspace({
   references,
   assistant,
   unreadNotifications,
+  initialCollections,
+  initialHighlights,
 }: {
   project: ProjectInfo;
   initialLibrary: LibraryEntry[];
@@ -76,8 +90,11 @@ export function ProjectWorkspace({
   references: SourceMetadata[];
   assistant: { consent: boolean; model: string | null };
   unreadNotifications: number;
+  initialCollections: CollectionEntry[];
+  initialHighlights: HighlightEntry[];
 }) {
   const t = useTranslations('Project');
+  const c = useTranslations('Collections');
   const locale = useLocale();
   const router = useRouter();
   const [creatingDraft, setCreatingDraft] = useState(false);
@@ -89,6 +106,10 @@ export function ProjectWorkspace({
   const [results, setResults] = useState<RetrieveResponse | null>(null);
   const [searchError, setSearchError] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
+  const collections = useCollections(project.id, project.workspaceId, initialCollections);
+  const [collectionFilter, setCollectionFilter] = useState<string | null>(null);
+  const [highlights, setHighlights] = useState(initialHighlights);
+  const [highlightFilter, setHighlightFilter] = useState('');
   const query = `workspaceId=${project.workspaceId}`;
   const base = `/api/projects/${project.id}`;
 
@@ -99,6 +120,24 @@ export function ProjectWorkspace({
       setLibrary(body.sources);
     }
   }, [base, query]);
+
+  const reloadHighlights = useCallback(
+    async (filter: string) => {
+      setHighlightFilter(filter);
+      try {
+        const sourceParam = filter === '' ? '' : `&sourceId=${filter}`;
+        const response = await fetch(`${base}/highlights?${query}${sourceParam}`, {
+          cache: 'no-store',
+        });
+        if (!response.ok) return false;
+        setHighlights(((await response.json()) as { highlights: HighlightEntry[] }).highlights);
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    [base, query],
+  );
 
   const pending = library.some((entry) =>
     entry.files.some((file) => file.status === 'uploaded' || file.status === 'processing'),
@@ -112,6 +151,11 @@ export function ProjectWorkspace({
   }, [pending, refresh]);
 
   const titles = new Map(library.map((entry) => [entry.sourceId, entry.title]));
+  const filterIds =
+    collections.collections.find((collection) => collection.id === collectionFilter)?.sourceIds ??
+    null;
+  const visibleLibrary =
+    filterIds === null ? library : library.filter((entry) => filterIds.includes(entry.sourceId));
 
   const upload = async (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -269,11 +313,20 @@ export function ProjectWorkspace({
             </p>
           )}
 
+          <CollectionsToolbar
+            state={collections}
+            canWrite={project.canWrite}
+            selected={filterIds === null ? null : collectionFilter}
+            onSelect={setCollectionFilter}
+          />
+
           {library.length === 0 ? (
             <p className="muted">{t('libraryEmpty')}</p>
+          ) : visibleLibrary.length === 0 ? (
+            <p className="muted">{c('emptyFilter')}</p>
           ) : (
             <ul className="space-y-3" aria-live="polite" aria-label={t('libraryTitle')}>
-              {library.map((entry) => (
+              {visibleLibrary.map((entry) => (
                 <li key={entry.sourceId} className="rounded-xl border border-border p-4">
                   <p className="break-words font-semibold" dir="auto">
                     {entry.title}
@@ -309,6 +362,12 @@ export function ProjectWorkspace({
                       </a>
                     </div>
                   ))}
+                  <SourceCollections
+                    state={collections}
+                    canWrite={project.canWrite}
+                    sourceId={entry.sourceId}
+                    title={entry.title}
+                  />
                 </li>
               ))}
             </ul>
@@ -364,32 +423,40 @@ export function ProjectWorkspace({
                       className="rounded-xl border border-border p-4"
                       data-testid="evidence"
                     >
-                      <p className="break-words font-serif leading-loose" dir="auto">
-                        {item.content}
-                      </p>
-                      <div className="muted mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-                        <span dir="auto">{titles.get(item.sourceId) ?? item.sourceTitle}</span>
-                        <span data-testid="evidence-page">
-                          {item.pageStart === null
-                            ? t('noPage')
-                            : item.pageEnd !== null && item.pageEnd !== item.pageStart
-                              ? t('pageRange', { start: item.pageStart, end: item.pageEnd })
-                              : t('page', { page: item.pageStart })}
-                        </span>
-                        {item.provenance?.extractionMethod === 'ocr' ? (
-                          <span className="font-medium">{t('ocrEvidence')}</span>
-                        ) : null}
-                        {item.fileId === null ? null : (
-                          <a
-                            className="underline underline-offset-4"
-                            href={fileUrl(item.fileId, item.pageStart)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {t(item.pageStart === null ? 'openSource' : 'openAtPage')}
-                          </a>
-                        )}
-                      </div>
+                      <HighlightablePassage
+                        chunkId={item.chunkId}
+                        content={item.content}
+                        canWrite={project.canWrite}
+                        projectId={project.id}
+                        workspaceId={project.workspaceId}
+                        onSaved={() => {
+                          void reloadHighlights(highlightFilter);
+                        }}
+                      >
+                        <div className="muted mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+                          <span dir="auto">{titles.get(item.sourceId) ?? item.sourceTitle}</span>
+                          <span data-testid="evidence-page">
+                            {item.pageStart === null
+                              ? t('noPage')
+                              : item.pageEnd !== null && item.pageEnd !== item.pageStart
+                                ? t('pageRange', { start: item.pageStart, end: item.pageEnd })
+                                : t('page', { page: item.pageStart })}
+                          </span>
+                          {item.provenance?.extractionMethod === 'ocr' ? (
+                            <span className="font-medium">{t('ocrEvidence')}</span>
+                          ) : null}
+                          {item.fileId === null ? null : (
+                            <a
+                              className="underline underline-offset-4"
+                              href={fileUrl(item.fileId, item.pageStart)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {t(item.pageStart === null ? 'openSource' : 'openAtPage')}
+                            </a>
+                          )}
+                        </div>
+                      </HighlightablePassage>
                     </li>
                   ))}
                 </ol>
@@ -398,6 +465,16 @@ export function ProjectWorkspace({
           )}
         </section>
       </div>
+
+      <HighlightsPanel
+        projectId={project.id}
+        workspaceId={project.workspaceId}
+        canWrite={project.canWrite}
+        highlights={highlights}
+        sourceFilter={highlightFilter}
+        onReload={reloadHighlights}
+        sources={library.map((entry) => ({ sourceId: entry.sourceId, title: entry.title }))}
+      />
 
       <AssistantPanel
         projectId={project.id}

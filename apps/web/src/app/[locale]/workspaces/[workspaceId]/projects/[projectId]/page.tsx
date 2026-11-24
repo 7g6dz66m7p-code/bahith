@@ -1,7 +1,9 @@
 import {
   getProjectAiConsent,
   getProjectForUser,
+  listCollections,
   listDocuments,
+  listHighlights,
   listProjectLibrary,
   listProjectSourceMetadata,
   SanadError,
@@ -41,13 +43,15 @@ export default async function ProjectPage({
     listProjectSourceMetadata(database, { userId: session.user.id, workspaceId, projectId }),
     getProjectAiConsent(database, { userId: session.user.id, workspaceId, projectId }),
     getUnreadNotificationCount(session.user.id),
+    listCollections(database, { userId: session.user.id, workspaceId, projectId }),
+    listHighlights(database, { userId: session.user.id, workspaceId, projectId }),
   ]).catch((error: unknown) => {
     // Not a member, or not this workspace's project: indistinguishable from "missing".
     if (error instanceof SanadError) return null;
     throw error;
   });
   if (data === null) notFound();
-  const [project, library, drafts, references, consent, unread] = data;
+  const [project, library, drafts, references, consent, unread, collections, highlights] = data;
   return (
     <ProjectWorkspace
       project={project}
@@ -56,6 +60,8 @@ export default async function ProjectPage({
       references={references}
       assistant={{ consent: consent.enabled, model: configuredChatModel() }}
       unreadNotifications={unread}
+      initialCollections={collections}
+      initialHighlights={highlights}
     />
   );
 }

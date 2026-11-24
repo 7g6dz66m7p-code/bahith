@@ -6,6 +6,7 @@ import type { SubmitEvent } from 'react';
 import { useCallback, useState } from 'react';
 
 import { FilePicker } from '@/components/file-picker';
+import { ZoteroImport } from '@/components/zotero-import';
 
 const ERROR_KEYS = {
   SCHOLARLY_NOT_CONFIGURED: 'errorNotConfigured',
@@ -230,7 +231,7 @@ export function ReferencesPanel({
               <FilePicker
                 id="reference-import"
                 name="file"
-                accept=".bib,.ris,.txt,application/x-bibtex,application/x-research-info-systems"
+                accept=".bib,.ris,.txt,.json,application/json,application/x-bibtex,application/x-research-info-systems"
               />
               <button className="btn" type="submit" disabled={busy !== null}>
                 {t(busy === 'import' ? 'importing' : 'import')}
@@ -238,6 +239,9 @@ export function ReferencesPanel({
             </div>
           </form>
         </div>
+      ) : null}
+      {canWrite ? (
+        <ZoteroImport projectId={projectId} workspaceId={workspaceId} onImported={refresh} />
       ) : null}
 
       <div className="flex flex-wrap gap-3 text-sm">

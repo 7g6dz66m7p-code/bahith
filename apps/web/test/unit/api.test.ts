@@ -60,6 +60,19 @@ describe('research API request boundary', () => {
       expect(await response.json()).toEqual({ code });
     }
   });
+  it('maps library organisation errors to stable status codes', async () => {
+    const cases = [
+      ['LIBRARY_NOT_FOUND', 404],
+      ['LIBRARY_NAME_TAKEN', 409],
+      ['HIGHLIGHT_QUOTE_MISMATCH', 422],
+      ['SANAD_SOURCE_MISMATCH', 400],
+    ] as const;
+    for (const [code, status] of cases) {
+      const response = apiError(new SanadError(code, 'quoted passage text'));
+      expect(response.status, code).toBe(status);
+      expect(await response.json()).toEqual({ code });
+    }
+  });
   it('never serializes database error details or supplied research text', async () => {
     const response = apiError(new Error('private source text and SQL parameters'));
     expect(response.status).toBe(503);

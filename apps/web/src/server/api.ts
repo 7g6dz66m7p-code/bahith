@@ -41,11 +41,16 @@ export function apiError(error: unknown): Response {
             ? 403
             : error.code === 'SANAD_PROJECT_NOT_FOUND' ||
                 error.code === 'SANAD_FILE_NOT_FOUND' ||
-                error.code === 'REVIEW_NOT_FOUND'
+                error.code === 'REVIEW_NOT_FOUND' ||
+                error.code === 'LIBRARY_NOT_FOUND'
               ? 404
-              : error.code === 'REVIEW_ANCHOR_STALE' || error.code === 'REVIEW_INVALID_STATE'
+              : error.code === 'REVIEW_ANCHOR_STALE' ||
+                  error.code === 'REVIEW_INVALID_STATE' ||
+                  error.code === 'LIBRARY_NAME_TAKEN'
                 ? 409
-                : 400,
+                : error.code === 'HIGHLIGHT_QUOTE_MISMATCH'
+                  ? 422
+                  : 400,
       },
     );
   }

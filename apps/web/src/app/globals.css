@@ -297,3 +297,46 @@ button:disabled {
 .notification-unread {
   border-inline-start: 4px solid var(--accent);
 }
+/* Highlights: a colour bar on the inline start; the colour name is also given as text. */
+.highlight-mark {
+  border-inline-start: 4px solid var(--highlight);
+  padding-inline-start: 0.75rem;
+}
+.highlight-yellow {
+  --highlight: #8a6a00;
+}
+.highlight-green {
+  --highlight: #2e7031;
+}
+.highlight-blue {
+  --highlight: #2a5ca8;
+}
+.highlight-pink {
+  --highlight: #a8326b;
+}
+:root[data-theme='dark'] .highlight-yellow {
+  --highlight: #f0c94a;
+}
+:root[data-theme='dark'] .highlight-green {
+  --highlight: #8fd694;
+}
+:root[data-theme='dark'] .highlight-blue {
+  --highlight: #9cc2ff;
+}
+:root[data-theme='dark'] .highlight-pink {
+  --highlight: #f5a3c9;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .highlight-yellow {
+    --highlight: #f0c94a;
+  }
+  :root:not([data-theme='light']) .highlight-green {
+    --highlight: #8fd694;
+  }
+  :root:not([data-theme='light']) .highlight-blue {
+    --highlight: #9cc2ff;
+  }
+  :root:not([data-theme='light']) .highlight-pink {
+    --highlight: #f5a3c9;
+  }
+}
