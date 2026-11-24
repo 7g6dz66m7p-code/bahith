@@ -1,0 +1,3 @@
+# False positive: a rollback test's array of public migration names, not a credential.
+# Keep this exact historical fingerprint only; all other lines and commits stay scanned.
+e644ff30e99e684fe4722c90166c65921ad0366c:packages/db/test/integration/migrations.test.ts:generic-api-key:113
