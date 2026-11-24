@@ -62,6 +62,15 @@ docker run --rm --network host -v /tmp/zap:/zap/wrk:rw zaproxy/zap-stable:2.16.1
 | تعليقات مشبوهة                                      | حميد            | كلمات داخل حزم JavaScript مصغّرة للإطار                                            |
 | Modern Web App / Authentication Request             | معلوماتي        | —                                                                                 |
 
+### الجولة الثانية بعد الإصلاحات (البناء الجديد): **0 FAIL، 51 PASS، 7 WARN**
+
+اختفت تحذيرات الرؤوس الثلاثة وبيانات الاعتماد في الرابط ورسالة «under construction».
+التحذيرات المتبقية: `NEXT_LOCALE` (مقبول)، Content-Type في 307 (حميد)، تعليقات الحزم
+(حميد)، `CSP: script-src unsafe-inline` (المقايضة أدناه)، «Absence of Anti-CSRF Tokens»
+(النماذج الآن POST؛ لكن كل تغيير يمر عبر `fetch` يفحص ترويسة `Origin` على الخادم
+`requireSameOrigin`، مع ملفات تعريف SameSite — لا يوجد إرسال نموذج تقليدي يغيّر حالة)،
+ومعلوماتيان.
+
 **مقايضة CSP:** سكربتات Next.js المضمّنة تتطلب `'unsafe-inline'` ما لم تُعرض كل صفحة
 بـnonce لكل طلب. السياسة ما زالت تمنع سكربتات الأطراف الثالثة والتضمين في إطارات والإضافات
 وأهداف النماذج الخارجية. التحسين التالي: nonce عبر `proxy.ts`.
