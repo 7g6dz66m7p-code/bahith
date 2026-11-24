@@ -6,6 +6,7 @@ import { useRef, useState } from 'react';
 
 import { CommandMenu } from '@/components/command-menu';
 import { LocaleSwitcher } from '@/components/locale-switcher';
+import { NotificationBell } from '@/components/notification-bell';
 import { Link, useRouter } from '@/i18n/navigation';
 import { authClient } from '@/lib/auth-client';
 
@@ -39,7 +40,12 @@ const roleKey = {
   supervisor: 'roleSupervisor',
 } as const;
 
-export function DashboardView({ name, workspaces, projects }: DashboardData & { name: string }) {
+export function DashboardView({
+  name,
+  workspaces,
+  projects,
+  unreadNotifications,
+}: DashboardData & { name: string; unreadNotifications: number }) {
   const t = useTranslations('Dashboard');
   const members = useTranslations('Members');
   const locale = useLocale();
@@ -115,6 +121,7 @@ export function DashboardView({ name, workspaces, projects }: DashboardData & { 
         </Link>
         <nav className="flex flex-wrap items-center gap-4" aria-label={t('title')}>
           <CommandMenu />
+          <NotificationBell count={unreadNotifications} />
           <Link href="/security" className="text-sm underline underline-offset-4">
             {t('security')}
           </Link>

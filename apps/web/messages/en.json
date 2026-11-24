@@ -498,5 +498,34 @@
     "unlimited": "no allowance set yet (AI is off)",
     "upgrade": "Upgrade plan",
     "paymentsDisabled": "Payments are not enabled on the platform yet. No transaction was made."
+  },
+  "Notifications": {
+    "title": "Notifications",
+    "description": "What happened in your workspaces: review notes, decisions on your suggestions, sources you uploaded becoming ready, and membership changes. Only you see your notifications.",
+    "breadcrumb": "Breadcrumb",
+    "back": "Back to dashboard",
+    "bell": "Notifications",
+    "bellUnread": "Notifications ({count} unread)",
+    "manyUnread": "99+",
+    "unreadCount": "{count, plural, one {# unread notification} other {# unread notifications}}",
+    "noUnread": "No unread notifications",
+    "unread": "Unread: ",
+    "empty": "No notifications yet.",
+    "markAllRead": "Mark all as read",
+    "marking": "Marking…",
+    "allRead": "All notifications are marked as read.",
+    "markError": "We couldn’t mark the notifications as read. Try again.",
+    "unknownProject": "a project",
+    "openDraft": "Open draft",
+    "openProject": "Open project",
+    "openMembers": "View members",
+    "kind": {
+      "review_comment": "New review note on a draft in “<name>{project}</name>”.",
+      "suggestion_decided": "A decision was made on your suggestion on a draft in “<name>{project}</name>”.",
+      "source_ready": "A source you uploaded is ready to search in “<name>{project}</name>”.",
+      "source_failed": "A source you uploaded could not be processed in “<name>{project}</name>”.",
+      "member_joined": "A new member joined the workspace “<name>{workspace}</name>”.",
+      "role_changed": "Your role changed in the workspace “<name>{workspace}</name>”."
+    }
   }
 }

@@ -7,6 +7,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { AssistantPanel } from '@/components/assistant-panel';
 import { FilePicker } from '@/components/file-picker';
+import { NotificationBell } from '@/components/notification-bell';
 import { ReferencesPanel } from '@/components/references-panel';
 import { Link, useRouter } from '@/i18n/navigation';
 
@@ -67,12 +68,14 @@ export function ProjectWorkspace({
   drafts,
   references,
   assistant,
+  unreadNotifications,
 }: {
   project: ProjectInfo;
   initialLibrary: LibraryEntry[];
   drafts: DocumentSummary[];
   references: SourceMetadata[];
   assistant: { consent: boolean; model: string | null };
+  unreadNotifications: number;
 }) {
   const t = useTranslations('Project');
   const locale = useLocale();
@@ -204,11 +207,14 @@ export function ProjectWorkspace({
 
   return (
     <main className="app-shell mx-auto min-h-dvh w-full max-w-6xl space-y-8 px-5 py-7 sm:px-8">
-      <nav aria-label={t('breadcrumb')} className="text-sm">
-        <Link href="/dashboard" className="underline underline-offset-4">
-          {t('backToDashboard')}
-        </Link>
-      </nav>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <nav aria-label={t('breadcrumb')} className="text-sm">
+          <Link href="/dashboard" className="underline underline-offset-4">
+            {t('backToDashboard')}
+          </Link>
+        </nav>
+        <NotificationBell count={unreadNotifications} />
+      </div>
       <header className="space-y-3">
         <p className="muted text-sm">{t('kicker')}</p>
         <h1 className="break-words text-3xl font-bold sm:text-4xl" dir="auto">

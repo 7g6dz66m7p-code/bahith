@@ -15,6 +15,7 @@ import { ProjectWorkspace } from '@/components/project-workspace';
 import { routing } from '@/i18n/routing';
 import { configuredChatModel } from '@/server/assistant';
 import { getDatabase } from '@/server/db';
+import { getUnreadNotificationCount } from '@/server/notifications';
 import { requireSession } from '@/server/session';
 
 export const dynamic = 'force-dynamic';
@@ -39,13 +40,14 @@ export default async function ProjectPage({
     listDocuments(database, { userId: session.user.id, workspaceId, projectId }),
     listProjectSourceMetadata(database, { userId: session.user.id, workspaceId, projectId }),
     getProjectAiConsent(database, { userId: session.user.id, workspaceId, projectId }),
+    getUnreadNotificationCount(session.user.id),
   ]).catch((error: unknown) => {
     // Not a member, or not this workspace's project: indistinguishable from "missing".
     if (error instanceof SanadError) return null;
     throw error;
   });
   if (data === null) notFound();
-  const [project, library, drafts, references, consent] = data;
+  const [project, library, drafts, references, consent, unread] = data;
   return (
     <ProjectWorkspace
       project={project}
@@ -53,6 +55,7 @@ export default async function ProjectPage({
       drafts={drafts}
       references={references}
       assistant={{ consent: consent.enabled, model: configuredChatModel() }}
+      unreadNotifications={unread}
     />
   );
 }

@@ -280,3 +280,20 @@ button:disabled {
   outline: 3px solid var(--accent);
   outline-offset: 4px;
 }
+
+/* Notifications: unread badge in the header and the unread marker in the list. */
+.notification-count {
+  display: inline-block;
+  min-inline-size: 1.4rem;
+  border-radius: 9999px;
+  padding-inline: 0.4rem;
+  background: var(--accent);
+  color: var(--background);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.4rem;
+  text-align: center;
+}
+.notification-unread {
+  border-inline-start: 4px solid var(--accent);
+}
