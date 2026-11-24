@@ -56,3 +56,12 @@ export type {
   EvidenceStrength,
 } from './agents/evidence-judge';
 export { EVIDENCE_JUDGE_PROMPT_VERSION } from './prompts/evidence-judge';
+export {
+  estimateCostUsd,
+  loadChatModelChain,
+  parseModelPrices,
+  resolveChatModelChain,
+  runWithFallback,
+  shouldFallBack,
+} from './fallback';
+export type { FallbackAttempt, ModelPrice, ResolvedChatModel } from './fallback';

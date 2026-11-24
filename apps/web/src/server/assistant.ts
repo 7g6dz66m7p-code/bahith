@@ -8,10 +8,13 @@ import {
   loadEmbeddingModelRef,
   resolveEmbeddingModel,
   AiProviderError,
+  loadChatModelChain,
   loadChatModelRef,
   MAX_ANSWER_PASSAGES,
+  resolveChatModelChain,
   resolveLanguageModel,
   runGroundedAnswer,
+  runWithFallback,
 } from '@bahith/ai';
 import type { Database, SanadProjectContext } from '@bahith/db';
 import {
@@ -37,11 +40,15 @@ function embeddingModelFromEnv() {
   }
 }
 
-/** The configured chat model as "provider:model", or null — shown to the user before consent. */
+/**
+ * The configured chat models as "provider:model", primary first, or null — shown to the
+ * user before consent, so a fallback provider is disclosed as well.
+ */
 export function configuredChatModel(): string | null {
   try {
-    const ref = loadChatModelRef(process.env);
-    return `${ref.provider}:${ref.model}`;
+    return loadChatModelChain(process.env)
+      .map((ref) => `${ref.provider}:${ref.model}`)
+      .join(' → ');
   } catch {
     return null;
   }
@@ -101,18 +108,18 @@ export async function askAssistant(
   if (!(await getProjectAiConsent(database, context)).enabled) {
     throw new AssistantRequestError('AI_CONSENT_REQUIRED', 409);
   }
-  let model;
-  let label: string;
+  let chain;
   try {
-    const ref = loadChatModelRef(process.env);
-    model = resolveLanguageModel(ref, process.env);
-    label = `${ref.provider}:${ref.model}`;
+    chain = resolveChatModelChain(loadChatModelChain(process.env), process.env);
   } catch (error) {
     if (error instanceof AiConfigError) throw new AssistantRequestError('AI_NOT_CONFIGURED', 503);
     if (error instanceof AiProviderError) throw new AssistantRequestError(error.code, 503);
     throw error;
   }
 
+  const primary = chain[0];
+  if (primary === undefined) throw new AssistantRequestError('AI_NOT_CONFIGURED', 503);
+  let label = primary.label;
   const startRun = async (): Promise<string> => {
     try {
       return (
@@ -209,17 +216,42 @@ export async function askAssistant(
   }
   runId ??= await startRun();
 
+  // Each model attempt is its own counted run, attributed to the model that was called;
+  // a failed attempt is finished as failed before the next provider is tried.
+  let currentRun: string = runId;
   let run;
   try {
-    run = await runGroundedAnswer({
-      model,
-      question: input.question,
-      language: input.language,
-      passages,
-    });
+    const outcome = await runWithFallback(
+      chain,
+      async (entry) => {
+        if (entry.label !== label) {
+          label = entry.label;
+          currentRun = await startRun();
+        }
+        return runGroundedAnswer({
+          model: entry.model,
+          question: input.question,
+          language: input.language,
+          passages,
+        });
+      },
+      async (_entry, error, willRetry) => {
+        if (!willRetry) return;
+        await finishAssistantRun(database, context, currentRun, {
+          status: 'failed',
+          inputTokens: null,
+          outputTokens: null,
+          latencyMs: null,
+          errorCode: error instanceof AiCallError ? error.code : 'AI_PROVIDER_ERROR',
+        });
+      },
+    );
+    run = outcome.result;
   } catch (error) {
-    return fail(runId, error);
+    if (error instanceof AssistantRequestError) throw error;
+    return fail(currentRun, error);
   }
+  runId = currentRun;
   await finishAssistantRun(database, context, runId, {
     status: 'succeeded',
     inputTokens: run.usage.inputTokens,
