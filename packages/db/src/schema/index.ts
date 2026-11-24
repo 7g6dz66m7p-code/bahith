@@ -10,3 +10,4 @@ export * from './documents';
 export * from './review';
 export * from './billing';
 export * from './invitations';
+export * from './notifications';

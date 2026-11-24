@@ -224,6 +224,14 @@ export async function seedWorkspace(
         invitedBy: user.id,
         expiresAt: new Date(Date.now() + 86_400_000),
       });
+      await tx.insert(schema.notifications).values({
+        workspaceId,
+        recipientUserId: user.id,
+        kind: 'source_ready',
+        entityType: 'file',
+        entityId: file.id,
+        projectId: project.id,
+      });
       await tx.insert(schema.citations).values({
         workspaceId,
         documentId: document.id,

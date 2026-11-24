@@ -80,6 +80,16 @@ export const documentCommentStatusEnum = pgEnum('document_comment_status', [
   'rejected',
 ]);
 
+/** What a notification is about; the reader's interface builds the text from the kind. */
+export const notificationKindEnum = pgEnum('notification_kind', [
+  'review_comment',
+  'suggestion_decided',
+  'source_ready',
+  'source_failed',
+  'member_joined',
+  'role_changed',
+]);
+
 export const subscriptionStatusEnum = pgEnum('subscription_status', [
   'active',
   'trialing',

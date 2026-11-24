@@ -4,6 +4,7 @@ import { and, asc, eq } from 'drizzle-orm';
 import { z } from 'zod';
 
 import type { Database } from '../client';
+import { notify } from '../notifications';
 import { chunks, EMBEDDING_DIMENSIONS, files, projectSources, sources } from '../schema/index';
 
 import type { SanadProjectContext } from './access';
@@ -173,6 +174,15 @@ export async function ingestExtraction(database: Database, input: IngestExtracti
         .set({ fullTextStatus: 'full_text' })
         .where(and(eq(sources.workspaceId, input.workspaceId), eq(sources.id, file.sourceId)));
     }
+    // Only on the first ingestion (a reused result returned above): tell the uploader.
+    await notify(tx, {
+      workspaceId: input.workspaceId,
+      kind: status === 'ready' ? 'source_ready' : 'source_failed',
+      entityType: 'file',
+      entityId: file.id,
+      projectId: input.projectId,
+      userIds: [file.uploadedBy ?? input.userId],
+    });
     return { fileId: file.id, status, chunkIds, failures: manifest.failures, reused: false };
   });
 }

@@ -4,6 +4,7 @@ import { and, asc, eq, gt, isNull, ne, sql } from 'drizzle-orm';
 import { z } from 'zod';
 
 import type { Database, Tx } from './client';
+import { notify } from './notifications';
 import { auditLog, memberships, workspaceInvitations } from './schema/index';
 
 export type MemberErrorCode =
@@ -188,6 +189,16 @@ export async function acceptInvitation(
         .update(workspaceInvitations)
         .set({ acceptedAt: now, acceptedBy: actor.userId })
         .where(eq(workspaceInvitations.id, invitation.id));
+      if (existing === null) {
+        await notify(tx, {
+          workspaceId: actor.workspaceId,
+          kind: 'member_joined',
+          entityType: 'user',
+          entityId: actor.userId,
+          roles: ['owner'],
+          exceptUserId: actor.userId,
+        });
+      }
       await audit(tx, actor, 'member.joined', 'invitation', invitation.id, {
         role: invitation.role,
         alreadyMember: existing !== null,
@@ -325,6 +336,16 @@ export async function changeMemberRole(
       from: current,
       to: newRole.data,
     });
+    if (current !== newRole.data) {
+      await notify(tx, {
+        workspaceId: actor.workspaceId,
+        kind: 'role_changed',
+        entityType: 'workspace',
+        entityId: actor.workspaceId,
+        userIds: [target.data],
+        exceptUserId: actor.userId,
+      });
+    }
   });
 }
 

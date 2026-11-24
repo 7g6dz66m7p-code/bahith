@@ -46,7 +46,7 @@ describe('migrations', () => {
     const all = await loadMigrations();
     expect(await migrateUp(client)).toEqual(all.map((m) => m.tag));
 
-    expect(await listNames(client, TABLES)).toHaveLength(30 + 1); // + schema_migrations
+    expect(await listNames(client, TABLES)).toHaveLength(31 + 1); // + schema_migrations
     expect(await listNames(client, EXTENSIONS)).toEqual(['vector']);
     expect(await listNames(client, ROLES)).toEqual([
       'bahith_app',
@@ -106,7 +106,7 @@ describe('migrations', () => {
                   WHERE table_name = 'users' AND column_name LIKE 'phone_number%' ORDER BY 1`;
     expect(await listNames(client, cols)).toEqual(['phone_number', 'phone_number_verified']);
     const tags = await rollBackThrough('0011_phone_number');
-    expect(tags).toEqual(['0011_phone_number']);
+    expect(tags[0]).toBe('0011_phone_number');
     expect(await listNames(client, cols)).toEqual([]);
     await reapply(tags);
   });
@@ -120,6 +120,29 @@ describe('migrations', () => {
     expect(await listNames(client, fns)).toEqual([]);
     await reapply(tags);
     expect(await listNames(client, fns)).toEqual(['platform_stats', 'set_plan_limit']);
+  });
+
+  it('rolls back notifications and their enum on their own', async () => {
+    const table = `SELECT tablename AS name FROM pg_tables WHERE tablename = 'notifications'`;
+    const enums = `SELECT typname AS name FROM pg_type WHERE typname = 'notification_kind'`;
+    const policy = `SELECT policyname AS name FROM pg_policies WHERE tablename = 'notifications'`;
+    const forced = `SELECT relforcerowsecurity::text AS name FROM pg_class
+                    WHERE oid = 'notifications'::regclass`;
+    const grants = `SELECT privilege_type AS name FROM information_schema.role_table_grants
+                    WHERE table_name = 'notifications' AND grantee = 'bahith_app' ORDER BY 1`;
+    expect(await listNames(client, table)).toEqual(['notifications']);
+    expect(await listNames(client, enums)).toEqual(['notification_kind']);
+    expect(await listNames(client, policy)).toEqual(['notifications_tenant_isolation']);
+    expect(await listNames(client, forced)).toEqual(['true']);
+    expect(await listNames(client, grants)).toEqual(['INSERT', 'SELECT', 'UPDATE']);
+    const tags = await rollBackThrough('0012_notifications');
+    expect(tags).toEqual(['0012_notifications']);
+    expect(await listNames(client, table)).toEqual([]);
+    expect(await listNames(client, enums)).toEqual([]);
+    expect(await listNames(client, TABLES)).toHaveLength(30 + 1);
+    await reapply(tags);
+    expect(await listNames(client, policy)).toEqual(['notifications_tenant_isolation']);
+    expect(await listNames(client, grants)).toEqual(['INSERT', 'SELECT', 'UPDATE']);
   });
 
   it('rolls back workspace invitations on their own', async () => {
@@ -247,6 +270,6 @@ describe('migrations', () => {
     expect(await rollbackLast(client)).toEqual([]);
 
     expect(await migrateUp(client)).toEqual(all.map((m) => m.tag));
-    expect(await listNames(client, TABLES)).toHaveLength(30 + 1);
+    expect(await listNames(client, TABLES)).toHaveLength(31 + 1);
   });
 });

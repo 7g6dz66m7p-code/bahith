@@ -15,6 +15,7 @@ import {
   replacementSchema,
   textAt,
 } from './review-anchor';
+import { notify } from './notifications';
 import type { CommentAnchor, CommentSuggestion } from './schema/index';
 import { auditLog, documentComments, documentVersions, memberships } from './schema/index';
 import type { MembershipRole, SanadProjectContext } from './sanad/access';
@@ -184,6 +185,16 @@ async function insertNote(
       entityId: documentId,
       metadata: { commentId: row.id },
     });
+    // Owners and editors decide on review notes; tell them (not the author) one arrived.
+    await notify(tx, {
+      workspaceId: context.workspaceId,
+      kind: 'review_comment',
+      entityType: 'document',
+      entityId: documentId,
+      projectId: context.projectId,
+      roles: ['owner', 'editor'],
+      exceptUserId: context.userId,
+    });
     const [created] = await selectComments(tx, context, documentId, row.id);
     if (created === undefined) throw new SanadError('REVIEW_NOT_FOUND');
     return created;
@@ -295,6 +306,18 @@ async function closeNote(
   });
   const [updated] = await selectComments(tx, context, documentId, commentId);
   if (updated === undefined) throw new SanadError('REVIEW_NOT_FOUND');
+  if (status !== 'resolved') {
+    // The suggestion's author learns it was accepted or declined.
+    await notify(tx, {
+      workspaceId: context.workspaceId,
+      kind: 'suggestion_decided',
+      entityType: 'document',
+      entityId: documentId,
+      projectId: context.projectId,
+      userIds: [updated.authorId],
+      exceptUserId: context.userId,
+    });
+  }
   return updated;
 }
 

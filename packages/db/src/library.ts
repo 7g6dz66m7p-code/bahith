@@ -3,6 +3,7 @@ import type { SQL, SQLWrapper } from 'drizzle-orm';
 import { z } from 'zod';
 
 import type { Database } from './client';
+import { notify } from './notifications';
 import { auditLog, chunks, files, projectSources, sources } from './schema/index';
 import type { SanadProjectContext } from './sanad/access';
 import { withSanadProject } from './sanad/access';
@@ -249,7 +250,7 @@ export async function markFileFailed(
   if (!parsedCode.success) throw new SanadError('SANAD_INVALID_INPUT');
   await loadProjectFile(database, context, fileId, true);
   await withSanadProject(database, context, true, async (tx) => {
-    await tx
+    const [failed] = await tx
       .update(files)
       .set({ status: 'failed', errorCode: parsedCode.data })
       .where(
@@ -258,7 +259,18 @@ export async function markFileFailed(
           eq(files.id, fileId),
           inArray(files.status, ['uploaded', 'processing']),
         ),
-      );
+      )
+      .returning({ uploadedBy: files.uploadedBy });
+    if (failed !== undefined) {
+      await notify(tx, {
+        workspaceId: context.workspaceId,
+        kind: 'source_failed',
+        entityType: 'file',
+        entityId: fileId,
+        projectId: context.projectId,
+        userIds: [failed.uploadedBy ?? context.userId],
+      });
+    }
     await tx.insert(auditLog).values({
       workspaceId: context.workspaceId,
       actorUserId: context.userId,

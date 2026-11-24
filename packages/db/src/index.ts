@@ -108,3 +108,11 @@ export {
   setPlanAiRequestLimit,
 } from './admin';
 export type { PlatformStats, WorkspaceUsage } from './admin';
+export { listNotifications, markNotificationsRead, notify, unreadCount } from './notifications';
+export type {
+  NotificationEntityType,
+  NotificationEntry,
+  NotificationKind,
+  NotificationReader,
+  NotifyInput,
+} from './notifications';

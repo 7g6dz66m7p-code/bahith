@@ -49,6 +49,7 @@ describe('database schema', () => {
         'literature_matrix_rows',
         'memberships',
         'messages',
+        'notifications',
         'plans',
         'project_sources',
         'projects',

@@ -128,9 +128,9 @@ describe('workspace isolation (row-level security)', () => {
       // The database and the Drizzle schema agree on which tables are tenant tables…
       expect(rows.map((row) => row.table)).toEqual(tenantTableNames);
       // …and the list is the one Phase 1 specifies (memberships + 20 research tables).
-      // 21 research tables: the 19 of Phase 1, document_comments (draft review) and
-      // workspace_invitations (members).
-      expect(tenantTableNames).toHaveLength(22);
+      // 22 research tables: the 19 of Phase 1, document_comments (draft review),
+      // workspace_invitations (members) and notifications.
+      expect(tenantTableNames).toHaveLength(23);
       for (const row of rows) {
         expect(row, row.table).toMatchObject({ enabled: true, forced: true });
         expect(row.policies, row.table).toBeGreaterThan(0);
@@ -288,6 +288,16 @@ describe('workspace isolation (row-level security)', () => {
               body: 'intruder',
             }),
           ),
+        () =>
+          database.withWorkspace(a.workspaceId, (tx) =>
+            tx.insert(schema.notifications).values({
+              workspaceId: b.workspaceId,
+              recipientUserId: b.userId,
+              kind: 'review_comment',
+              entityType: 'document',
+              entityId: b.documentId,
+            }),
+          ),
       ];
       for (const attempt of attempts) {
         expect(await pgErrorCode(attempt)).toBe(PG_INSUFFICIENT_PRIVILEGE);
@@ -336,6 +346,28 @@ describe('workspace isolation (row-level security)', () => {
             tx
               .insert(schema.projectSources)
               .values({ workspaceId: a.workspaceId, projectId: a.projectId, sourceId: b.sourceId }),
+          ),
+        // A notification for someone who is not a member, or about another workspace's project.
+        () =>
+          database.withWorkspace(a.workspaceId, (tx) =>
+            tx.insert(schema.notifications).values({
+              workspaceId: a.workspaceId,
+              recipientUserId: b.userId,
+              kind: 'review_comment',
+              entityType: 'document',
+              entityId: a.documentId,
+            }),
+          ),
+        () =>
+          database.withWorkspace(a.workspaceId, (tx) =>
+            tx.insert(schema.notifications).values({
+              workspaceId: a.workspaceId,
+              recipientUserId: a.userId,
+              kind: 'source_ready',
+              entityType: 'file',
+              entityId: a.fileId,
+              projectId: b.projectId,
+            }),
           ),
       ];
       for (const attempt of attempts) {
