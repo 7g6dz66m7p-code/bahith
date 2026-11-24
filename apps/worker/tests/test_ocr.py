@@ -3,6 +3,7 @@
 The fixture images contain synthetic test sentences (see fixtures/ocr/make_fixtures.cjs).
 """
 
+from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
 from pathlib import Path
 
@@ -10,8 +11,9 @@ import pytest
 from PIL import Image
 from pypdf import PdfWriter
 
-from bahith_worker.sanad import extract_document
-from bahith_worker.sanad.ocr import ocr_available
+from bahith_worker.sanad import SanadError, extract_document
+from bahith_worker.sanad.extraction import _pdf_page_image
+from bahith_worker.sanad.ocr import ocr_available, recognise_image_bytes
 
 FIXTURES = Path(__file__).parent / "fixtures" / "ocr"
 PDF = "application/pdf"
@@ -93,3 +95,41 @@ def test_text_layer_pages_never_go_through_ocr() -> None:
     # A blank page has no text layer; with OCR disabled it is flagged, never filled.
     manifest = extract_document(buffer.getvalue(), PDF, ocr=False)
     assert manifest.units[0].method == "text"
+
+
+def test_multipage_images_are_decoded_lazily_and_each_frame_is_bounded(monkeypatch) -> None:
+    # TIFFs can declare many individually huge frames within the 50 MiB upload limit.
+    first = Image.new("RGB", (5, 5), "white")
+    second = Image.new("RGB", (20, 20), "white")
+    buffer = BytesIO()
+    first.save(buffer, format="TIFF", save_all=True, append_images=[second])
+    monkeypatch.setattr("bahith_worker.sanad.ocr.MAX_OCR_PIXELS", 100)
+    pages = recognise_image_bytes(buffer.getvalue())
+    with next(pages) as page:
+        assert page.size == (5, 5)
+    # Reading the first frame did not pre-decode the oversized second frame.
+    with pytest.raises(SanadError, match="OCR_PAGE_TOO_LARGE"):
+        next(pages)
+
+
+def test_multipage_image_frame_count_is_bounded_before_rgb_decoding() -> None:
+    frame = Image.new("RGB", (1, 1), "white")
+    buffer = BytesIO()
+    frame.save(buffer, format="TIFF", save_all=True, append_images=[frame] * 500)
+    with pytest.raises(SanadError, match="RESOURCE_LIMIT"):
+        next(recognise_image_bytes(buffer.getvalue()))
+
+
+def test_native_pdf_rendering_can_be_requested_from_concurrent_worker_threads() -> None:
+    writer = PdfWriter()
+    writer.add_blank_page(width=72, height=72)
+    buffer = BytesIO()
+    writer.write(buffer)
+
+    def render(_index: int) -> tuple[int, int]:
+        with _pdf_page_image(buffer.getvalue(), 0)() as image:
+            assert image.getpixel((150, 150)) == (255, 255, 255)
+            return image.size
+
+    with ThreadPoolExecutor(max_workers=4) as threads:
+        assert list(threads.map(render, range(8))) == [(300, 300)] * 8

@@ -10,10 +10,12 @@ text is ever inferred or completed.
 import io
 import re
 import shutil
+from collections.abc import Iterator
 from dataclasses import dataclass
+from itertools import pairwise
 
 import pytesseract
-from PIL import Image
+from PIL import Image, ImageOps
 
 from bahith_worker.sanad.models import SanadError
 
@@ -31,6 +33,7 @@ Image.MAX_IMAGE_PIXELS = MAX_OCR_PIXELS
 class OcrResult:
     text: str
     confidence: float | None
+    top: int | None = None
 
 
 def tesseract_version() -> str | None:
@@ -67,21 +70,74 @@ def recognise(image: Image.Image) -> OcrResult:
     if image.width * image.height > MAX_OCR_PIXELS:
         raise SanadError("OCR_PAGE_TOO_LARGE")
     first = _recognise(image, OCR_LANGUAGES)
+    languages = OCR_LANGUAGES
     arabic = len(ARABIC_LETTER.findall(first.text))
     latin = len(LATIN_LETTER.findall(first.text))
     if arabic > 0 and arabic >= 2 * latin:
         second = _recognise(image, "ara")
         if (second.confidence or 0) > (first.confidence or 0):
-            return second
-    return first
+            first = second
+            languages = "ara"
+    return _recover_heading(image, first, languages)
 
 
-def _recognise(image: Image.Image, languages: str) -> OcrResult:
+def _recover_heading(image: Image.Image, result: OcrResult, languages: str) -> OcrResult:
+    """Recover a single ink line ignored above Tesseract's first recognised word.
+
+    Tesseract 5.5 page segmentation can silently discard Arabic headings. A raw-line
+    pass over that actual image region retains them. Multiple lines/graphics are not
+    treated as a heading; this is bounded to one additional recognition per page.
+    """
+    if result.top is None or result.top <= 0:
+        return result
+    with image.crop((0, 0, image.width, result.top)) as top, top.convert("L") as gray:
+        with ImageOps.invert(gray) as inverted:
+            mask = inverted.point(lambda pixel: 255 if pixel > 127 else 0)
+        try:
+            bounds = mask.getbbox()
+            if bounds is None or bounds[3] - bounds[1] < 8:
+                return result
+            with mask.resize((1, mask.height), resample=Image.Resampling.BOX) as projection:
+                rows = [i for i, value in enumerate(projection.get_flattened_data()) if value > 0]
+            if not rows or any(
+                following - previous > max(3, (bounds[3] - bounds[1]) // 6)
+                for previous, following in pairwise(rows)
+            ):
+                return result
+            with (
+                top.crop(bounds) as cropped,
+                ImageOps.expand(cropped, border=10, fill="white") as line,
+            ):
+                try:
+                    heading = _recognise(line, languages, psm=13)
+                except SanadError:
+                    return result
+        finally:
+            mask.close()
+    if not ARABIC_LETTER.search(heading.text) and not LATIN_LETTER.search(heading.text):
+        return result
+    length = len(heading.text) + len(result.text)
+    confidence = (
+        round(
+            (
+                (heading.confidence or 0) * len(heading.text)
+                + (result.confidence or 0) * len(result.text)
+            )
+            / length,
+            2,
+        )
+        if length
+        else None
+    )
+    return OcrResult(text=heading.text + "\n" + result.text, confidence=confidence, top=bounds[1])
+
+
+def _recognise(image: Image.Image, languages: str, *, psm: int = 3) -> OcrResult:
     try:
         data = pytesseract.image_to_data(
             image,
             lang=languages,
-            config="--psm 3",
+            config=f"--psm {psm}",
             output_type=pytesseract.Output.DICT,
             timeout=OCR_TIMEOUT_SECONDS,
         )
@@ -93,32 +149,36 @@ def _recognise(image: Image.Image, languages: str) -> OcrResult:
 
     lines: dict[tuple[int, int, int], list[str]] = {}
     confidences: list[float] = []
+    tops: list[int] = []
     for index, word in enumerate(data["text"]):
         word = word.strip()
         if not word:
             continue
         key = (data["block_num"][index], data["par_num"][index], data["line_num"][index])
         lines.setdefault(key, []).append(word)
+        tops.append(data["top"][index])
         confidence = float(data["conf"][index])
         if confidence >= 0:
             confidences.append(confidence)
     # Tesseract emits words in logical (reading) order, also for Arabic.
     text = "\n".join(" ".join(words) for _, words in sorted(lines.items()))
     mean = round(sum(confidences) / len(confidences), 2) if confidences else None
-    return OcrResult(text=text, confidence=mean)
+    return OcrResult(text=text, confidence=mean, top=min(tops) if tops else None)
 
 
-def recognise_image_bytes(data: bytes) -> list[Image.Image]:
-    """Decodes an uploaded PNG/JPEG/TIFF into pages (multi-page TIFF yields several)."""
+def recognise_image_bytes(data: bytes) -> Iterator[Image.Image]:
+    """Decode one page at a time so multi-page TIFFs cannot retain all RGB frames."""
     try:
-        image = Image.open(io.BytesIO(data))
-        pages: list[Image.Image] = []
-        for frame in range(getattr(image, "n_frames", 1)):
-            image.seek(frame)
-            pages.append(image.convert("RGB"))
-            if len(pages) > 500:
+        with Image.open(io.BytesIO(data)) as image:
+            frame_count = getattr(image, "n_frames", 1)
+            if frame_count > 500:
                 raise SanadError("RESOURCE_LIMIT")
-        return pages
+            for frame in range(frame_count):
+                image.seek(frame)
+                if image.width * image.height > MAX_OCR_PIXELS:
+                    raise SanadError("OCR_PAGE_TOO_LARGE")
+                # The consumer owns this independent frame and must close it.
+                yield image.convert("RGB")
     except SanadError:
         raise
     except (Image.DecompressionBombError, OSError, ValueError):

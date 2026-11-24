@@ -13,6 +13,7 @@ Supported MIME types:
 - `application/vnd.openxmlformats-officedocument.wordprocessingml.document`: body
   paragraphs and table cells in document order; no invented page numbers.
 - `text/plain`: strict UTF-8 text; no invented page numbers.
+- `image/png`, `image/jpeg`, `image/tiff`: local OCR with real image/frame numbers.
 
 The command creates an exclusive, owner-readable/writable output file. It refuses
 existing output files and an output path equal to the input. Standard output contains
@@ -43,13 +44,23 @@ tree settings. Encrypted and malformed documents fail explicitly. A failed PDF p
 creates an empty page unit and a `PAGE_EXTRACTION_FAILED` record; no text is inferred.
 
 This local tool does not execute document instructions, call a model, verify scientific
-claims, connect to storage/database, or authorize access. A future authenticated
-ingestion service must validate workspace/project/source/file ownership before using
-or persisting a manifest. There is deliberately no queue job accepting local paths.
+claims, connect to storage/database, or authorize access. The `sanad.extract` queue job
+reads a workspace-scoped object, verifies its SHA-256 and uploads a manifest. The Node
+ingestion service rechecks workspace/project/file access before persisting it. There is
+deliberately no queue job accepting local paths. S3 reads enforce byte limits while
+streaming and release the response connection on success and failure.
 
-Text extraction depends on the document's encoding and layout. Scanned PDFs need OCR,
-which this module does not perform. DOCX headers, footers, text boxes and nested table
-contents are not currently extracted. Missing or empty text is never filled in.
+Text extraction depends on the document's encoding and layout. Scanned PDF pages and
+images use local Tesseract when its Arabic and English traineddata are installed.
+Missing OCR produces `OCR_UNAVAILABLE`, with empty text rather than invented text.
+OCR results carry their method and confidence and require review; confidence is not a
+scientific verification score. A bounded raw-line pass recovers a single heading that
+Tesseract page segmentation omitted above its first recognised word. Its algorithm
+version is recorded with the Tesseract version so changed extraction cannot silently
+reuse old evidence. Multi-page images are decoded one frame at a time (maximum 500),
+with a pixel limit checked for every frame. DOCX headers, footers, text boxes and
+nested table contents are not currently extracted. Missing or empty text is never
+filled in.
 
 Validation:
 

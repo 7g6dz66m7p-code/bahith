@@ -50,21 +50,27 @@ class S3Storage:
         )
 
     def get_bytes(self, key: str, max_bytes: int) -> bytes:
+        if max_bytes < 0:
+            raise StorageError("STORAGE_TOO_LARGE")
         try:
             response = self._client.get_object(Bucket=self._bucket, Key=key)
+            body = response["Body"]
+            try:
+                if int(response.get("ContentLength", 0)) > max_bytes:
+                    raise StorageError("STORAGE_TOO_LARGE")
+                data = body.read(max_bytes + 1)
+                if len(data) > max_bytes:
+                    raise StorageError("STORAGE_TOO_LARGE")
+                return data
+            finally:
+                body.close()
         except ClientError as error:
             code = error.response.get("Error", {}).get("Code", "")
             raise StorageError(
                 "STORAGE_NOT_FOUND" if code in {"NoSuchKey", "404"} else "STORAGE_UNAVAILABLE"
             ) from None
-        except BotoCoreError:
+        except (BotoCoreError, OSError):
             raise StorageError("STORAGE_UNAVAILABLE") from None
-        if int(response.get("ContentLength", 0)) > max_bytes:
-            raise StorageError("STORAGE_TOO_LARGE")
-        data = response["Body"].read(max_bytes + 1)
-        if len(data) > max_bytes:
-            raise StorageError("STORAGE_TOO_LARGE")
-        return data
 
     def put(self, key: str, data: bytes, content_type: str) -> None:
         try:

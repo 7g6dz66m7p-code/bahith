@@ -75,6 +75,7 @@ export function createStorage(config: StorageConfig): ObjectStorage {
     forcePathStyle: config.forcePathStyle,
     credentials: { accessKeyId: config.accessKeyId, secretAccessKey: config.secretAccessKey },
     maxAttempts: 3,
+    requestHandler: { connectionTimeout: 10_000, requestTimeout: 60_000 },
   });
   const Bucket = config.bucket;
 
@@ -96,16 +97,33 @@ export function createStorage(config: StorageConfig): ObjectStorage {
       }
     },
     async getBytes(key, maxBytes) {
+      if (!Number.isSafeInteger(maxBytes) || maxBytes < 0) {
+        throw new PipelineError('STORAGE_TOO_LARGE');
+      }
       try {
         const response = await client.send(new GetObjectCommand({ Bucket, Key: key }));
-        if (response.ContentLength !== undefined && response.ContentLength > maxBytes) {
-          throw new PipelineError('STORAGE_TOO_LARGE');
-        }
         const body = response.Body;
         if (body === undefined) throw new PipelineError('STORAGE_NOT_FOUND');
-        const bytes = await body.transformToByteArray();
-        if (bytes.byteLength > maxBytes) throw new PipelineError('STORAGE_TOO_LARGE');
-        return bytes;
+        // Enforce the limit while reading: Content-Length can be absent or inaccurate.
+        // transformToByteArray() would allocate the entire object before checking it.
+        const stream = body as Readable;
+        try {
+          if (response.ContentLength !== undefined && response.ContentLength > maxBytes) {
+            throw new PipelineError('STORAGE_TOO_LARGE');
+          }
+          const chunks: Uint8Array[] = [];
+          let length = 0;
+          for await (const chunk of stream as AsyncIterable<Uint8Array>) {
+            if (chunk.byteLength > maxBytes - length) {
+              throw new PipelineError('STORAGE_TOO_LARGE');
+            }
+            length += chunk.byteLength;
+            chunks.push(chunk);
+          }
+          return Buffer.concat(chunks, length);
+        } finally {
+          stream.destroy();
+        }
       } catch (error) {
         return storageFailure(error);
       }

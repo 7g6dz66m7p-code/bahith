@@ -10,7 +10,7 @@ import logging
 import threading
 import zipfile
 from collections.abc import Callable, Iterator
-from contextlib import contextmanager
+from contextlib import closing, contextmanager
 from importlib.metadata import version
 
 import pypdfium2 as pdfium
@@ -52,6 +52,9 @@ SUPPORTED_MIME_TYPES = frozenset(
         *IMAGE_MIME_TYPES,
     }
 )
+# PDFium forbids simultaneous calls, including calls using different documents.
+# Queue jobs run extraction in threads, so serialize the native render lifecycle.
+_PDFIUM_LOCK = threading.Lock()
 
 
 class _CurrentThreadFilter(logging.Filter):
@@ -131,7 +134,8 @@ def _ocr_page(
         code = "OCR_UNAVAILABLE"
     else:
         try:
-            result = recognise(image_loader())
+            with image_loader() as image:
+                result = recognise(image)
         except SanadError as error:
             code = error.code
         else:
@@ -203,29 +207,32 @@ def _pdf(data: bytes, units: _Units, ocr_enabled: bool) -> tuple[list[Extraction
 
 def _pdf_page_image(data: bytes, index: int) -> "Callable[[], Image.Image]":
     def load() -> Image.Image:
-        document = pdfium.PdfDocument(data)
         try:
-            page = document[index]
-            width, height = page.get_size()
-            scale = OCR_DPI / 72
-            if width * scale * height * scale > MAX_OCR_PIXELS:
-                raise SanadError("OCR_PAGE_TOO_LARGE")
-            bitmap = page.render(scale=scale, grayscale=True)
-            return bitmap.to_pil().convert("RGB")
+            with (
+                _PDFIUM_LOCK,
+                closing(pdfium.PdfDocument(data)) as document,
+                closing(document[index]) as page,
+            ):
+                width, height = page.get_size()
+                scale = OCR_DPI / 72
+                if width * scale * height * scale > MAX_OCR_PIXELS:
+                    raise SanadError("OCR_PAGE_TOO_LARGE")
+                with closing(page.render(scale=scale, grayscale=True)) as bitmap:
+                    return bitmap.to_pil().convert("RGB")
         except SanadError:
             raise
         except Exception:
             raise SanadError("OCR_RENDER_FAILED") from None
-        finally:
-            document.close()
 
     return load
 
 
 def _images(data: bytes, units: _Units, ocr_enabled: bool) -> list[ExtractionFailure]:
     failures: list[ExtractionFailure] = []
-    for number, image in enumerate(recognise_image_bytes(data), start=1):
-        _ocr_page(lambda image=image: image, number, units, failures, ocr_enabled)
+    with closing(recognise_image_bytes(data)) as images:
+        for number, image in enumerate(images, start=1):
+            with image:
+                _ocr_page(lambda image=image: image, number, units, failures, ocr_enabled)
     return failures
 
 
@@ -293,7 +300,7 @@ def extract_document(data: bytes, mime_type: str, *, ocr: bool | None = None) ->
 
     # OCR is used only when Tesseract with Arabic and English data is installed here.
     ocr_enabled = ocr_available() if ocr is None else ocr and ocr_available()
-    ocr_tag = f"+ocr-tesseract-{tesseract_version()}"
+    ocr_tag = f"+ocr-tesseract-{tesseract_version()}:heading-v2"
     units = _Units()
     failures: list[ExtractionFailure] = []
     try:
