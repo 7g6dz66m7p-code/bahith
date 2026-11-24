@@ -128,9 +128,10 @@ describe('workspace isolation (row-level security)', () => {
       // The database and the Drizzle schema agree on which tables are tenant tables…
       expect(rows.map((row) => row.table)).toEqual(tenantTableNames);
       // …and the list is the one Phase 1 specifies (memberships + 20 research tables).
-      // 22 research tables: the 19 of Phase 1, document_comments (draft review),
-      // workspace_invitations (members) and notifications.
-      expect(tenantTableNames).toHaveLength(23);
+      // 25 research tables: the 19 of Phase 1, document_comments (draft review),
+      // workspace_invitations (members), notifications, and collections,
+      // collection_sources and highlights (library organisation).
+      expect(tenantTableNames).toHaveLength(26);
       for (const row of rows) {
         expect(row, row.table).toMatchObject({ enabled: true, forced: true });
         expect(row.policies, row.table).toBeGreaterThan(0);
@@ -298,6 +299,33 @@ describe('workspace isolation (row-level security)', () => {
               entityId: b.documentId,
             }),
           ),
+        () =>
+          database.withWorkspace(a.workspaceId, (tx) =>
+            tx.insert(schema.collections).values({
+              workspaceId: b.workspaceId,
+              projectId: b.projectId,
+              name: 'intruder',
+            }),
+          ),
+        () =>
+          database.withWorkspace(a.workspaceId, (tx) =>
+            tx.insert(schema.collectionSources).values({
+              workspaceId: b.workspaceId,
+              collectionId: b.collectionId,
+              sourceId: b.sourceId,
+            }),
+          ),
+        () =>
+          database.withWorkspace(a.workspaceId, (tx) =>
+            tx.insert(schema.highlights).values({
+              workspaceId: b.workspaceId,
+              projectId: b.projectId,
+              chunkId: b.chunkId,
+              charStart: 0,
+              charEnd: 1,
+              quote: 'ا',
+            }),
+          ),
       ];
       for (const attempt of attempts) {
         expect(await pgErrorCode(attempt)).toBe(PG_INSUFFICIENT_PRIVILEGE);
@@ -360,6 +388,14 @@ describe('workspace isolation (row-level security)', () => {
           ),
         () =>
           database.withWorkspace(a.workspaceId, (tx) =>
+            tx.insert(schema.collections).values({
+              workspaceId: a.workspaceId,
+              projectId: b.projectId,
+              name: 'intruder',
+            }),
+          ),
+        () =>
+          database.withWorkspace(a.workspaceId, (tx) =>
             tx.insert(schema.notifications).values({
               workspaceId: a.workspaceId,
               recipientUserId: a.userId,
@@ -367,6 +403,33 @@ describe('workspace isolation (row-level security)', () => {
               entityType: 'file',
               entityId: a.fileId,
               projectId: b.projectId,
+            }),
+          ),
+        () =>
+          database.withWorkspace(a.workspaceId, (tx) =>
+            tx.insert(schema.collectionSources).values({
+              workspaceId: a.workspaceId,
+              collectionId: a.collectionId,
+              sourceId: b.sourceId,
+            }),
+          ),
+        () =>
+          database.withWorkspace(a.workspaceId, (tx) =>
+            tx.insert(schema.collectionSources).values({
+              workspaceId: a.workspaceId,
+              collectionId: b.collectionId,
+              sourceId: a.sourceId,
+            }),
+          ),
+        () =>
+          database.withWorkspace(a.workspaceId, (tx) =>
+            tx.insert(schema.highlights).values({
+              workspaceId: a.workspaceId,
+              projectId: a.projectId,
+              chunkId: b.chunkId,
+              charStart: 0,
+              charEnd: 1,
+              quote: 'ا',
             }),
           ),
       ];

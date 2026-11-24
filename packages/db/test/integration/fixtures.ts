@@ -25,6 +25,7 @@ export interface WorkspaceFixture {
   chunkId: string;
   documentId: string;
   claimId: string;
+  collectionId: string;
 }
 
 function only<T>(rows: T[]): T {
@@ -216,6 +217,30 @@ export async function seedWorkspace(
         authorId: user.id,
         authorName: `Workspace ${label}`,
       });
+      const collection = only(
+        await tx
+          .insert(schema.collections)
+          .values({
+            workspaceId,
+            projectId: project.id,
+            name: `مجموعة ${label}`,
+            createdBy: user.id,
+          })
+          .returning({ id: schema.collections.id }),
+      );
+      await tx
+        .insert(schema.collectionSources)
+        .values({ workspaceId, collectionId: collection.id, sourceId: source.id });
+      await tx.insert(schema.highlights).values({
+        workspaceId,
+        projectId: project.id,
+        chunkId: chunk.id,
+        charStart: 0,
+        charEnd: 12,
+        quote: 'الْإِحْصَاءُ',
+        note: `ملاحظة ${label}`,
+        createdBy: user.id,
+      });
       await tx.insert(schema.workspaceInvitations).values({
         workspaceId,
         email: `invitee-${label.toLowerCase()}@example.test`,
@@ -273,6 +298,7 @@ export async function seedWorkspace(
         chunkId: chunk.id,
         documentId: document.id,
         claimId: claim.id,
+        collectionId: collection.id,
       };
     },
     { userId: user.id },

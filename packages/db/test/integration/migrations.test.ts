@@ -46,7 +46,7 @@ describe('migrations', () => {
     const all = await loadMigrations();
     expect(await migrateUp(client)).toEqual(all.map((m) => m.tag));
 
-    expect(await listNames(client, TABLES)).toHaveLength(31 + 1); // + schema_migrations
+    expect(await listNames(client, TABLES)).toHaveLength(34 + 1); // + schema_migrations
     expect(await listNames(client, EXTENSIONS)).toEqual(['vector']);
     expect(await listNames(client, ROLES)).toEqual([
       'bahith_app',
@@ -136,13 +136,58 @@ describe('migrations', () => {
     expect(await listNames(client, forced)).toEqual(['true']);
     expect(await listNames(client, grants)).toEqual(['INSERT', 'SELECT', 'UPDATE']);
     const tags = await rollBackThrough('0012_notifications');
-    expect(tags).toEqual(['0012_notifications']);
+    expect(tags[0]).toBe('0012_notifications');
     expect(await listNames(client, table)).toEqual([]);
     expect(await listNames(client, enums)).toEqual([]);
     expect(await listNames(client, TABLES)).toHaveLength(30 + 1);
     await reapply(tags);
     expect(await listNames(client, policy)).toEqual(['notifications_tenant_isolation']);
     expect(await listNames(client, grants)).toEqual(['INSERT', 'SELECT', 'UPDATE']);
+  });
+
+  it('rolls back library organisation (collections, highlights) on its own', async () => {
+    const tables = `SELECT tablename AS name FROM pg_tables
+                    WHERE tablename IN ('collections', 'collection_sources', 'highlights') ORDER BY 1`;
+    const forced = `SELECT relname || ':' || relforcerowsecurity::text AS name FROM pg_class
+                    WHERE relname IN ('collections', 'collection_sources', 'highlights')
+                      AND relkind = 'r' ORDER BY 1`;
+    const grants = `SELECT table_name || ':' || privilege_type AS name
+                    FROM information_schema.role_table_grants
+                    WHERE table_name IN ('collections', 'collection_sources', 'highlights')
+                      AND grantee = 'bahith_app' ORDER BY 1`;
+    const colorEnum = `SELECT typname AS name FROM pg_type WHERE typname = 'highlight_color'`;
+    const expectedGrants = [
+      'collection_sources:DELETE',
+      'collection_sources:INSERT',
+      'collection_sources:SELECT',
+      'collections:DELETE',
+      'collections:INSERT',
+      'collections:SELECT',
+      'collections:UPDATE',
+      'highlights:DELETE',
+      'highlights:INSERT',
+      'highlights:SELECT',
+      'highlights:UPDATE',
+    ];
+    expect(await listNames(client, tables)).toEqual([
+      'collection_sources',
+      'collections',
+      'highlights',
+    ]);
+    expect(await listNames(client, forced)).toEqual([
+      'collection_sources:true',
+      'collections:true',
+      'highlights:true',
+    ]);
+    expect(await listNames(client, grants)).toEqual(expectedGrants);
+    expect(await listNames(client, colorEnum)).toEqual(['highlight_color']);
+    const tags = await rollBackThrough('0013_library_organisation');
+    expect(tags).toEqual(['0013_library_organisation']);
+    expect(await listNames(client, tables)).toEqual([]);
+    expect(await listNames(client, colorEnum)).toEqual([]);
+    expect(await listNames(client, TABLES)).toHaveLength(31 + 1);
+    await reapply(tags);
+    expect(await listNames(client, grants)).toEqual(expectedGrants);
   });
 
   it('rolls back workspace invitations on their own', async () => {
@@ -270,6 +315,6 @@ describe('migrations', () => {
     expect(await rollbackLast(client)).toEqual([]);
 
     expect(await migrateUp(client)).toEqual(all.map((m) => m.tag));
-    expect(await listNames(client, TABLES)).toHaveLength(31 + 1);
+    expect(await listNames(client, TABLES)).toHaveLength(34 + 1);
   });
 });

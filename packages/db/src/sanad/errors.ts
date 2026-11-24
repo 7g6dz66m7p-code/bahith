@@ -12,7 +12,13 @@ export type SanadErrorCode =
   | 'REVIEW_ANCHOR_INVALID'
   | 'REVIEW_NOT_FOUND'
   /** The comment is not open, or the action does not apply to its kind. */
-  | 'REVIEW_INVALID_STATE';
+  | 'REVIEW_INVALID_STATE'
+  /** A collection, highlight or passage is not in this project. */
+  | 'LIBRARY_NOT_FOUND'
+  /** Another collection of the project already has this name. */
+  | 'LIBRARY_NAME_TAKEN'
+  /** The highlighted text is not exactly the stored passage at those offsets. */
+  | 'HIGHLIGHT_QUOTE_MISMATCH';
 
 export class SanadError extends Error {
   readonly code: SanadErrorCode;

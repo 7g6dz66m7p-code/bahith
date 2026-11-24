@@ -116,3 +116,21 @@ export type {
   NotificationReader,
   NotifyInput,
 } from './notifications';
+export {
+  addHighlight,
+  addHighlightSchema,
+  addSourceToCollection,
+  codePointSlice,
+  collectionNameSchema,
+  createCollection,
+  deleteCollection,
+  deleteHighlight,
+  HIGHLIGHT_COLORS,
+  listCollections,
+  listHighlights,
+  removeSourceFromCollection,
+  renameCollection,
+  updateHighlightNote,
+  updateHighlightSchema,
+} from './collections';
+export type { CollectionEntry, HighlightColor, HighlightEntry } from './collections';
