@@ -8,6 +8,7 @@ import { OrcidClient } from './providers/orcid';
 import { PubmedClient } from './providers/pubmed';
 import { SemanticScholarClient } from './providers/semantic-scholar';
 import { UnpaywallClient } from './providers/unpaywall';
+import { ZoteroClient } from './providers/zotero';
 
 export {
   loadScholarlyConfig,
@@ -64,6 +65,14 @@ export {
   type OpenAccessResult,
 } from './providers/unpaywall';
 export {
+  ZOTERO_MAX_ITEMS,
+  ZOTERO_PAGE_SIZE,
+  ZoteroClient,
+  zoteroCredentialsSchema,
+  type ZoteroCredentials,
+  type ZoteroLibrary,
+} from './providers/zotero';
+export {
   PROVIDER_IDS,
   type CslDate,
   type CslItem,
@@ -109,6 +118,7 @@ export interface ScholarlyClients {
   doaj: DoajClient;
   orcid: OrcidClient;
   unpaywall: UnpaywallClient;
+  zotero: ZoteroClient;
 }
 
 /**
@@ -131,5 +141,6 @@ export function createScholarlyClients(
     doaj: new DoajClient(ctx),
     orcid: new OrcidClient(ctx),
     unpaywall: new UnpaywallClient(ctx),
+    zotero: new ZoteroClient(ctx),
   };
 }

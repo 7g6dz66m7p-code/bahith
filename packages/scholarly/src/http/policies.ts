@@ -100,6 +100,16 @@ export const HOST_POLICIES: Record<ProviderId, HostPolicy> = {
     dailyLimit: 100_000,
     requiresContactEmail: true,
   },
+  // Zotero Web API: no fixed rate is published; clients must slow down on `Backoff` and
+  // obey 429 Retry-After. Imports read pages one at a time, at most two per second.
+  zotero: {
+    provider: 'zotero',
+    host: 'api.zotero.org',
+    ratePerSecond: 2,
+    burst: 2,
+    maxConcurrent: 1,
+    requiresContactEmail: false,
+  },
 };
 
 /** Limiter pool of Crossref list queries (`/works?query…`, `/works?sample…`). */

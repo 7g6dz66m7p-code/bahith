@@ -7,6 +7,7 @@ export const PROVIDER_IDS = [
   'doaj',
   'orcid',
   'unpaywall',
+  'zotero',
 ] as const;
 
 export type ProviderId = (typeof PROVIDER_IDS)[number];
