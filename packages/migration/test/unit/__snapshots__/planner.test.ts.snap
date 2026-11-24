@@ -1,0 +1,110 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`report > is deterministic, contains no personal data, and matches the snapshot 1`] = `
+"# تقرير الترحيل التجريبي (Dry run) — Legacy migration report
+
+- generated_at: 2026-01-01T00:00:00.000Z
+- source: json
+- mode: dry-run (لم يُكتب أي شيء / nothing was written)
+
+## الأعداد لكل كيان / Counts per entity
+
+| entity | read | accepted | rejected | conflict |
+| --- | --- | --- | --- | --- |
+| users | 10 | 3 | 3 | 4 |
+| subscriptions | 7 | 3 | 2 | 2 |
+| payments | 11 | 6 | 3 | 2 |
+| projects | 5 | 3 | 1 | 1 |
+| files | 3 | 2 | 1 | 0 |
+| telegramLinks | 4 | 2 | 1 | 1 |
+
+## الأسباب / Reasons
+
+| entity | reason | rows |
+| --- | --- | --- |
+| users | duplicate_email | 1 |
+| users | invalid:email | 1 |
+| users | missing_email | 1 |
+| users | same_email_different_phone | 2 |
+| users | same_phone_different_email | 2 |
+| subscriptions | orphan_user | 1 |
+| subscriptions | overlapping_period | 2 |
+| subscriptions | period_end_before_start | 1 |
+| subscriptions | subscription_without_payment | 1 |
+| payments | amount_outlier | 1 |
+| payments | duplicate_provider_reference | 1 |
+| payments | invalid:amountMinor | 1 |
+| payments | paid_without_paid_at | 1 |
+| payments | payment_without_user | 1 |
+| projects | invalid:title | 1 |
+| projects | user_in_conflict | 1 |
+| files | file_without_location | 1 |
+| telegramLinks | user_in_conflict | 1 |
+| telegramLinks | user_rejected | 1 |
+
+## الصفوف المرفوضة والمتعارضة / Rejected and conflicting rows
+
+| entity | legacy_id | status | reasons | details |
+| --- | --- | --- | --- | --- |
+| users | 2 | rejected | duplicate_email | duplicateOf=1 |
+| users | 3 | conflict | same_email_different_phone | email=b***@e***.org; group=3,4 |
+| users | 4 | conflict | same_email_different_phone | email=b***@e***.org; group=3,4 |
+| users | 5 | conflict | same_phone_different_email | group=5,6 |
+| users | 6 | conflict | same_phone_different_email | group=5,6 |
+| users | 7 | rejected | missing_email |  |
+| users | 8 | rejected | invalid:email |  |
+| subscriptions | 3 | conflict | overlapping_period | overlapsWith=4 |
+| subscriptions | 4 | conflict | overlapping_period, subscription_without_payment | overlapsWith=3 |
+| subscriptions | 6 | rejected | orphan_user |  |
+| subscriptions | 7 | rejected | period_end_before_start |  |
+| payments | 3 | rejected | duplicate_provider_reference | duplicateOf=2 |
+| payments | 5 | conflict | payment_without_user |  |
+| payments | 6 | rejected | invalid:amountMinor |  |
+| payments | 7 | conflict | amount_outlier | currencyMedianMinor=4900 |
+| payments | 11 | rejected | paid_without_paid_at |  |
+| projects | 3 | conflict | user_in_conflict |  |
+| projects | 4 | rejected | invalid:title |  |
+| files | 3 | rejected | file_without_location |  |
+| telegramLinks | 333 | rejected | user_rejected |  |
+| telegramLinks | 444 | conflict | user_in_conflict |  |
+
+## التحذيرات / Warnings
+
+- users 9: phone_not_e164_dropped
+- payments *: multiple_currencies:KWD
+- payments *: multiple_currencies:SAR
+- files 2: no_sha256
+- files 2: unknown_project
+
+## المطابقة المالية / Financial reconciliation
+
+| currency | month | paid | paid total | matched | unmatched | refunded | covered days |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| KWD | 2024-03 | 1 | 9.000 KWD | 9.000 KWD | 0.000 KWD | 0 (0.000 KWD) | 31 |
+| SAR | 2024-03 | 3 | 147.00 SAR | 98.00 SAR | 49.00 SAR | 0 (0.00 SAR) | 123 |
+| SAR | 2024-04 | 1 | 49.00 SAR | 49.00 SAR | 0.00 SAR | 1 (49.00 SAR) | 30 |
+| SAR | 2024-05 | 1 | 4900.00 SAR | 0.00 SAR | 4900.00 SAR | 0 (0.00 SAR) | 0 |
+
+### الإجماليات / Totals
+
+- KWD: paid 9.000 KWD, unmatched 0.000 KWD
+- SAR: paid 5096.00 SAR, unmatched 4949.00 SAR
+
+### مدفوعات غير مطابقة / Unmatched payments
+
+- 5, 7
+
+### مفاتيح عدم التكرار / Idempotency keys
+
+Other entities use \`<entity>:<legacy_id>\`. Payments:
+
+- 1 → \`payment:gw:REF-1\`
+- 2 → \`payment:gw:REF-2\`
+- 4 → \`payment:gw:REF-4\`
+- 5 → \`payment:gw:REF-5\`
+- 7 → \`payment:gw:REF-7\`
+- 8 → \`payment:gw:REF-8\`
+- 9 → \`payment:gw:REF-9\`
+- 10 → \`payment:gw:REF-10\`
+"
+`;

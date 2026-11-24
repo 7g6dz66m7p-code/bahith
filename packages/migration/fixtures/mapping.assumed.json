@@ -1,0 +1,99 @@
+{
+  "version": 1,
+  "description": "ASSUMED legacy schema used by the tests only. Replace with the owner's real schema mapping.",
+  "defaults": {
+    "phoneCountryCode": "966",
+    "currency": "SAR",
+    "language": "ar",
+    "provider": "legacy-gateway"
+  },
+  "entities": {
+    "users": {
+      "table": "legacy.members",
+      "key": "id",
+      "fields": {
+        "legacyId": "id",
+        "email": "email",
+        "phone": "mobile",
+        "name": "full_name",
+        "createdAt": "created_on",
+        "updatedAt": "updated_on"
+      }
+    },
+    "subscriptions": {
+      "table": "legacy.plans_subs",
+      "key": "id",
+      "fields": {
+        "legacyId": "id",
+        "userLegacyId": "member_id",
+        "planCode": "plan",
+        "status": "state",
+        "periodStart": "starts_at",
+        "periodEnd": "ends_at",
+        "paymentLegacyId": "payment_id",
+        "updatedAt": "updated_on"
+      },
+      "values": {
+        "status": { "1": "active", "0": "expired", "2": "canceled" },
+        "planCode": { "premium": "pro", "basic": "free" }
+      }
+    },
+    "payments": {
+      "table": "legacy.transactions",
+      "key": "id",
+      "amountUnit": "major",
+      "fields": {
+        "legacyId": "id",
+        "userLegacyId": "member_id",
+        "subscriptionLegacyId": "sub_id",
+        "amount": "amount",
+        "currency": "currency",
+        "provider": "gateway",
+        "providerReference": "gateway_ref",
+        "status": "state",
+        "paidAt": "paid_on",
+        "updatedAt": "updated_on"
+      },
+      "values": {
+        "status": { "success": "paid", "captured": "paid", "fail": "failed", "refund": "refunded" }
+      }
+    },
+    "projects": {
+      "table": "legacy.researches",
+      "key": "id",
+      "fields": {
+        "legacyId": "id",
+        "userLegacyId": "member_id",
+        "title": "title",
+        "researchQuestion": "question",
+        "language": "lang",
+        "createdAt": "created_on",
+        "updatedAt": "updated_on"
+      }
+    },
+    "files": {
+      "table": "legacy.uploads",
+      "key": "id",
+      "fields": {
+        "legacyId": "id",
+        "userLegacyId": "member_id",
+        "projectLegacyId": "research_id",
+        "storagePath": "path",
+        "sha256": "checksum",
+        "mimeType": "mime",
+        "sizeBytes": "size",
+        "updatedAt": "updated_on"
+      }
+    },
+    "telegramLinks": {
+      "table": "legacy.tg_users",
+      "key": "tg_id",
+      "fields": {
+        "legacyId": "tg_id",
+        "telegramUserId": "tg_id",
+        "userLegacyId": "member_id",
+        "updatedAt": "updated_on"
+      }
+    }
+  }
+}
