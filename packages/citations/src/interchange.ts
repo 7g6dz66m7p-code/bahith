@@ -73,13 +73,13 @@ function parse(text: unknown, format: InterchangeFormat): CslItem[] {
 }
 
 /**
- * The entry key (BibTeX) or ID tag (RIS) when present, else `<format>-<n>`. Repeated keys
+ * The entry key (BibTeX), ID tag (RIS) or item id (CSL-JSON) when present, else `<format>-<n>`. Repeated keys
  * get a `-2`, `-3`… suffix so every returned item has a distinct id.
  */
 function uniqueId(
   entry: Record<string, unknown>,
   index: number,
-  format: InterchangeFormat,
+  format: InterchangeFormat | 'csl',
   used: Set<string>,
 ): string {
   const declared = [entry.id, entry['citation-key']].find(
@@ -108,6 +108,92 @@ export function parseBibtex(text: string): CslItem[] {
 /** Parses RIS text into CSL-JSON items. */
 export function parseRis(text: string): CslItem[] {
   return parse(text, 'ris');
+}
+
+/** The CSL-JSON items of a parsed JSON value: an array, or Zotero's `{ "items": [...] }`. */
+function cslJsonEntries(value: unknown): readonly unknown[] | null {
+  const list: unknown = isRecord(value) ? value.items : value;
+  return Array.isArray(list) ? (list as readonly unknown[]) : null;
+}
+
+function looksLikeCslItem(value: unknown): boolean {
+  return isRecord(value) && (typeof value.type === 'string' || typeof value.title === 'string');
+}
+
+/**
+ * Which interchange format a bibliography file is in. CSL-JSON (what Zotero and most
+ * reference managers export as "CSL JSON") is a JSON array of objects with a `type` or
+ * `title`; RIS starts records with `TY  -`; anything else is treated as BibTeX.
+ */
+export function detectInterchangeFormat(text: string): 'csl-json' | 'ris' | 'bibtex' {
+  const source = text.replace(/^\uFEFF/, '').trimStart();
+  if (source.startsWith('[') || source.startsWith('{')) {
+    try {
+      const entries = cslJsonEntries(JSON.parse(source));
+      if (entries !== null && entries.length > 0 && entries.some(looksLikeCslItem)) {
+        return 'csl-json';
+      }
+    } catch {
+      // Not JSON: fall through to the text formats.
+    }
+  }
+  return /^\s*TY\s{2}-/mu.test(source) ? 'ris' : 'bibtex';
+}
+
+export interface CslJsonImport {
+  /** Valid items, with unknown types mapped to `document` and unique ids. */
+  items: CslItem[];
+  /** Entries that were not CSL items or failed validation (skipped, not fatal). */
+  invalid: number;
+}
+
+/**
+ * Parses CSL-JSON: text, or an already-parsed JSON value (a Zotero Web API
+ * `format=csljson` response). Unlike BibTeX/RIS, one malformed entry does not reject the
+ * whole file: real libraries carry odd records, so they are counted in `invalid` and
+ * skipped. CSL-JSON is the native item format of citation-js and citeproc, so no
+ * conversion plugin is involved: items are validated by {@link cslItemSchema} only.
+ */
+export function parseCslJson(input: unknown): CslJsonImport {
+  let value = input;
+  if (typeof input === 'string') {
+    if (input.length > MAX_INTERCHANGE_CHARS) throw new CitationError('CITATION_INPUT_TOO_LARGE');
+    const source = input.replace(/^\uFEFF/, '');
+    if (source.trim() === '') throw new CitationError('CITATION_EMPTY_INPUT');
+    try {
+      value = JSON.parse(source);
+    } catch {
+      // The SyntaxError message quotes the input, so it is not attached.
+      throw new CitationError('CITATION_PARSE_FAILED');
+    }
+  }
+  const entries = cslJsonEntries(value);
+  if (entries === null) {
+    throw new CitationError('CITATION_INVALID_INPUT', {
+      issues: [{ path: [], code: 'invalid_type' }],
+    });
+  }
+  if (entries.length === 0) throw new CitationError('CITATION_NO_ENTRIES');
+  if (entries.length > LIMITS.items) throw new CitationError('CITATION_INPUT_TOO_LARGE');
+
+  const usedIds = new Set<string>();
+  const items: CslItem[] = [];
+  let invalid = 0;
+  entries.forEach((entry, index) => {
+    if (!isRecord(entry)) {
+      invalid += 1;
+      return;
+    }
+    const candidate: Record<string, unknown> = {
+      ...entry,
+      type: typeof entry.type === 'string' && KNOWN_TYPES.has(entry.type) ? entry.type : 'document',
+    };
+    candidate.id = uniqueId(entry, index, 'csl', usedIds);
+    const result = cslItemSchema.safeParse(candidate);
+    if (result.success) items.push(result.data);
+    else invalid += 1;
+  });
+  return { items, invalid };
 }
 
 // ---------------------------------------------------------------------------

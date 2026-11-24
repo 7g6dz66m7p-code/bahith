@@ -55,7 +55,16 @@ export {
 
 export { ARABIC_TRADITIONAL_VERSION } from './arabic-traditional';
 
-export { MAX_INTERCHANGE_CHARS, parseBibtex, parseRis, toBibtex, toRis } from './interchange';
+export {
+  detectInterchangeFormat,
+  MAX_INTERCHANGE_CHARS,
+  parseBibtex,
+  parseCslJson,
+  parseRis,
+  toBibtex,
+  toRis,
+  type CslJsonImport,
+} from './interchange';
 
 export {
   checkCitationConsistency,

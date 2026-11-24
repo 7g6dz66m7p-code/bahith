@@ -3,8 +3,10 @@ import { describe, expect, it } from 'vitest';
 import {
   CitationError,
   cslItemSchema,
+  detectInterchangeFormat,
   MAX_INTERCHANGE_CHARS,
   parseBibtex,
+  parseCslJson,
   parseRis,
   toBibtex,
   toRis,
@@ -289,5 +291,107 @@ describe('round trips', () => {
   it('export validates items', () => {
     expectCode(() => toBibtex([{ id: 'x' }]), 'CITATION_INVALID_INPUT');
     expectCode(() => toRis([arBook, arBook]), 'CITATION_DUPLICATE_ID');
+  });
+});
+
+/**
+ * The shape Zotero writes for "Export Library… → CSL JSON" (and the Web API's
+ * format=csljson): ids like "<library>/<key>", string date parts, Zotero-only fields such as
+ * `source` or `event-place`, and an Arabic record. Synthetic data, not real publications.
+ */
+const ZOTERO_CSL_JSON = JSON.stringify([
+  {
+    id: '12345/ABCD2345',
+    type: 'article-journal',
+    title: 'أثر التعلم المدمج في التحصيل',
+    'container-title': 'مجلة العلوم التربوية',
+    page: '45-67',
+    volume: '12',
+    issue: '3',
+    source: 'Zotero',
+    language: 'ar',
+    author: [{ family: 'الأحمد', given: 'سارة' }],
+    issued: { 'date-parts': [['2024', 3, 1]] },
+    DOI: '10.5555/example.2024.3',
+  },
+  {
+    id: '12345/EFGH6789',
+    type: 'thesis',
+    genre: 'PhD thesis',
+    title: 'Methods of Qualitative Inquiry',
+    publisher: 'Example University',
+    'event-place': 'Somewhere',
+    author: [{ family: 'Smith', given: 'Jane' }],
+    issued: { 'date-parts': [[2019]] },
+  },
+]);
+
+describe('CSL-JSON (Zotero export)', () => {
+  it('detects CSL-JSON, RIS and BibTeX', () => {
+    expect(detectInterchangeFormat(ZOTERO_CSL_JSON)).toBe('csl-json');
+    expect(detectInterchangeFormat(`\uFEFF  ${ZOTERO_CSL_JSON}`)).toBe('csl-json');
+    const envelope = `{"items": ${ZOTERO_CSL_JSON}}`;
+    expect(detectInterchangeFormat(envelope)).toBe('csl-json');
+    expect(detectInterchangeFormat('TY  - JOUR\nTI  - x\nER  - \n')).toBe('ris');
+    expect(detectInterchangeFormat(BIBTEX)).toBe('bibtex');
+    // JSON that is not a list of CSL items is not CSL-JSON (and then fails as BibTeX).
+    expect(detectInterchangeFormat('[1, 2, 3]')).toBe('bibtex');
+    expect(detectInterchangeFormat('{"title": "x"}')).toBe('bibtex');
+    expect(detectInterchangeFormat('[]')).toBe('bibtex');
+    expect(detectInterchangeFormat('[{"type": ')).toBe('bibtex');
+  });
+
+  it('parses a Zotero CSL-JSON export into validated items, Arabic intact', () => {
+    const { items, invalid } = parseCslJson(ZOTERO_CSL_JSON);
+    expect(invalid).toBe(0);
+    expect(items).toHaveLength(2);
+    expect(items[0]).toMatchObject({
+      id: '12345/ABCD2345',
+      type: 'article-journal',
+      title: 'أثر التعلم المدمج في التحصيل',
+      'container-title': 'مجلة العلوم التربوية',
+      author: [{ family: 'الأحمد', given: 'سارة' }],
+      issued: { 'date-parts': [[2024, 3, 1]] },
+      DOI: '10.5555/example.2024.3',
+    });
+    // Fields outside the accepted subset are dropped, never passed on.
+    expect(items[0]).not.toHaveProperty('source');
+    expect(items[1]).not.toHaveProperty('event-place');
+    expect(items[1]).toMatchObject({ type: 'thesis', genre: 'PhD thesis' });
+  });
+
+  it('accepts the Web API envelope and a parsed value', () => {
+    const parsed: unknown = JSON.parse(ZOTERO_CSL_JSON);
+    expect(parseCslJson({ items: parsed }).items).toHaveLength(2);
+    expect(parseCslJson(parsed).items).toHaveLength(2);
+  });
+
+  it('skips malformed entries instead of rejecting the library', () => {
+    const { items, invalid } = parseCslJson(
+      JSON.stringify([
+        { id: 'a', type: 'book', title: 'Good' },
+        'not an item',
+        { id: 'b', type: 'book', title: 'Bad date', issued: { 'date-parts': [['spring']] } },
+        { id: 'c', type: 'zotero-only-type', title: 'Unknown type' },
+        { id: 'a', type: 'book', title: 'Repeated id' },
+      ]),
+    );
+    expect(invalid).toBe(2);
+    expect(items.map((item) => [item.id, item.type])).toEqual([
+      ['a', 'book'],
+      ['c', 'document'],
+      ['a-2', 'book'],
+    ]);
+  });
+
+  it('fails with stable codes on unusable input', () => {
+    expectCode(() => parseCslJson(''), 'CITATION_EMPTY_INPUT');
+    expectCode(() => parseCslJson('[{"type": '), 'CITATION_PARSE_FAILED');
+    expectCode(() => parseCslJson('{"title": "x"}'), 'CITATION_INVALID_INPUT');
+    expectCode(() => parseCslJson('[]'), 'CITATION_NO_ENTRIES');
+    expectCode(
+      () => parseCslJson('x'.repeat(MAX_INTERCHANGE_CHARS + 1)),
+      'CITATION_INPUT_TOO_LARGE',
+    );
   });
 });
