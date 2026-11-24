@@ -1,7 +1,7 @@
 /** Real, isolated services for browser tests. Credentials never leave this child process. */
 import { spawn } from 'node:child_process';
 import type { ChildProcess } from 'node:child_process';
-import { rm, writeFile } from 'node:fs/promises';
+import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 
@@ -9,6 +9,8 @@ import { createDatabase } from '@bahith/db';
 import { seedReferenceData, startTestDatabase } from '@bahith/db/testing';
 import { createStorage } from '@bahith/pipeline';
 import { GenericContainer, Wait } from 'testcontainers';
+
+import { SMS_CAPTURE_DIR } from './sms';
 
 const require = createRequire(import.meta.url);
 const appDir = path.resolve(import.meta.dirname, '..');
@@ -52,6 +54,7 @@ try {
   client.release();
   await admin.close();
 }
+await mkdir(SMS_CAPTURE_DIR, { recursive: true, mode: 0o700 });
 const env = {
   ...process.env,
   DATABASE_URL: database.appUrl,
@@ -75,6 +78,9 @@ const env = {
   // Fixed test administrators (admin.spec.ts registers them); payments stay off.
   PLATFORM_ADMIN_EMAILS: 'e2e-admin-ar@example.test,e2e-admin-en@example.test',
   PAYMENTS_PROVIDER: '',
+  // Phone OTP codes go to a local file (localhost only); no real SMS is sent in e2e.
+  SMS_PROVIDER: 'capture',
+  SMS_CAPTURE_DIR: SMS_CAPTURE_DIR,
   PAYMENTS_LIVE_AUTHORIZED: '',
   ANTHROPIC_API_KEY: '',
   OPENAI_API_KEY: '',

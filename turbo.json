@@ -30,7 +30,8 @@
     "NCBI_API_KEY",
     "NODE_USE_ENV_PROXY",
     "PLATFORM_ADMIN_EMAILS",
-    "PAYMENTS_*"
+    "PAYMENTS_*",
+    "SMS_*"
   ],
   "tasks": {
     "build": {

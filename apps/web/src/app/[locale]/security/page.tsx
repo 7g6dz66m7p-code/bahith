@@ -5,7 +5,9 @@ import { locale as rootLocale } from 'next/root-params';
 import { AccountSecurity } from '@/components/account-security';
 import { CommandMenu } from '@/components/command-menu';
 import { LocaleSwitcher } from '@/components/locale-switcher';
+import { PhoneVerification } from '@/components/phone-verification';
 import { routing } from '@/i18n/routing';
+import { isSmsDeliveryAvailable } from '@/server/auth';
 import { requireSession } from '@/server/session';
 
 export default async function SecurityPage() {
@@ -19,6 +21,13 @@ export default async function SecurityPage() {
         <LocaleSwitcher />
       </div>
       <AccountSecurity twoFactorEnabled={Boolean(session.user.twoFactorEnabled)} />
+      <div id="phone">
+        <PhoneVerification
+          phoneNumber={session.user.phoneNumber ?? null}
+          verified={Boolean(session.user.phoneNumberVerified)}
+          smsAvailable={isSmsDeliveryAvailable()}
+        />
+      </div>
     </main>
   );
 }

@@ -608,5 +608,24 @@
     "errorRateLimited": "Zotero asked us to slow down. Try again in a minute.",
     "errorTimeout": "Zotero did not answer in time. Nothing was imported.",
     "errorUnavailable": "Zotero could not be reached. Nothing was imported; try again later."
+  },
+  "Phone": {
+    "title": "Phone number",
+    "description": "Verify a mobile number for account recovery and notices. It cannot be used to sign in.",
+    "verified": "Verified number:",
+    "notVerified": "No verified phone number yet.",
+    "number": "Mobile number",
+    "numberHint": "International format with country code, for example +9647701234567.",
+    "sendCode": "Send verification code",
+    "code": "6-digit code",
+    "verify": "Verify number",
+    "changeNumber": "Change number",
+    "codeSent": "A code was sent by SMS. It expires in 5 minutes.",
+    "verifiedSuccess": "Your phone number is verified.",
+    "invalidNumber": "Enter the number in international format, starting with + and the country code.",
+    "invalidCode": "The code is incorrect or has expired.",
+    "sendFailed": "We couldn’t send the code. Try again later.",
+    "tooManyRequests": "Too many attempts. Wait a few minutes and try again.",
+    "unavailable": "SMS verification is not available yet. You can keep using your account normally."
   }
 }
