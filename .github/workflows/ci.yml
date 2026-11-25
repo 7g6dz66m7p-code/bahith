@@ -55,6 +55,7 @@ jobs:
       - uses: astral-sh/setup-uv@v6
       # Local OCR for the document worker (Arabic + English traineddata).
       - run: sudo apt-get update -qq && sudo apt-get install -y -qq tesseract-ocr tesseract-ocr-ara tesseract-ocr-eng
+      - run: sudo scripts/install-arabic-ocr-model.sh
       - run: pnpm install --frozen-lockfile
       # @bahith/export prints PDFs with Playwright Chromium in its unit tests.
       - run: pnpm --filter @bahith/export exec playwright install --with-deps chromium
@@ -78,6 +79,7 @@ jobs:
           sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-common
           sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
           sudo apt-get install -y -qq tesseract-ocr tesseract-ocr-ara tesseract-ocr-eng postgresql-client-16
+          sudo scripts/install-arabic-ocr-model.sh
           # The runner also has a newer client; dumps must come from 16 to restore into 16.
           echo /usr/lib/postgresql/16/bin >> "$GITHUB_PATH"
       - run: pnpm install --frozen-lockfile
@@ -108,6 +110,7 @@ jobs:
       - uses: astral-sh/setup-uv@v6
       # Local OCR for the document worker (Arabic + English traineddata).
       - run: sudo apt-get update -qq && sudo apt-get install -y -qq tesseract-ocr tesseract-ocr-ara tesseract-ocr-eng
+      - run: sudo scripts/install-arabic-ocr-model.sh
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @bahith/web exec playwright install --with-deps chromium
       - run: pnpm --filter @bahith/web run test:e2e

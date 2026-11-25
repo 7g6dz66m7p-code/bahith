@@ -32,6 +32,7 @@ from bahith_worker.sanad.ocr import (
     MAX_OCR_PIXELS,
     OCR_DPI,
     OCR_LAYOUT_VERSION,
+    arabic_model_fingerprint,
     ocr_available,
     recognise,
     recognise_image_bytes,
@@ -317,7 +318,8 @@ def extract_document(data: bytes, mime_type: str, *, ocr: bool | None = None) ->
 
     # OCR is used only when Tesseract with Arabic and English data is installed here.
     ocr_enabled = ocr_available() if ocr is None else ocr and ocr_available()
-    ocr_tag = f"+ocr-tesseract-{tesseract_version()}-{OCR_LAYOUT_VERSION}"
+    model = arabic_model_fingerprint()
+    ocr_tag = f"+ocr-tesseract-{tesseract_version()}-ara-{model}-{OCR_LAYOUT_VERSION}"
     units = _Units()
     failures: list[ExtractionFailure] = []
     try:

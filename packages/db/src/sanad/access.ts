@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
 
 import type { Database, Tx } from '../client';
@@ -58,11 +58,20 @@ export async function withSanadProject<T>(
   return database.withWorkspace(
     workspaceId,
     async (tx) => {
+      // Named prepared statements: these checks run on every request, and planning them
+      // cost about twice their execution under load. Postgres keeps the plan per connection.
       const [member] = await tx
         .select({ role: memberships.role })
         .from(memberships)
-        .where(and(eq(memberships.workspaceId, workspaceId), eq(memberships.userId, userId)))
-        .for('share');
+        .where(
+          and(
+            eq(memberships.workspaceId, sql.placeholder('workspaceId')),
+            eq(memberships.userId, sql.placeholder('userId')),
+          ),
+        )
+        .for('share')
+        .prepare('sanad_member_role')
+        .execute({ workspaceId, userId });
       if (member === undefined || !ALLOWED_ROLES[access].includes(member.role)) {
         throw new SanadError(
           'SANAD_FORBIDDEN',
@@ -72,8 +81,15 @@ export async function withSanadProject<T>(
       const [project] = await tx
         .select({ id: projects.id })
         .from(projects)
-        .where(and(eq(projects.workspaceId, workspaceId), eq(projects.id, projectId)))
-        .for('share');
+        .where(
+          and(
+            eq(projects.workspaceId, sql.placeholder('workspaceId')),
+            eq(projects.id, sql.placeholder('projectId')),
+          ),
+        )
+        .for('share')
+        .prepare('sanad_project_exists')
+        .execute({ workspaceId, projectId });
       if (project === undefined) {
         throw new SanadError(
           'SANAD_PROJECT_NOT_FOUND',

@@ -7,10 +7,14 @@ available or recognises nothing, the page stays empty and carries a failure code
 text is ever inferred or completed.
 """
 
+import hashlib
 import io
+import os
 import re
 import shutil
 from dataclasses import dataclass
+from functools import lru_cache
+from pathlib import Path
 
 import pytesseract
 from PIL import Image
@@ -45,6 +49,32 @@ def tesseract_version() -> str | None:
         return str(pytesseract.get_tesseract_version())
     except (pytesseract.TesseractNotFoundError, OSError):
         return None
+
+
+# Where distributions install traineddata (Debian/Ubuntu 5.x and 4.x, Homebrew, source).
+_TESSDATA_DIRS = (
+    "/usr/share/tesseract-ocr/5/tessdata",
+    "/usr/share/tesseract-ocr/4.00/tessdata",
+    "/opt/homebrew/share/tessdata",
+    "/usr/local/share/tessdata",
+)
+
+
+@lru_cache(maxsize=1)
+def arabic_model_fingerprint() -> str:
+    """First 12 hex digits of the SHA-256 of the Arabic traineddata in use.
+
+    Part of the extractor version, so stored text records which model read it (the
+    distribution's standard model and tessdata_best give different text).
+    """
+    prefix = os.environ.get("TESSDATA_PREFIX")
+    candidates = [Path(prefix)] if prefix else []
+    candidates += [Path(p) for p in _TESSDATA_DIRS]
+    directory = next((d for d in candidates if (d / "ara.traineddata").is_file()), None)
+    model = directory / "ara.traineddata" if directory is not None else None
+    if model is None or not model.is_file():
+        return "unknown"
+    return hashlib.sha256(model.read_bytes()).hexdigest()[:12]
 
 
 def ocr_available() -> bool:

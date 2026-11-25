@@ -62,6 +62,17 @@ services:
   postgres:
     image: pgvector/pgvector:pg16
     restart: unless-stopped
+    # Query statistics for performance work (staging only; no query parameters stored).
+    command:
+      [
+        'postgres',
+        '-c',
+        'shared_preload_libraries=pg_stat_statements',
+        '-c',
+        'pg_stat_statements.track=top',
+        '-c',
+        'pg_stat_statements.track_planning=on',
+      ]
     environment:
       POSTGRES_USER: ${POSTGRES_USER:?Run "pnpm staging:env"}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run "pnpm staging:env"}

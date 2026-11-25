@@ -11,6 +11,18 @@ RUN --mount=type=secret,id=extra_ca,required=false \
  && apt-get update -qq && apt-get install -y -qq --no-install-recommends \
       tesseract-ocr tesseract-ocr-ara tesseract-ocr-eng ca-certificates \
  && rm -rf /var/lib/apt/lists/* /etc/apt/apt.conf.d/99extra-ca /tmp/extra-ca.crt
+# Arabic OCR model: tessdata_best (Apache-2.0), pinned to a commit and verified by SHA-256.
+# Clearly fewer misread words than the distribution's model on scanned Arabic pages (see
+# docs/reports/ocr-arabic.md); the model fingerprint is part of each extraction's version.
+ARG TESSDATA_BEST_COMMIT=e12c65a915945e4c28e237a9b52bc4a8f39a0cec
+ARG ARA_BEST_SHA256=ab9d157d8e38ca00e7e39c7d5363a5239e053f5b0dbdb3167dde9d8124335896
+RUN --mount=type=secret,id=extra_ca,required=false \
+    SSL_CERT_FILE=$([ -s /run/secrets/extra_ca ] && echo /run/secrets/extra_ca || echo /etc/ssl/certs/ca-certificates.crt) \
+    python -c "import hashlib,os,urllib.request as u; \
+d=u.urlopen('https://raw.githubusercontent.com/tesseract-ocr/tessdata_best/${TESSDATA_BEST_COMMIT}/ara.traineddata',timeout=120).read(); \
+assert hashlib.sha256(d).hexdigest()=='${ARA_BEST_SHA256}', 'ara.traineddata checksum mismatch'; \
+p=[x for x in ('/usr/share/tesseract-ocr/5/tessdata','/usr/share/tesseract-ocr/4.00/tessdata') if os.path.isdir(x)][0]; \
+open(os.path.join(p,'ara.traineddata'),'wb').write(d)"
 RUN --mount=type=secret,id=extra_ca,required=false \
     PIP_CERT=$([ -s /run/secrets/extra_ca ] && echo /run/secrets/extra_ca) pip install --no-cache-dir uv==0.9.7
 WORKDIR /app

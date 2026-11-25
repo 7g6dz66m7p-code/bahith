@@ -69,10 +69,25 @@ export async function retrieve(database: Database, input: SanadRetrieveInput) {
     // Minimum-should-match over per-term queries (ADR-0010): a passage must match at
     // least half of the query's terms (by surface form or stem); relevance is the share
     // matched, with cover density only breaking ties within the same share.
-    const terms = sql`(select ${searchTermQueries(query)})`;
-    const anyTerm = sql`(select coalesce(tsquery_or_agg, ''::tsquery) from (select string_agg(q::text, ' | ')::tsquery as tsquery_or_agg from unnest(${terms}) as t(q)) as any_term)`;
+    //
+    // The per-term queries are computed ONCE here and then bound as a parameter. Written
+    // inline, the IMMUTABLE function was folded by the planner at each of its ~10
+    // occurrences: planning took ~10 ms per search against ~1 ms of execution.
+    const prepared = await tx.execute(
+      sql`with t as (select ${searchTermQueries(query)} as q)
+          select q::text[] as terms,
+                 (select coalesce(string_agg(x::text, ' | '), '') from unnest(t.q) as x) as any_term
+          from t`,
+    );
+    const row = z
+      .object({ terms: z.array(z.string()).nullable(), any_term: z.string() })
+      .parse(prepared.rows[0]);
+    const termList = row.terms ?? [];
+    // One JSON parameter (Drizzle would spread a JS array into several parameters).
+    const terms = sql`array(select jsonb_array_elements_text(${JSON.stringify(termList)}::jsonb)::tsquery)`;
+    const anyTerm = sql`${row.any_term}::tsquery`;
     const matched = sql<number>`(select count(*) from unnest(${terms}) as t(q) where ${chunks.tsv} @@ t.q)`;
-    const termCount = sql<number>`cardinality(${terms})`;
+    const termCount = sql<number>`${termList.length}::int`;
     const lexicalRelevance = sql<number>`(${matched}::float8 / greatest(${termCount}, 1) + ts_rank_cd(${chunks.tsv}, ${anyTerm}, 32) * 0.01)`;
     const scope = and(
       eq(chunks.workspaceId, workspaceId),
