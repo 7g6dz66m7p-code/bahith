@@ -1,0 +1,49 @@
+name: Database migrate (Neon)
+
+# Runs migrations, role provisioning, reference data and the privilege audit against a
+# managed database. Manual only. "production" uses the GitHub Environment of that name,
+# which should require a reviewer (the owner) before the job starts.
+# Secrets per environment: DATABASE_ADMIN_URL, DATABASE_URL, AUTH_DATABASE_URL.
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'staging or production'
+        required: true
+        type: choice
+        options: [staging, production]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: db-deploy-${{ inputs.target }}
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.target }}
+    env:
+      DATABASE_ADMIN_URL: ${{ secrets.DATABASE_ADMIN_URL }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      AUTH_DATABASE_URL: ${{ secrets.AUTH_DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Refuse to run without the environment's secrets
+        run: |
+          for v in DATABASE_ADMIN_URL DATABASE_URL AUTH_DATABASE_URL; do
+            [ -n "${!v}" ] || { echo "::error::$v is not set for ${{ inputs.target }}"; exit 1; }
+          done
+      - name: Migrate, provision roles, revoke foreign privileges
+        run: pnpm --filter @bahith/db exec tsx src/cli/migrate.ts --allow-remote
+      - name: Reference data (plans; no prices)
+        run: pnpm --filter @bahith/db exec tsx src/cli/seed.ts --allow-remote
+      - name: Verify schema, RLS, roles, pgvector and tenant isolation (rolled back)
+        run: pnpm --filter @bahith/db exec tsx src/cli/verify-deployment.ts --allow-remote --isolation-smoke

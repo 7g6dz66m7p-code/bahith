@@ -1,0 +1,321 @@
+name: Staging operations
+
+# Staging only. Runs when ops/staging-run.txt changes on a branch (manual dispatch needs
+# the workflow on the default branch). Order: migrate + verify (with a rolled-back
+# isolation smoke) -> R2 storage check -> backup + restore test. Production is never
+# touched here (its workflows are manual, behind the "production" environment).
+on:
+  push:
+    paths: ['ops/staging-run.txt']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: staging-ops
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    environment: staging
+    env:
+      DATABASE_ADMIN_URL: ${{ secrets.DATABASE_ADMIN_URL }}
+      SECRET_DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      SECRET_AUTH_DATABASE_URL: ${{ secrets.AUTH_DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Secrets present (names only)
+        run: |
+          for v in DATABASE_ADMIN_URL SECRET_DATABASE_URL SECRET_AUTH_DATABASE_URL; do
+            [ -n "${!v}" ] || { echo "::error::$v is not set in environment staging"; exit 1; }
+          done
+      - name: Role URLs from DATABASE_ADMIN_URL's host + the secrets' passwords (masked)
+        run: pnpm --filter @bahith/db exec tsx src/cli/role-urls.ts
+      - name: Migrate, provision roles, revoke foreign privileges
+        run: pnpm --filter @bahith/db exec tsx src/cli/migrate.ts --allow-remote
+      - name: Reference data
+        run: pnpm --filter @bahith/db exec tsx src/cli/seed.ts --allow-remote
+      - name: Verify schema, RLS, roles, pgvector and isolation (rolled back)
+        run: pnpm --filter @bahith/db exec tsx src/cli/verify-deployment.ts --allow-remote --isolation-smoke
+
+  storage:
+    needs: migrate
+    runs-on: ubuntu-latest
+    environment: staging
+    env:
+      S3_ENDPOINT: https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
+      S3_REGION: auto
+      S3_BUCKET: ${{ vars.R2_BUCKET || 'bahith-staging-files' }}
+      S3_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      S3_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      S3_FORCE_PATH_STYLE: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: R2 settings present (names only)
+        run: |
+          missing=""
+          for v in S3_BUCKET S3_ACCESS_KEY_ID S3_SECRET_ACCESS_KEY; do [ -n "${!v}" ] || missing="$missing $v"; done
+          [ "$S3_ENDPOINT" != "https://.r2.cloudflarestorage.com" ] || missing="$missing R2_ACCOUNT_ID"
+          if [ -n "$missing" ]; then
+            echo "::error::R2 is not configured in environment staging (missing:$missing). Secrets R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY (bucket defaults to bahith-staging-files)."
+            exit 1
+          fi
+      # tsx is a dependency of @bahith/jobs (which depends on @bahith/pipeline).
+      - run: pnpm --filter @bahith/jobs exec tsx ../../packages/pipeline/src/cli/storage-check.ts
+
+  backup:
+    needs: migrate
+    runs-on: ubuntu-latest
+    environment: staging
+    env:
+      DATABASE_ADMIN_URL: ${{ secrets.DATABASE_ADMIN_URL }}
+      SECRET_DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      SECRET_AUTH_DATABASE_URL: ${{ secrets.AUTH_DATABASE_URL }}
+    services:
+      restore-target:
+        image: pgvector/pgvector:pg18
+        env:
+          POSTGRES_PASSWORD: restore-check-only
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Postgres 18 client (same major as Neon)
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y -qq postgresql-client-18
+          echo /usr/lib/postgresql/18/bin >> "$GITHUB_PATH"
+      - name: Role URLs from DATABASE_ADMIN_URL's host + the secrets' passwords (masked)
+        run: pnpm --filter @bahith/db exec tsx src/cli/role-urls.ts
+      - name: Backup Neon staging
+        run: pnpm --filter @bahith/db exec tsx src/cli/backup.ts --allow-remote --dir="$RUNNER_TEMP/backup"
+      - name: R2 settings for the backup (names only)
+        id: r2
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        run: |
+          missing=""
+          for v in R2_ACCOUNT_ID R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY; do [ -n "${!v}" ] || missing="$missing $v"; done
+          if [ -n "$missing" ]; then
+            echo "::warning::R2 is not configured in environment staging (missing:$missing): the backup is restored from the local copy and not uploaded."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+      # Cloud round trip: upload, delete the local copy, download into an empty folder,
+      # and restore ONLY from what came back from R2 (the manifest's SHA-256s prove it).
+      - name: Upload the backup to R2 and download it back into an empty folder
+        if: steps.r2.outputs.ready == 'true'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          AWS_REQUEST_CHECKSUM_CALCULATION: when_required
+          AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_BACKUP_BUCKET: ${{ vars.R2_BACKUP_BUCKET || 'bahith-staging-files' }}
+        run: |
+          set -euo pipefail
+          case "$R2_BACKUP_BUCKET" in *staging*) ;; *) echo "::error::refusing a non-staging backup bucket"; exit 1;; esac
+          endpoint="https://$R2_ACCOUNT_ID.r2.cloudflarestorage.com"
+          key="db-backups/bahith-staging-$(date -u +%Y-%m-%dT%H%M%SZ)-run$GITHUB_RUN_NUMBER.tgz"
+          tar -C "$RUNNER_TEMP" -czf "$RUNNER_TEMP/upload.tgz" backup
+          aws s3 cp "$RUNNER_TEMP/upload.tgz" "s3://$R2_BACKUP_BUCKET/$key" --endpoint-url "$endpoint" --only-show-errors
+          echo "uploaded $key ($(stat -c %s "$RUNNER_TEMP/upload.tgz") bytes)"
+          rm -rf "$RUNNER_TEMP/backup" "$RUNNER_TEMP/upload.tgz"
+          mkdir -p "$RUNNER_TEMP/from-r2"
+          aws s3 cp "s3://$R2_BACKUP_BUCKET/$key" "$RUNNER_TEMP/from-r2.tgz" --endpoint-url "$endpoint" --only-show-errors
+          tar -C "$RUNNER_TEMP/from-r2" -xzf "$RUNNER_TEMP/from-r2.tgz"
+          echo "downloaded it back from R2 ($(stat -c %s "$RUNNER_TEMP/from-r2.tgz") bytes); local copy deleted"
+          echo "RESTORE_DIR=$RUNNER_TEMP/from-r2/backup" >> "$GITHUB_ENV"
+      - name: Restore into an empty server and verify checksums, migrations, row counts
+        env:
+          DATABASE_ADMIN_URL: postgresql://postgres:restore-check-only@localhost:5432/postgres
+          # The restore target is a throwaway local server: its role URLs must point at it
+          # too (the CLI refuses a mix of servers). Passwords here are local-only.
+          RESTORE_APP_URL: postgresql://bahith_app:Restore-Check-App-1@localhost:5432/postgres
+          RESTORE_AUTH_URL: postgresql://bahith_auth:Restore-Check-Auth-1@localhost:5432/postgres
+        # Exported in the shell so they win over the Neon role URLs in GITHUB_ENV.
+        run: |
+          export DATABASE_URL="$RESTORE_APP_URL" AUTH_DATABASE_URL="$RESTORE_AUTH_URL"
+          if [ -n "${RESTORE_DIR:-}" ]; then echo "restoring from the copy downloaded from R2"; else echo "restoring from the local copy"; fi
+          pnpm --filter @bahith/db exec tsx src/cli/restore.ts --dir="${RESTORE_DIR:-$RUNNER_TEMP/backup}"
+      - name: The cloud backup needs R2
+        if: steps.r2.outputs.ready != 'true'
+        run: |
+          echo "::error::Backup verified locally but not stored in R2: add secrets R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY to environment staging."
+          exit 1
+
+  # The real application against Neon staging: production build of web + jobs + Python
+  # worker (Redis and a mail capture run on the runner; files in R2 staging, or MinIO
+  # without R2 secrets). Sign-up, e-mail
+  # verification, sign-in, upload + OCR, search, assistant, claim check, DOCX/PDF export.
+  # Test accounts use @example.test and are deleted at the end (their workspaces too).
+  journey:
+    needs: migrate
+    runs-on: ubuntu-latest
+    environment: staging
+    services:
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+      mailpit:
+        image: axllent/mailpit:v1.33.1
+        ports: ['1025:1025', '8025:8025']
+    env:
+      DATABASE_ADMIN_URL: ${{ secrets.DATABASE_ADMIN_URL }}
+      SECRET_DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      SECRET_AUTH_DATABASE_URL: ${{ secrets.AUTH_DATABASE_URL }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      BETTER_AUTH_URL: http://localhost:3000
+      REDIS_URL: redis://localhost:6379
+      SMTP_HOST: localhost
+      SMTP_PORT: '1025'
+      SMTP_SECURE: 'false'
+      SMTP_FROM: staging@bahith.local
+      S3_FORCE_PATH_STYLE: 'true'
+      NEXT_TELEMETRY_DISABLED: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - uses: astral-sh/setup-uv@v6
+      - name: OCR (Tesseract + pinned Arabic model), Postgres client
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq tesseract-ocr tesseract-ocr-ara tesseract-ocr-eng postgresql-client
+          sudo scripts/install-arabic-ocr-model.sh
+      - run: pnpm install --frozen-lockfile
+      - name: Role URLs from DATABASE_ADMIN_URL's host + the secrets' passwords (masked)
+        run: pnpm --filter @bahith/db exec tsx src/cli/role-urls.ts
+      # R2 (bahith-staging-files) when the staging environment has its secrets: uploads,
+      # retrieval and deletion then run against the real bucket. Otherwise a local MinIO.
+      - name: Object storage for this run (R2 staging, or local MinIO)
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET: ${{ vars.R2_BUCKET || 'bahith-staging-files' }}
+        run: |
+          if [ -n "$R2_ACCOUNT_ID" ] && [ -n "$R2_ACCESS_KEY_ID" ] && [ -n "$R2_SECRET_ACCESS_KEY" ]; then
+            case "$R2_BUCKET" in *staging*) ;; *) echo "::error::refusing a non-staging bucket"; exit 1;; esac
+            {
+              echo "S3_ENDPOINT=https://$R2_ACCOUNT_ID.r2.cloudflarestorage.com"
+              echo "S3_REGION=auto"
+              echo "S3_BUCKET=$R2_BUCKET"
+              echo "S3_ACCESS_KEY_ID=$R2_ACCESS_KEY_ID"
+              echo "S3_SECRET_ACCESS_KEY=$R2_SECRET_ACCESS_KEY"
+              echo "STAGING_STORAGE=r2"
+            } >> "$GITHUB_ENV"
+            echo "object storage: R2 bucket $R2_BUCKET"
+          else
+            echo "::warning::R2 secrets are not set in environment staging: this run stores files in a local MinIO."
+            docker run -d --name minio -p 9000:9000 -e MINIO_ROOT_USER=ci-staging -e MINIO_ROOT_PASSWORD=ci-staging-local-only \
+              coollabsio/minio:RELEASE.2025-10-15T17-29-55Z server /data
+            for i in $(seq 1 30); do curl -fsS http://localhost:9000/minio/health/live && break; sleep 1; done
+            {
+              echo "S3_ENDPOINT=http://localhost:9000"
+              echo "S3_REGION=us-east-1"
+              echo "S3_BUCKET=bahith-staging-ci"
+              echo "S3_ACCESS_KEY_ID=ci-staging"
+              echo "S3_SECRET_ACCESS_KEY=ci-staging-local-only"
+              echo "STAGING_STORAGE=minio"
+            } >> "$GITHUB_ENV"
+            S3_ENDPOINT=http://localhost:9000 S3_REGION=us-east-1 S3_BUCKET=bahith-staging-ci \
+              S3_ACCESS_KEY_ID=ci-staging S3_SECRET_ACCESS_KEY=ci-staging-local-only \
+              pnpm --filter @bahith/jobs exec tsx src/init-storage.ts
+          fi
+      - name: Model configuration (AI only when the staging environment has a key)
+        run: |
+          auth_secret=$(openssl rand -hex 32)
+          echo "::add-mask::$auth_secret"
+          echo "BETTER_AUTH_SECRET=$auth_secret" >> "$GITHUB_ENV"
+          if [ -n "$OPENAI_API_KEY" ]; then
+            echo "AI_CHAT_MODEL=openai:gpt-5.4-mini" >> "$GITHUB_ENV"
+            echo "AI_EMBEDDING_MODEL=openai:text-embedding-3-small" >> "$GITHUB_ENV"
+            echo "STAGING_EXPECT_AI=1" >> "$GITHUB_ENV"
+            # Staging quota so the assistant can answer (the production value is the owner's decision).
+            pnpm --filter @bahith/db exec tsx src/cli/plan-limits.ts --allow-remote --plan=free --ai-requests-per-month=50
+          else
+            echo "::notice::OPENAI_API_KEY is not set in environment staging: the assistant is checked to refuse clearly, not to answer."
+          fi
+      - name: Chromium for PDF export
+        run: pnpm --filter @bahith/export exec playwright install --with-deps chromium
+      - name: Build the web application
+        run: pnpm --filter @bahith/web build
+      - name: Start web, jobs and worker
+        run: |
+          (cd apps/web && nohup pnpm exec next start -p 3000 > "$RUNNER_TEMP/web.log" 2>&1 &)
+          (cd apps/jobs && nohup pnpm exec tsx src/main.ts > "$RUNNER_TEMP/jobs.log" 2>&1 &)
+          (cd apps/worker && nohup uv run --quiet python -m bahith_worker > "$RUNNER_TEMP/worker.log" 2>&1 &)
+          for i in $(seq 1 60); do curl -fsS http://localhost:3000/api/health && break; sleep 2; done
+          curl -fsS http://localhost:3000/api/health
+      - name: Journey — sign-up, verification, sign-in, upload, processing
+        run: |
+          LOAD_BASE_URL=http://localhost:3000 LOAD_MAIL_URL=http://localhost:8025 \
+            pnpm --filter @bahith/web exec tsx load/prepare.ts > "$RUNNER_TEMP/journey.json"
+          echo "signed in, project created, source processed"
+      - name: Journey — search, assistant, claim check, exports
+        run: pnpm --filter @bahith/web exec tsx load/staging-journey.ts "$RUNNER_TEMP/journey.json"
+      - name: Service logs (on failure; ids and codes only)
+        if: failure()
+        run: tail -n 40 "$RUNNER_TEMP/web.log" "$RUNNER_TEMP/jobs.log" "$RUNNER_TEMP/worker.log"
+      # Deletion on the real bucket: every object of the test workspaces is removed and
+      # the prefix is proven empty (before the database rows that name them go).
+      - name: Delete the test documents from R2 and prove they are gone
+        if: always() && env.STAGING_STORAGE == 'r2'
+        env:
+          AWS_DEFAULT_REGION: auto
+          AWS_REQUEST_CHECKSUM_CALCULATION: when_required
+          AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
+        run: |
+          set -euo pipefail
+          export AWS_ACCESS_KEY_ID="$S3_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$S3_SECRET_ACCESS_KEY"
+          ids=$(psql "$DATABASE_ADMIN_URL" -At -v ON_ERROR_STOP=1 -c "SELECT DISTINCT m.workspace_id FROM memberships m JOIN users u ON u.id = m.user_id WHERE u.email LIKE 'load-%@example.test'")
+          # `aws s3 ls` exits 1 on an empty prefix; that is a count of 0, not an error.
+          count() { { aws s3 ls "s3://$S3_BUCKET/workspaces/$1/" --recursive --endpoint-url "$S3_ENDPOINT" || true; } | wc -l; }
+          total=0; left=0
+          for id in $ids; do
+            total=$((total + $(count "$id")))
+            aws s3 rm "s3://$S3_BUCKET/workspaces/$id/" --recursive --endpoint-url "$S3_ENDPOINT" --only-show-errors
+            left=$((left + $(count "$id")))
+          done
+          echo "test workspaces: $(echo "$ids" | grep -c . || true); objects deleted from R2: $total; left: $left"
+          [ "$total" -gt 0 ] || { echo "::error::no stored documents found in R2 for the test workspaces"; exit 1; }
+          [ "$left" -eq 0 ] || { echo "::error::objects remain in R2 after deletion"; exit 1; }
+      - name: Remove the test accounts and their workspaces from Neon staging
+        if: always()
+        run: |
+          psql "$DATABASE_ADMIN_URL" -v ON_ERROR_STOP=1 -q <<'SQL'
+          DELETE FROM workspaces WHERE id IN (
+            SELECT m.workspace_id FROM memberships m JOIN users u ON u.id = m.user_id
+             WHERE u.email LIKE 'load-%@example.test');
+          DELETE FROM users WHERE email LIKE 'load-%@example.test';
+          SELECT 'test users left: ' || count(*) FROM users WHERE email LIKE '%@example.test';
+          SQL

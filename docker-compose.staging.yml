@@ -1,0 +1,185 @@
+# Isolated BAHITH staging stack: production builds of web, jobs and the document worker,
+# with their own Postgres, Redis and S3 storage, volumes and network. It shares nothing
+# with local development or production. Create its env with: pnpm staging:env
+#
+#   docker compose -f docker-compose.staging.yml --env-file .env.staging up -d --build
+#
+# To use managed services instead (e.g. Neon branch + Cloudflare R2), point DATABASE_*,
+# REDIS_URL and S3_* in .env.staging at them and start only: migrate web jobs worker.
+name: bahith-staging
+
+x-app-env: &app-env
+  env_file: .env.staging
+
+services:
+  # Staging-only CA and certificate for the mail capture's STARTTLS. The app requires TLS
+  # for any non-local SMTP server and that rule is not relaxed for staging: web trusts
+  # this CA explicitly (NODE_EXTRA_CA_CERTS). Generated once into a volume, never tracked.
+  certs:
+    image: bahith-node:staging-web
+    user: root
+    command:
+      - sh
+      - -c
+      - >-
+        [ -s /certs/mailpit.crt ] || (openssl req -x509 -newkey rsa:2048 -nodes -days 365 -subj "/CN=bahith-staging-ca"
+        -keyout /certs/ca.key -out /certs/ca.crt &&
+        openssl req -newkey rsa:2048 -nodes -subj "/CN=mailpit" -addext "subjectAltName=DNS:mailpit"
+        -keyout /certs/mailpit.key -out /certs/mailpit.csr &&
+        printf 'subjectAltName=DNS:mailpit\n' > /certs/ext.cnf &&
+        openssl x509 -req -in /certs/mailpit.csr -CA /certs/ca.crt -CAkey /certs/ca.key
+        -CAcreateserial -days 365 -extfile /certs/ext.cnf -out /certs/mailpit.crt &&
+        chmod 644 /certs/*.crt /certs/mailpit.key && rm /certs/ca.key)
+    volumes:
+      - staging-certs:/certs
+
+  # Staging never sends real e-mail: messages land in this inbox (http://127.0.0.1:8225).
+  mailpit:
+    image: axllent/mailpit:v1.33.1
+    restart: unless-stopped
+    environment:
+      MP_SMTP_TLS_CERT: /certs/mailpit.crt
+      MP_SMTP_TLS_KEY: /certs/mailpit.key
+      MP_SMTP_REQUIRE_STARTTLS: 'true'
+    volumes:
+      - staging-certs:/certs:ro
+    ports:
+      - '127.0.0.1:${STAGING_MAIL_PORT:-8225}:8025'
+    depends_on:
+      certs: { condition: service_completed_successfully }
+
+  # TLS terminator / load balancer in front of the web instances (production uses the
+  # same pattern with a real certificate for al-bahith.com).
+  proxy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    command: ['caddy', 'reverse-proxy', '--from', ':3000', '--to', 'web:3000']
+    ports:
+      - '127.0.0.1:${STAGING_WEB_PORT:-3200}:3000'
+    depends_on:
+      - web
+
+  postgres:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    # Query statistics for performance work (staging only; no query parameters stored).
+    command:
+      [
+        'postgres',
+        '-c',
+        'shared_preload_libraries=pg_stat_statements',
+        '-c',
+        'pg_stat_statements.track=top',
+        '-c',
+        'pg_stat_statements.track_planning=on',
+      ]
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?Run "pnpm staging:env"}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run "pnpm staging:env"}
+      POSTGRES_DB: ${POSTGRES_DB:?Run "pnpm staging:env"}
+    volumes:
+      - staging-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Run "pnpm staging:env"}
+    command:
+      - sh
+      - -c
+      - exec redis-server --requirepass "$$REDIS_PASSWORD" --appendonly yes --maxmemory-policy noeviction
+    volumes:
+      - staging-redis:/data
+    healthcheck:
+      test: ['CMD-SHELL', 'redis-cli -a "$$REDIS_PASSWORD" --no-auth-warning ping | grep -q PONG']
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  minio:
+    image: coollabsio/minio:RELEASE.2025-10-15T17-29-55Z
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY_ID:?Run "pnpm staging:env"}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_ACCESS_KEY:?Run "pnpm staging:env"}
+    command: server /data
+    volumes:
+      - staging-minio:/data
+    healthcheck:
+      test:
+        - CMD
+        - bash
+        - -c
+        - |
+          exec 3<>/dev/tcp/127.0.0.1/9000 &&
+          printf 'GET /minio/health/live HTTP/1.0\r\nHost: localhost\r\n\r\n' >&3 &&
+          read -r status <&3 && [[ "$$status" == *" 200 "* ]]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  # One-shot: migrations, role provisioning, reference data and the storage bucket.
+  migrate:
+    <<: *app-env
+    build: { context: ., dockerfile: docker/node.Dockerfile, target: migrate }
+    image: bahith-node:staging-migrate
+    command:
+      - sh
+      - -c
+      - >-
+        pnpm --filter @bahith/db exec tsx src/cli/migrate.ts --allow-remote &&
+        pnpm --filter @bahith/db exec tsx src/cli/seed.ts --allow-remote &&
+        pnpm --filter @bahith/jobs exec tsx src/init-storage.ts --staging
+    depends_on:
+      postgres: { condition: service_healthy }
+      minio: { condition: service_healthy }
+
+  web:
+    <<: *app-env
+    build: { context: ., dockerfile: docker/node.Dockerfile, target: web }
+    image: bahith-node:staging-web
+    restart: unless-stopped
+    # Several instances behind the proxy: one Node process uses one CPU core.
+    deploy:
+      replicas: ${STAGING_WEB_REPLICAS:-3}
+    environment:
+      SMTP_HOST: mailpit
+      NODE_EXTRA_CA_CERTS: /certs/ca.crt
+      # The image's Chromium for PDF export (an empty value in .env.staging would hide it).
+      PDF_CHROMIUM_PATH: /usr/bin/chromium
+    volumes:
+      - staging-certs:/certs:ro
+    depends_on:
+      mailpit: { condition: service_started }
+      migrate: { condition: service_completed_successfully }
+      redis: { condition: service_healthy }
+
+  jobs:
+    <<: *app-env
+    build: { context: ., dockerfile: docker/node.Dockerfile, target: jobs }
+    image: bahith-node:staging-jobs
+    restart: unless-stopped
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      redis: { condition: service_healthy }
+
+  worker:
+    <<: *app-env
+    build: { context: ., dockerfile: docker/worker.Dockerfile }
+    image: bahith-worker:staging
+    restart: unless-stopped
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      redis: { condition: service_healthy }
+
+volumes:
+  staging-certs:
+  staging-postgres:
+  staging-redis:
+  staging-minio:

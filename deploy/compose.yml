@@ -1,0 +1,86 @@
+# BAHITH on one VPS: Caddy (automatic HTTPS) → web instances, jobs, Python worker, Redis.
+# Database: Neon (DATABASE_*), files: Cloudflare R2 (S3_*), from /etc/bahith/<env>.env.
+#
+#   BAHITH_ENV=staging docker compose -p bahith-staging -f deploy/compose.yml up -d --wait
+#
+# Images are built by CI or on the server from this repository (docker/*.Dockerfile with
+# PG_CLIENT_MAJOR=18 for Neon). Nothing secret is in this file.
+name: bahith-${BAHITH_ENV:?set BAHITH_ENV=staging or production}
+
+x-app: &app
+  env_file: /etc/bahith/${BAHITH_ENV}.env
+  restart: unless-stopped
+  logging:
+    driver: json-file
+    options: { max-size: '20m', max-file: '5' }
+
+services:
+  caddy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    ports: ['80:80', '443:443', '443:443/udp']
+    environment:
+      BAHITH_HOST: ${BAHITH_HOST:?e.g. staging.al-bahith.com}
+      ACME_EMAIL: ${ACME_EMAIL:?contact e-mail for Let's Encrypt}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on: [web]
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command:
+      - sh
+      - -c
+      - exec redis-server --requirepass "$$REDIS_PASSWORD" --appendonly yes --maxmemory-policy noeviction
+    env_file: /etc/bahith/${BAHITH_ENV}.env
+    volumes: [redis-data:/data]
+    healthcheck:
+      test: ['CMD-SHELL', 'redis-cli -a "$$REDIS_PASSWORD" --no-auth-warning ping | grep -q PONG']
+      interval: 5s
+      retries: 20
+
+  web:
+    <<: *app
+    image: bahith-node:${BAHITH_TAG:-latest}-web
+    deploy:
+      replicas: ${WEB_REPLICAS:-2}
+      resources:
+        limits: { memory: 1g }
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://localhost:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      retries: 6
+    depends_on:
+      redis: { condition: service_healthy }
+
+  jobs:
+    <<: *app
+    image: bahith-node:${BAHITH_TAG:-latest}-jobs
+    deploy:
+      resources:
+        limits: { memory: 512m }
+    depends_on:
+      redis: { condition: service_healthy }
+
+  worker:
+    <<: *app
+    image: bahith-worker:${BAHITH_TAG:-latest}
+    deploy:
+      resources:
+        limits: { memory: 2g }
+    depends_on:
+      redis: { condition: service_healthy }
+
+volumes:
+  caddy-data:
+  caddy-config:
+  redis-data:

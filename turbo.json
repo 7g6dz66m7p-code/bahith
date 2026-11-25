@@ -1,0 +1,58 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "globalDependencies": [".env"],
+  "globalPassThroughEnv": [
+    "CI",
+    "HTTP_PROXY",
+    "HTTPS_PROXY",
+    "NO_PROXY",
+    "http_proxy",
+    "https_proxy",
+    "no_proxy",
+    "SSL_CERT_FILE",
+    "SSL_CERT_DIR",
+    "NODE_EXTRA_CA_CERTS",
+    "REQUESTS_CA_BUNDLE",
+    "UV_*",
+    "DOCKER_HOST",
+    "TESTCONTAINERS_*",
+    "PLAYWRIGHT_*",
+    "DATABASE_URL",
+    "DATABASE_ADMIN_URL",
+    "REDIS_URL",
+    "S3_*",
+    "AI_*",
+    "ANTHROPIC_API_KEY",
+    "OPENAI_API_KEY",
+    "SCHOLARLY_*",
+    "OPENALEX_API_KEY",
+    "SEMANTIC_SCHOLAR_API_KEY",
+    "NCBI_API_KEY",
+    "NODE_USE_ENV_PROXY",
+    "PLATFORM_ADMIN_EMAILS",
+    "PAYMENTS_*",
+    "SMS_*",
+    "PDF_CHROMIUM_PATH"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "lint": {},
+    "typecheck": {
+      "dependsOn": ["^typecheck"]
+    },
+    "test": {},
+    "test:integration": {
+      "cache": false
+    },
+    "test:e2e": {
+      "cache": false
+    }
+  }
+}

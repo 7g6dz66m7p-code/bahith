@@ -1,0 +1,36 @@
+{
+  "name": "@bahith/migration",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./telegram": "./src/telegram.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --config vitest.config.ts",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "dry-run": "tsx src/cli.ts",
+    "inspect-dump": "tsx src/inspect-cli.ts"
+  },
+  "dependencies": {
+    "@bahith/db": "workspace:*",
+    "@testcontainers/mariadb": "12.2.2",
+    "mysql2": "3.24.6",
+    "pg": "^8.23.1",
+    "testcontainers": "^12.2.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@bahith/config": "workspace:*",
+    "@testcontainers/postgresql": "^12.2.1",
+    "@types/node": "^22.19.0",
+    "@types/pg": "^8.23.1",
+    "eslint": "^9.39.5",
+    "tsx": "^4.23.15",
+    "typescript": "~6.0.3",
+    "vitest": "^5.1.0"
+  }
+}

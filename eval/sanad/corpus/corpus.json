@@ -1,0 +1,249 @@
+{
+  "note": "Synthetic evaluation corpus written for BAHITH tests. These are NOT real studies: every author, figure and finding is invented test content and must never be cited as research.",
+  "version": "sanad-eval-corpus-v1",
+  "documents": [
+    {
+      "id": "ar-elearning",
+      "fileName": "ar-elearning.pdf",
+      "lang": "ar",
+      "dir": "rtl",
+      "scanned": false,
+      "pages": [
+        [
+          "مقدمة الدراسة: تتناول هذه الدراسة التجريبية أثر التعلم الإلكتروني المدمج في التحصيل الدراسي لدى طلاب المرحلة الثانوية في ثلاث مدارس حكومية.",
+          "تكونت عينة الدراسة من 240 طالباً وطالبة، وُزّعوا عشوائياً على مجموعتين: تجريبية درست بالتعلم المدمج، وضابطة درست بالطريقة التقليدية.",
+          "استمرت التجربة فصلاً دراسياً كاملاً مدته ستة عشر أسبوعاً، وطُبّق اختبار تحصيلي قبلي وبعدي في مادة الرياضيات."
+        ],
+        [
+          "النتائج: أظهرت النتائج أن متوسط درجات المجموعة التجريبية ارتفع بنسبة 18% مقارنة بالمجموعة الضابطة، وكان الفرق دالاً إحصائياً عند مستوى 0.05.",
+          "كما لوحظ أن الطالبات استفدن من التعلم المدمج أكثر من الطلاب، إذ بلغ حجم الأثر لديهن 0.62 مقابل 0.41 لدى الطلاب.",
+          "ولم تظهر فروق دالة بين المدارس الثلاث في مقدار التحسن، مما يشير إلى ثبات الأثر عبر البيئات المدرسية."
+        ],
+        [
+          "حدود الدراسة: اقتصرت الدراسة على مادة الرياضيات، ولم تقس الاحتفاظ بالتعلم بعد انتهاء الفصل الدراسي.",
+          "توصي الدراسة بتدريب المعلمين على تصميم الأنشطة المدمجة، وبإجراء دراسات طولية تتابع الطلاب لمدة عام كامل.",
+          "ملاحظة منهجية: جُمعت البيانات بموافقة أولياء الأمور، وحُذفت الأسماء من سجلات التحليل حفاظاً على الخصوصية."
+        ]
+      ]
+    },
+    {
+      "id": "en-sleep",
+      "fileName": "en-sleep.pdf",
+      "lang": "en",
+      "dir": "ltr",
+      "scanned": false,
+      "pages": [
+        [
+          "Background: This synthetic cohort study examines the relationship between nightly sleep duration and verbal memory performance among university students.",
+          "A total of 312 undergraduate volunteers wore wrist actigraphy devices for fourteen consecutive nights before completing a standardised word-recall task.",
+          "Participants were grouped into short sleepers, averaging under six hours, and adequate sleepers, averaging seven hours or more."
+        ],
+        [
+          "Findings: Adequate sleepers recalled on average 23% more words than short sleepers, and the difference remained significant after adjusting for caffeine intake.",
+          "Irregular bedtimes, defined as a nightly variation above ninety minutes, were associated with lower recall independently of total sleep duration.",
+          "No meaningful difference was observed between morning and evening testing sessions."
+        ],
+        [
+          "Limitations: The sample was drawn from a single campus, and actigraphy cannot distinguish quiet wakefulness from light sleep.",
+          "Future work should test whether a two-week sleep extension programme causally improves recall, using a randomised design.",
+          "Ethics: The protocol was approved by an institutional review board, and all participants gave written informed consent."
+        ]
+      ]
+    },
+    {
+      "id": "ar-mixed-manuscripts",
+      "fileName": "ar-mixed-manuscripts.pdf",
+      "lang": "ar",
+      "dir": "rtl",
+      "scanned": false,
+      "pages": [
+        [
+          "تعرض هذه الورقة منهجية لفهرسة المخطوطات العربية رقمياً باستخدام معيار TEI لترميز النصوص، مع ربط كل ورقة من المخطوط بصورتها الأصلية.",
+          "شمل المشروع 85 مخطوطاً في علوم اللغة، يعود أقدمها إلى القرن السابع الهجري، وحُفظت نسخها الرقمية بصيغة TIFF عالية الدقة."
+        ],
+        [
+          "واجه الفريق صعوبة في قراءة الحواشي المكتوبة بخط مغاير، فاعتُمدت مراجعة بشرية مزدوجة لكل حاشية قبل اعتمادها في الفهرس.",
+          "بلغت نسبة الاتفاق بين المراجعين 91% في المرحلة الأولى، وارتفعت إلى 97% بعد توحيد دليل الترميز وتدريب المفهرسين."
+        ]
+      ]
+    },
+    {
+      "id": "ar-scanned-heritage",
+      "fileName": "ar-scanned-heritage.pdf",
+      "lang": "ar",
+      "dir": "rtl",
+      "scanned": true,
+      "pages": [
+        [
+          "تدرس هذه الورقة أساليب توثيق الروايات الشفهية في الأحياء القديمة، وتعتمد على مقابلات مسجلة مع كبار السن.",
+          "أجريت المقابلات مع ستين راوياً، وفُرّغت تسجيلاتها كتابياً ثم رُوجعت مع الرواة أنفسهم للتأكد من دقة النقل."
+        ],
+        [
+          "خلصت الدراسة إلى أن مقارنة الروايات المتعددة للحدث الواحد تكشف مواضع الاختلاف وتساعد على تقدير موثوقية كل رواية.",
+          "وتقترح الورقة إنشاء أرشيف رقمي مفتوح للتسجيلات مع حماية هوية الرواة الذين طلبوا عدم ذكر أسمائهم."
+        ]
+      ]
+    }
+  ],
+  "questions": [
+    { "id": "q01", "query": "عينة الدراسة طالب وطالبة مجموعتين", "doc": "ar-elearning", "page": 1 },
+    { "id": "q02", "query": "مدة التجربة ستة عشر أسبوعاً", "doc": "ar-elearning", "page": 1 },
+    {
+      "id": "q03",
+      "query": "ارتفاع متوسط درجات المجموعة التجريبية",
+      "doc": "ar-elearning",
+      "page": 2
+    },
+    { "id": "q04", "query": "حجم الأثر لدى الطالبات", "doc": "ar-elearning", "page": 2 },
+    {
+      "id": "q05",
+      "query": "فروق بين المدارس الثلاث في مقدار التحسن",
+      "doc": "ar-elearning",
+      "page": 2
+    },
+    { "id": "q06", "query": "حدود الدراسة الاحتفاظ بالتعلم", "doc": "ar-elearning", "page": 3 },
+    {
+      "id": "q07",
+      "query": "تدريب المعلمين على تصميم الأنشطة المدمجة",
+      "doc": "ar-elearning",
+      "page": 3
+    },
+    { "id": "q08", "query": "موافقة أولياء الأمور والخصوصية", "doc": "ar-elearning", "page": 3 },
+    { "id": "q09", "query": "wrist actigraphy fourteen nights", "doc": "en-sleep", "page": 1 },
+    { "id": "q10", "query": "short sleepers under six hours", "doc": "en-sleep", "page": 1 },
+    {
+      "id": "q11",
+      "query": "adequate sleepers recalled more words caffeine",
+      "doc": "en-sleep",
+      "page": 2
+    },
+    { "id": "q12", "query": "irregular bedtimes lower recall", "doc": "en-sleep", "page": 2 },
+    { "id": "q13", "query": "morning evening testing sessions", "doc": "en-sleep", "page": 2 },
+    { "id": "q14", "query": "single campus limitation light sleep", "doc": "en-sleep", "page": 3 },
+    { "id": "q15", "query": "sleep extension programme randomised", "doc": "en-sleep", "page": 3 },
+    {
+      "id": "q16",
+      "query": "institutional review board informed consent",
+      "doc": "en-sleep",
+      "page": 3
+    },
+    { "id": "q17", "query": "معيار TEI لترميز النصوص", "doc": "ar-mixed-manuscripts", "page": 1 },
+    {
+      "id": "q18",
+      "query": "مخطوطاً في علوم اللغة القرن السابع",
+      "doc": "ar-mixed-manuscripts",
+      "page": 1
+    },
+    {
+      "id": "q19",
+      "query": "مراجعة بشرية مزدوجة للحواشي",
+      "doc": "ar-mixed-manuscripts",
+      "page": 2
+    },
+    {
+      "id": "q20",
+      "query": "نسبة الاتفاق بين المراجعين",
+      "doc": "ar-mixed-manuscripts",
+      "page": 2
+    },
+    {
+      "id": "q21",
+      "query": "توثيق الروايات الشفهية مقابلات",
+      "doc": "ar-scanned-heritage",
+      "page": 1
+    },
+    { "id": "q22", "query": "ستين راوياً تفريغ التسجيلات", "doc": "ar-scanned-heritage", "page": 1 },
+    {
+      "id": "q23",
+      "query": "مقارنة الروايات المتعددة موثوقية",
+      "doc": "ar-scanned-heritage",
+      "page": 2
+    },
+    { "id": "q24", "query": "أرشيف رقمي مفتوح للتسجيلات", "doc": "ar-scanned-heritage", "page": 2 }
+  ],
+  "unanswerable": [
+    { "id": "u01", "query": "أثر الذكاء الاصطناعي في تشخيص أمراض القلب" },
+    { "id": "u02", "query": "quantum entanglement in photonic crystals" },
+    { "id": "u03", "query": "تحليل الانبعاثات الكربونية لمصانع الإسمنت" },
+    { "id": "u04", "query": "monetary policy inflation targeting central banks" },
+    { "id": "u05", "query": "زراعة النخيل في المناطق الصحراوية" },
+    { "id": "u06", "query": "مستوى الرضا الوظيفي لدى الممرضين" },
+    { "id": "u07", "query": "glacier retreat satellite imagery" },
+    { "id": "u08", "query": "تاريخ الموشحات الأندلسية" }
+  ],
+  "quotes": [
+    {
+      "id": "x01",
+      "doc": "ar-elearning",
+      "page": 1,
+      "quote": "تكونت عينة الدراسة من 240 طالباً وطالبة"
+    },
+    {
+      "id": "x02",
+      "doc": "ar-elearning",
+      "page": 2,
+      "quote": "ارتفع بنسبة 18% مقارنة بالمجموعة الضابطة"
+    },
+    {
+      "id": "x03",
+      "doc": "ar-elearning",
+      "page": 2,
+      "quote": "إذ بلغ حجم الأثر لديهن 0.62 مقابل 0.41 لدى الطلاب"
+    },
+    { "id": "x04", "doc": "ar-elearning", "page": 3, "quote": "اقتصرت الدراسة على مادة الرياضيات" },
+    {
+      "id": "x05",
+      "doc": "en-sleep",
+      "page": 1,
+      "quote": "A total of 312 undergraduate volunteers wore wrist actigraphy devices"
+    },
+    {
+      "id": "x06",
+      "doc": "en-sleep",
+      "page": 2,
+      "quote": "Adequate sleepers recalled on average 23% more words than short sleepers"
+    },
+    {
+      "id": "x07",
+      "doc": "en-sleep",
+      "page": 2,
+      "quote": "No meaningful difference was observed between morning and evening testing sessions."
+    },
+    {
+      "id": "x08",
+      "doc": "en-sleep",
+      "page": 3,
+      "quote": "actigraphy cannot distinguish quiet wakefulness from light sleep"
+    },
+    {
+      "id": "x09",
+      "doc": "ar-mixed-manuscripts",
+      "page": 1,
+      "quote": "شمل المشروع 85 مخطوطاً في علوم اللغة"
+    },
+    {
+      "id": "x10",
+      "doc": "ar-mixed-manuscripts",
+      "page": 2,
+      "quote": "بلغت نسبة الاتفاق بين المراجعين 91% في المرحلة الأولى"
+    },
+    {
+      "id": "x11",
+      "doc": "ar-scanned-heritage",
+      "page": 1,
+      "quote": "أجريت المقابلات مع ستين راوياً"
+    },
+    {
+      "id": "x12",
+      "doc": "ar-scanned-heritage",
+      "page": 2,
+      "quote": "تكشف مواضع الاختلاف وتساعد على تقدير موثوقية كل رواية"
+    }
+  ],
+  "fabricatedQuotes": [
+    { "id": "f01", "quote": "أظهرت النتائج أن التعلم المدمج خفض التحصيل الدراسي بنسبة 30%" },
+    { "id": "f02", "quote": "Short sleepers outperformed adequate sleepers on every memory task." },
+    { "id": "f03", "quote": "شمل المشروع ألف مخطوط في الطب والفلك" },
+    { "id": "f04", "quote": "The study proves that caffeine causes memory loss." }
+  ]
+}

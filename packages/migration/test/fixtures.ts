@@ -1,0 +1,417 @@
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+
+import type { LegacyDump, Mapping } from '../src/index';
+import { parseMapping } from '../src/index';
+
+/**
+ * SYNTHETIC data for an ASSUMED legacy schema. No real person, payment or record is
+ * represented: every address uses reserved test domains, every reference is invented.
+ * Each row exists to exercise one rule of the planner (see comments).
+ */
+
+export const assumedMapping: Mapping = parseMapping(
+  JSON.parse(
+    readFileSync(
+      fileURLToPath(new URL('../fixtures/mapping.assumed.json', import.meta.url)),
+      'utf8',
+    ),
+  ) as unknown,
+);
+
+const hex64 = 'ab'.repeat(32);
+
+export const legacyDump = {
+  members: [
+    {
+      id: 1,
+      email: 'amal@example.test',
+      mobile: '050 123 4567',
+      full_name: 'User One',
+      created_on: '2024-01-01T00:00:00Z',
+      updated_on: '2024-06-01T00:00:00Z',
+    },
+    // duplicate e-mail (case) of 1, later → rejected duplicate_email, children remap to 1
+    {
+      id: 2,
+      email: 'AMAL@example.test',
+      mobile: null,
+      full_name: 'User One again',
+      created_on: '2024-02-01T00:00:00Z',
+      updated_on: '2024-06-01T00:00:00Z',
+    },
+    // same e-mail, different phones → both conflict
+    {
+      id: 3,
+      email: 'badr@example.org',
+      mobile: '+966511111111',
+      full_name: 'User Three',
+      created_on: '2024-01-05T00:00:00Z',
+      updated_on: '2024-06-01T00:00:00Z',
+    },
+    {
+      id: 4,
+      email: 'badr@example.org',
+      mobile: '+966522222222',
+      full_name: 'User Four',
+      created_on: '2024-01-06T00:00:00Z',
+      updated_on: '2024-06-01T00:00:00Z',
+    },
+    // same phone (two notations), different e-mails → both conflict
+    {
+      id: 5,
+      email: 'chadi@example.net',
+      mobile: '0533333333',
+      full_name: 'User Five',
+      created_on: '2024-01-07T00:00:00Z',
+      updated_on: '2024-06-01T00:00:00Z',
+    },
+    {
+      id: 6,
+      email: 'dana@example.net',
+      mobile: '00966533333333',
+      full_name: 'User Six',
+      created_on: '2024-01-08T00:00:00Z',
+      updated_on: '2024-06-01T00:00:00Z',
+    },
+    // no e-mail → rejected missing_email
+    {
+      id: 7,
+      email: null,
+      mobile: '+966544444444',
+      full_name: 'Telegram only',
+      created_on: '2024-01-09T00:00:00Z',
+      updated_on: '2024-06-01T00:00:00Z',
+    },
+    // not an address → rejected invalid:email
+    {
+      id: 8,
+      email: 'not-an-email',
+      mobile: null,
+      full_name: 'User Eight',
+      created_on: '2024-01-10T00:00:00Z',
+      updated_on: '2024-06-01T00:00:00Z',
+    },
+    // unusable phone → accepted, phone dropped with a warning
+    {
+      id: 9,
+      email: 'eman@example.test',
+      mobile: '12',
+      full_name: 'User Nine',
+      created_on: '2024-01-11T00:00:00Z',
+      updated_on: '2024-06-01T00:00:00Z',
+    },
+    {
+      id: 10,
+      email: 'fahd@example.test',
+      mobile: null,
+      full_name: '',
+      created_on: '2024-01-12T00:00:00Z',
+      updated_on: '2024-06-01T00:00:00Z',
+    },
+  ],
+  plans_subs: [
+    {
+      id: 1,
+      member_id: 1,
+      plan: 'premium',
+      state: '1',
+      starts_at: '2024-03-01T00:00:00Z',
+      ends_at: '2024-04-01T00:00:00Z',
+      payment_id: 1,
+      updated_on: '2024-06-01T00:00:00Z',
+    },
+    // owned by the duplicate user 2 → remapped to 1
+    {
+      id: 2,
+      member_id: 2,
+      plan: 'premium',
+      state: '1',
+      starts_at: '2024-04-01T00:00:00Z',
+      ends_at: '2024-05-01T00:00:00Z',
+      payment_id: 2,
+      updated_on: '2024-06-01T00:00:00Z',
+    },
+    // overlapping periods for user 9; 4 has no payment
+    {
+      id: 3,
+      member_id: 9,
+      plan: 'premium',
+      state: '0',
+      starts_at: '2024-03-01T00:00:00Z',
+      ends_at: '2024-06-01T00:00:00Z',
+      payment_id: null,
+      updated_on: '2024-06-01T00:00:00Z',
+    },
+    {
+      id: 4,
+      member_id: 9,
+      plan: 'premium',
+      state: '1',
+      starts_at: '2024-05-01T00:00:00Z',
+      ends_at: '2024-07-01T00:00:00Z',
+      payment_id: null,
+      updated_on: '2024-06-01T00:00:00Z',
+    },
+    // free plan needs no payment
+    {
+      id: 5,
+      member_id: 10,
+      plan: 'basic',
+      state: '1',
+      starts_at: '2024-01-01T00:00:00Z',
+      ends_at: '2025-01-01T00:00:00Z',
+      payment_id: null,
+      updated_on: '2024-06-01T00:00:00Z',
+    },
+    // unknown user → rejected orphan_user
+    {
+      id: 6,
+      member_id: 999,
+      plan: 'premium',
+      state: '1',
+      starts_at: '2024-03-01T00:00:00Z',
+      ends_at: '2024-04-01T00:00:00Z',
+      payment_id: null,
+      updated_on: '2024-06-01T00:00:00Z',
+    },
+    // end before start → rejected
+    {
+      id: 7,
+      member_id: 1,
+      plan: 'premium',
+      state: '1',
+      starts_at: '2024-03-01T00:00:00Z',
+      ends_at: '2024-02-01T00:00:00Z',
+      payment_id: null,
+      updated_on: '2024-06-01T00:00:00Z',
+    },
+  ],
+  transactions: [
+    {
+      id: 1,
+      member_id: 1,
+      sub_id: 1,
+      amount: '49.00',
+      currency: 'SAR',
+      gateway: 'gw',
+      gateway_ref: 'REF-1',
+      state: 'success',
+      paid_on: '2024-03-01T10:00:00Z',
+      updated_on: '2024-06-01T00:00:00Z',
+    },
+    {
+      id: 2,
+      member_id: 2,
+      sub_id: 2,
+      amount: '49.00',
+      currency: 'SAR',
+      gateway: 'gw',
+      gateway_ref: 'REF-2',
+      state: 'success',
+      paid_on: '2024-04-01T10:00:00Z',
+      updated_on: '2024-06-01T00:00:00Z',
+    },
+    // same gateway reference, same amount → rejected duplicate_provider_reference
+    {
+      id: 3,
+      member_id: 2,
+      sub_id: 2,
+      amount: '49.00',
+      currency: 'SAR',
+      gateway: 'gw',
+      gateway_ref: 'REF-2',
+      state: 'success',
+      paid_on: '2024-04-01T10:00:00Z',
+      updated_on: '2024-06-01T00:00:00Z',
+    },
+    {
+      id: 4,
+      member_id: 9,
+      sub_id: 3,
+      amount: '49.00',
+      currency: 'SAR',
+      gateway: 'gw',
+      gateway_ref: 'REF-4',
+      state: 'success',
+      paid_on: '2024-03-01T10:00:00Z',
+      updated_on: '2024-06-01T00:00:00Z',
+    },
+    // unknown user → conflict payment_without_user (unmatched)
+    {
+      id: 5,
+      member_id: 999,
+      sub_id: null,
+      amount: '49.00',
+      currency: 'SAR',
+      gateway: 'gw',
+      gateway_ref: 'REF-5',
+      state: 'success',
+      paid_on: '2024-03-02T10:00:00Z',
+      updated_on: '2024-06-01T00:00:00Z',
+    },
+    // more precision than SAR allows → rejected invalid:amountMinor
+    {
+      id: 6,
+      member_id: 10,
+      sub_id: null,
+      amount: '49.999',
+      currency: 'SAR',
+      gateway: 'gw',
+      gateway_ref: 'REF-6',
+      state: 'success',
+      paid_on: '2024-03-03T10:00:00Z',
+      updated_on: '2024-06-01T00:00:00Z',
+    },
+    // 100× the usual amount → conflict amount_outlier (unmatched)
+    {
+      id: 7,
+      member_id: 10,
+      sub_id: null,
+      amount: '4900.00',
+      currency: 'SAR',
+      gateway: 'gw',
+      gateway_ref: 'REF-7',
+      state: 'captured',
+      paid_on: '2024-05-10T10:00:00Z',
+      updated_on: '2024-06-01T00:00:00Z',
+    },
+    // three-decimal currency, matched to subscription 1 by period
+    {
+      id: 8,
+      member_id: 1,
+      sub_id: null,
+      amount: '9.000',
+      currency: 'KWD',
+      gateway: 'gw',
+      gateway_ref: 'REF-8',
+      state: 'success',
+      paid_on: '2024-03-15T10:00:00Z',
+      updated_on: '2024-06-01T00:00:00Z',
+    },
+    {
+      id: 9,
+      member_id: 1,
+      sub_id: null,
+      amount: '49.00',
+      currency: 'SAR',
+      gateway: 'gw',
+      gateway_ref: 'REF-9',
+      state: 'refund',
+      paid_on: '2024-04-10T10:00:00Z',
+      updated_on: '2024-06-01T00:00:00Z',
+    },
+    {
+      id: 10,
+      member_id: 10,
+      sub_id: null,
+      amount: '49.00',
+      currency: 'SAR',
+      gateway: 'gw',
+      gateway_ref: 'REF-10',
+      state: 'fail',
+      paid_on: null,
+      updated_on: '2024-06-01T00:00:00Z',
+    },
+    // paid without a paid date → rejected
+    {
+      id: 11,
+      member_id: 10,
+      sub_id: null,
+      amount: '49.00',
+      currency: 'SAR',
+      gateway: 'gw',
+      gateway_ref: 'REF-11',
+      state: 'success',
+      paid_on: null,
+      updated_on: '2024-06-01T00:00:00Z',
+    },
+  ],
+  researches: [
+    {
+      id: 1,
+      member_id: 1,
+      title: 'Research one',
+      question: 'Question one?',
+      lang: 'ar',
+      created_on: '2024-03-05T00:00:00Z',
+      updated_on: '2024-06-01T00:00:00Z',
+    },
+    {
+      id: 2,
+      member_id: 2,
+      title: 'Research two',
+      question: null,
+      lang: 'en',
+      created_on: '2024-03-06T00:00:00Z',
+      updated_on: '2024-06-01T00:00:00Z',
+    },
+    {
+      id: 3,
+      member_id: 3,
+      title: 'Research three',
+      question: null,
+      lang: 'ar',
+      created_on: '2024-03-07T00:00:00Z',
+      updated_on: '2024-06-01T00:00:00Z',
+    },
+    {
+      id: 4,
+      member_id: 10,
+      title: '',
+      question: null,
+      lang: 'ar',
+      created_on: '2024-03-08T00:00:00Z',
+      updated_on: '2024-06-01T00:00:00Z',
+    },
+    {
+      id: 5,
+      member_id: 9,
+      title: 'Research five',
+      question: 'Q5',
+      lang: 'en',
+      created_on: '2024-03-09T00:00:00Z',
+      updated_on: '2024-06-01T00:00:00Z',
+    },
+  ],
+  uploads: [
+    {
+      id: 1,
+      member_id: 1,
+      research_id: 1,
+      path: 'legacy/u1.pdf',
+      checksum: hex64,
+      mime: 'application/pdf',
+      size: 1024,
+      updated_on: '2024-06-01T00:00:00Z',
+    },
+    {
+      id: 2,
+      member_id: 10,
+      research_id: 99,
+      path: 'legacy/u2.pdf',
+      checksum: null,
+      mime: 'application/pdf',
+      size: 2048,
+      updated_on: '2024-06-01T00:00:00Z',
+    },
+    {
+      id: 3,
+      member_id: 1,
+      research_id: 1,
+      path: null,
+      checksum: null,
+      mime: null,
+      size: null,
+      updated_on: '2024-06-01T00:00:00Z',
+    },
+  ],
+  tg_users: [
+    { tg_id: '111', member_id: 10, updated_on: '2024-06-01T00:00:00Z' },
+    { tg_id: '222', member_id: 1, updated_on: '2024-06-01T00:00:00Z' },
+    { tg_id: '333', member_id: 7, updated_on: '2024-06-01T00:00:00Z' },
+    { tg_id: '444', member_id: 3, updated_on: '2024-06-01T00:00:00Z' },
+  ],
+} satisfies LegacyDump;
+
+export const GENERATED_AT = '2026-01-01T00:00:00.000Z';

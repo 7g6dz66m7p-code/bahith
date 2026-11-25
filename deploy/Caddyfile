@@ -1,0 +1,24 @@
+{
+	email {$ACME_EMAIL}
+}
+
+{$BAHITH_HOST} {
+	encode zstd gzip
+	# Uploads are capped at 50 MB by the application; leave headroom for multipart overhead.
+	request_body {
+		max_size 60MB
+	}
+	reverse_proxy web:3000 {
+		lb_policy least_conn
+		health_uri /api/health
+		health_interval 10s
+	}
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		-Server
+	}
+	log {
+		output stdout
+		format json
+	}
+}

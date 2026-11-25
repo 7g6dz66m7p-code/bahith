@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "description": "Mapping for fixtures/legacy-mysql.synthetic.sql (tests only; the real mapping is written from the real dump's inspection report).",
+  "defaults": {
+    "phoneCountryCode": "966",
+    "currency": "SAR",
+    "language": "ar",
+    "provider": "legacy-gateway"
+  },
+  "entities": {
+    "users": {
+      "table": "legacy.members",
+      "key": "id",
+      "fields": {
+        "legacyId": "id",
+        "email": "email",
+        "phone": "mobile",
+        "name": "full_name",
+        "createdAt": "created_on",
+        "updatedAt": "updated_on"
+      }
+    },
+    "subscriptions": {
+      "table": "legacy.plans_subs",
+      "key": "id",
+      "fields": {
+        "legacyId": "id",
+        "userLegacyId": "member_id",
+        "planCode": "plan",
+        "status": "state",
+        "periodStart": "starts_at",
+        "periodEnd": "ends_at",
+        "paymentLegacyId": "payment_id",
+        "updatedAt": "updated_on"
+      },
+      "values": {
+        "status": { "1": "active", "0": "expired", "2": "canceled" },
+        "planCode": { "premium": "pro", "basic": "free" }
+      }
+    }
+  }
+}

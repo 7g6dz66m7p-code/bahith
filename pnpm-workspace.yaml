@@ -1,0 +1,13 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+  - 'eval'
+
+# Only these dependencies may run install scripts (pnpm blocks the rest).
+onlyBuiltDependencies:
+  - cpu-features
+  - esbuild
+  - protobufjs
+  - sharp
+  - ssh2
+  - unrs-resolver

@@ -1,0 +1,42 @@
+{
+  "name": "bahith",
+  "version": "0.0.0",
+  "private": true,
+  "description": "\u0628\u0627\u062d\u062b | BAHITH \u2014 \u0645\u0646\u0635\u0629 \u0628\u062d\u062b \u0623\u0643\u0627\u062f\u064a\u0645\u064a \u0639\u0631\u0628\u064a\u0629 \u0623\u0648\u0644\u0627\u064b",
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "bootstrap": "node scripts/setup-env.mjs",
+    "staging:env": "node scripts/setup-env.mjs --staging",
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "test:integration": "turbo run test:integration",
+    "test:e2e": "turbo run test:e2e",
+    "eval": "pnpm --filter @bahith/eval run eval",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "db:migrate": "pnpm --filter @bahith/db run migrate",
+    "db:rollback": "pnpm --filter @bahith/db run rollback",
+    "db:seed": "pnpm --filter @bahith/db run seed",
+    "secrets:scan": "gitleaks git --redact --no-banner",
+    "prepare": "husky",
+    "storage:init": "pnpm --filter @bahith/jobs exec tsx src/init-storage.ts",
+    "db:backup": "pnpm --filter @bahith/db run backup",
+    "db:restore": "pnpm --filter @bahith/db run restore",
+    "db:plan-limits": "pnpm --filter @bahith/db run plan-limits"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
+    "prettier": "^3.10.1",
+    "turbo": "^2.11.11"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,mjs,cjs,json,md,yml,yaml,css}": "prettier --write"
+  }
+}

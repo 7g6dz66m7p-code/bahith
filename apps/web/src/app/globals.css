@@ -1,0 +1,342 @@
+@import 'tailwindcss';
+@import '@bahith/config/tailwind/theme.css';
+@import '@fontsource/ibm-plex-sans-arabic/400.css';
+@import '@fontsource/ibm-plex-sans-arabic/600.css';
+@import '@fontsource-variable/noto-naskh-arabic';
+
+:root {
+  color-scheme: light;
+  --background: #f5f4ef;
+  --foreground: #172f2c;
+  --surface: #ffffff;
+  --border: #c2d0c9;
+  --muted: #50615e;
+  --accent: #1f6757;
+  --danger: #a72332;
+  --surface-glass: rgb(255 255 255 / 0.8);
+  --glow: rgb(31 103 87 / 0.1);
+  --shadow: 0 1px 2px rgb(23 47 44 / 0.06), 0 12px 32px -12px rgb(23 47 44 / 0.18);
+}
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --background: #101c1b;
+  --foreground: #edf4ef;
+  --surface: #1a2a27;
+  --border: #4f655e;
+  --muted: #b9c9c1;
+  --accent: #93d7bc;
+  --danger: #ffabb2;
+  --surface-glass: rgb(26 42 39 / 0.82);
+  --glow: rgb(147 215 188 / 0.08);
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 12px 32px -12px rgb(0 0 0 / 0.55);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --background: #101c1b;
+    --foreground: #edf4ef;
+    --surface: #1a2a27;
+    --border: #4f655e;
+    --muted: #b9c9c1;
+    --accent: #93d7bc;
+    --danger: #ffabb2;
+    --surface-glass: rgb(26 42 39 / 0.82);
+    --glow: rgb(147 215 188 / 0.08);
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 12px 32px -12px rgb(0 0 0 / 0.55);
+  }
+}
+body {
+  background:
+    radial-gradient(60rem 30rem at 85% -10%, var(--glow), transparent 70%),
+    radial-gradient(50rem 28rem at 0% 110%, var(--glow), transparent 70%), var(--background);
+  background-attachment: fixed;
+  min-height: 100vh;
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+button,
+a,
+input,
+textarea,
+select {
+  outline-offset: 4px;
+}
+:focus-visible {
+  outline: 3px solid var(--accent);
+}
+button:not(:disabled),
+a {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+.surface {
+  border: 1px solid var(--border);
+  border-radius: 1.5rem;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+/* Glass surfaces where the browser can blur, unless the user asks for less transparency. */
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  @media not (prefers-reduced-transparency: reduce) {
+    .surface {
+      background: var(--surface-glass);
+      -webkit-backdrop-filter: saturate(160%) blur(18px);
+      backdrop-filter: saturate(160%) blur(18px);
+    }
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .btn,
+  .btn-secondary,
+  .tool-button {
+    /* Never colours: a theme switch must not pass through low-contrast states. */
+    transition:
+      transform 120ms ease,
+      box-shadow 120ms ease;
+  }
+  .btn:not(:disabled):hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+  }
+}
+.field {
+  width: 100%;
+  min-height: 2.875rem;
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  padding: 0.65rem 0.8rem;
+  background: var(--background);
+  color: var(--foreground);
+}
+.btn,
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.875rem;
+  border-radius: 0.85rem;
+  padding: 0.65rem 1.15rem;
+  font-weight: 600;
+  text-align: center;
+}
+.btn {
+  background: var(--accent);
+  color: var(--surface);
+  border: 1px solid var(--accent);
+}
+.btn-secondary {
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.muted {
+  color: var(--muted);
+}
+.error-text {
+  color: var(--danger);
+}
+.success-text {
+  color: var(--accent);
+}
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+.app-shell {
+  max-width: 76rem;
+  margin-inline: auto;
+}
+
+/* Academic editor */
+.tool-button {
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  padding: 0.35rem 0.75rem;
+  background: var(--surface);
+  font-size: 0.875rem;
+}
+.tool-button.is-active {
+  background: var(--accent);
+  color: var(--surface);
+  border-color: var(--accent);
+}
+.draft-surface .draft-content {
+  min-height: 24rem;
+  outline: none;
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  line-height: 2;
+  counter-reset: footnote;
+}
+.draft-content h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-block: 1.25rem 0.5rem;
+}
+.draft-content h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-block: 1rem 0.5rem;
+}
+.draft-content h3,
+.draft-content h4 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-block: 0.75rem 0.25rem;
+}
+.draft-content p {
+  margin-block: 0.5rem;
+  text-align: start;
+}
+.draft-content ul,
+.draft-content ol {
+  padding-inline-start: 1.5rem;
+  list-style: revert;
+}
+.draft-content blockquote {
+  border-inline-start: 4px solid var(--accent);
+  padding-inline-start: 1rem;
+  color: var(--muted);
+}
+.draft-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-block: 0.75rem;
+}
+.draft-content th,
+.draft-content td {
+  border: 1px solid var(--border);
+  padding: 0.35rem 0.6rem;
+  text-align: start;
+}
+.citation-chip {
+  border-radius: 0.4rem;
+  padding-inline: 0.25rem;
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--foreground);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 0.9em;
+}
+.footnote-ref::after {
+  counter-increment: footnote;
+  content: counter(footnote);
+  color: var(--accent);
+  font-weight: 700;
+  padding-inline: 0.1rem;
+}
+.diff-added {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  text-decoration: none;
+}
+.diff-removed {
+  color: var(--danger);
+}
+
+/* Draft review: anchored ranges are a view-only decoration, never stored in the draft. */
+.review-anchor {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  border-block-end: 2px solid var(--accent);
+}
+.review-anchor-suggestion {
+  border-block-end-style: dashed;
+}
+.review-quote {
+  border-inline-start: 3px solid var(--border);
+  padding-inline-start: 0.5rem;
+}
+
+/* Research assistant: support labels for each answer sentence. */
+.support-badge {
+  display: inline-block;
+  border-radius: 9999px;
+  padding: 0 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  vertical-align: middle;
+  border: 1px solid currentColor;
+}
+.support-supported {
+  color: var(--accent);
+}
+.support-inference {
+  color: var(--foreground);
+  border-style: dashed;
+}
+.support-unsupported {
+  color: var(--danger);
+}
+
+/* Localized file picker: the hidden input's focus is shown on its visible button. */
+.file-picker:focus-within label {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+}
+
+/* Notifications: unread badge in the header and the unread marker in the list. */
+.notification-count {
+  display: inline-block;
+  min-inline-size: 1.4rem;
+  border-radius: 9999px;
+  padding-inline: 0.4rem;
+  background: var(--accent);
+  color: var(--background);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.4rem;
+  text-align: center;
+}
+.notification-unread {
+  border-inline-start: 4px solid var(--accent);
+}
+/* Highlights: a colour bar on the inline start; the colour name is also given as text. */
+.highlight-mark {
+  border-inline-start: 4px solid var(--highlight);
+  padding-inline-start: 0.75rem;
+}
+.highlight-yellow {
+  --highlight: #8a6a00;
+}
+.highlight-green {
+  --highlight: #2e7031;
+}
+.highlight-blue {
+  --highlight: #2a5ca8;
+}
+.highlight-pink {
+  --highlight: #a8326b;
+}
+:root[data-theme='dark'] .highlight-yellow {
+  --highlight: #f0c94a;
+}
+:root[data-theme='dark'] .highlight-green {
+  --highlight: #8fd694;
+}
+:root[data-theme='dark'] .highlight-blue {
+  --highlight: #9cc2ff;
+}
+:root[data-theme='dark'] .highlight-pink {
+  --highlight: #f5a3c9;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .highlight-yellow {
+    --highlight: #f0c94a;
+  }
+  :root:not([data-theme='light']) .highlight-green {
+    --highlight: #8fd694;
+  }
+  :root:not([data-theme='light']) .highlight-blue {
+    --highlight: #9cc2ff;
+  }
+  :root:not([data-theme='light']) .highlight-pink {
+    --highlight: #f5a3c9;
+  }
+}

@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "files_workspace_id_sha256_key" ON "files" USING btree ("workspace_id","sha256") WHERE "files"."sha256" is not null;

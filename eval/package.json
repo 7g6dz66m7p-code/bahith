@@ -1,0 +1,28 @@
+{
+  "name": "@bahith/eval",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "eval": "tsx sanad/run.ts",
+    "eval:corpus": "tsx sanad/make-corpus.ts",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "eval:assistant": "tsx sanad/assistant.ts",
+    "eval:references": "tsx references/run.ts",
+    "eval:references:build": "tsx references/build-dataset.ts"
+  },
+  "devDependencies": {
+    "@bahith/ai": "workspace:*",
+    "@bahith/config": "workspace:*",
+    "@bahith/db": "workspace:*",
+    "@types/node": "^22.19.0",
+    "eslint": "^9.39.5",
+    "playwright": "1.63.0",
+    "tsx": "^4.23.15",
+    "typescript": "~6.0.3",
+    "vitest": "^5.1.0",
+    "zod": "^4.6.7"
+  }
+}

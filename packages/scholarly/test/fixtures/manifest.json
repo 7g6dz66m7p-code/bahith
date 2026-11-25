@@ -1,0 +1,152 @@
+{
+  "note": "Recorded from the live APIs by scripts/record-fixtures.ts.",
+  "fixtures": {
+    "arxiv-id-1706.03762": {
+      "file": "arxiv-id-1706.03762.xml",
+      "url": "https://export.arxiv.org/api/query?id_list=1706.03762",
+      "status": 200,
+      "contentType": "application/atom+xml; charset=utf-8",
+      "recordedAt": "2026-11-20T18:13:12.027Z"
+    },
+    "arxiv-id-unknown": {
+      "file": "arxiv-id-unknown.xml",
+      "url": "https://export.arxiv.org/api/query?id_list=2401.99999",
+      "status": 200,
+      "contentType": "application/atom+xml; charset=utf-8",
+      "recordedAt": "2026-11-20T18:13:14.578Z"
+    },
+    "arxiv-search-attention": {
+      "file": "arxiv-search-attention.xml",
+      "url": "https://export.arxiv.org/api/query?search_query=ti%3Aattention+AND+ti%3Aneed&start=0&max_results=3",
+      "status": 200,
+      "contentType": "application/atom+xml; charset=utf-8",
+      "recordedAt": "2026-11-20T18:13:17.563Z"
+    },
+    "crossref-search-fabricated-title": {
+      "file": "crossref-search-fabricated-title.json",
+      "url": "https://api.crossref.org/works?query.bibliographic=%D8%A7%D9%84%D8%A3%D8%AB%D8%B1+%D8%A7%D9%84%D9%83%D9%85%D9%88%D9%85%D9%8A+%D9%84%D8%A3%D8%AD%D8%A8%D8%A7%D8%B1+%D8%A7%D9%84%D9%85%D8%AE%D8%B7%D9%88%D8%B7%D8%A7%D8%AA+%D8%A7%D9%84%D8%A3%D9%86%D8%AF%D9%84%D8%B3%D9%8A%D8%A9+%D9%81%D9%8A+%D8%AE%D9%88%D8%A7%D8%B1%D8%B2%D9%85%D9%8A%D8%A7%D8%AA+%D8%A7%D9%84%D8%AA%D8%B9%D9%84%D9%85+%D8%A7%D9%84%D8%B9%D9%85%D9%8A%D9%82+%D8%AD%D8%AF%D8%A7%D8%AF+2021&rows=5&select=DOI%2Ctype%2Ctitle%2Csubtitle%2Ccontainer-title%2Cvolume%2Cissue%2Cpage%2Cissued%2Cpublished%2Cpublisher%2CISBN%2CISSN%2CURL%2Cabstract%2Cauthor",
+      "status": 200,
+      "contentType": "application/json",
+      "recordedAt": "2026-11-20T18:13:03.677Z"
+    },
+    "crossref-search-real-title": {
+      "file": "crossref-search-real-title.json",
+      "url": "https://api.crossref.org/works?query.bibliographic=Deep+learning+lecun+2015&rows=5&select=DOI%2Ctype%2Ctitle%2Csubtitle%2Ccontainer-title%2Cvolume%2Cissue%2Cpage%2Cissued%2Cpublished%2Cpublisher%2CISBN%2CISSN%2CURL%2Cabstract%2Cauthor",
+      "status": 200,
+      "contentType": "application/json",
+      "recordedAt": "2026-11-20T18:13:02.367Z"
+    },
+    "crossref-work-fabricated": {
+      "file": "crossref-work-fabricated.txt",
+      "url": "https://api.crossref.org/works/10.9999/fake.2024.12345",
+      "status": 404,
+      "contentType": "text/plain",
+      "recordedAt": "2026-11-20T18:13:02.017Z"
+    },
+    "crossref-work-nature14539": {
+      "file": "crossref-work-nature14539.json",
+      "url": "https://api.crossref.org/works/10.1038/nature14539",
+      "status": 200,
+      "contentType": "application/json",
+      "recordedAt": "2026-11-20T18:13:01.916Z"
+    },
+    "doaj-search-deep-learning": {
+      "file": "doaj-search-deep-learning.json",
+      "url": "https://doaj.org/api/v4/search/articles/deep%20learning?page=1&pageSize=3",
+      "status": 200,
+      "contentType": "application/json",
+      "recordedAt": "2026-11-20T18:13:18.089Z"
+    },
+    "openalex-search-fabricated-title": {
+      "file": "openalex-search-fabricated-title.json",
+      "url": "https://api.openalex.org/works?search=%D8%A7%D9%84%D8%A3%D8%AB%D8%B1+%D8%A7%D9%84%D9%83%D9%85%D9%88%D9%85%D9%8A+%D9%84%D8%A3%D8%AD%D8%A8%D8%A7%D8%B1+%D8%A7%D9%84%D9%85%D8%AE%D8%B7%D9%88%D8%B7%D8%A7%D8%AA+%D8%A7%D9%84%D8%A3%D9%86%D8%AF%D9%84%D8%B3%D9%8A%D8%A9+%D9%81%D9%8A+%D8%AE%D9%88%D8%A7%D8%B1%D8%B2%D9%85%D9%8A%D8%A7%D8%AA+%D8%A7%D9%84%D8%AA%D8%B9%D9%84%D9%85+%D8%A7%D9%84%D8%B9%D9%85%D9%8A%D9%82&per_page=5&select=id%2Cdoi%2Ctitle%2Cdisplay_name%2Cpublication_year%2Cpublication_date%2Ctype%2Clanguage%2Cbiblio%2Cprimary_location%2Cauthorships%2Cabstract_inverted_index",
+      "status": 429,
+      "contentType": "application/json",
+      "recordedAt": "2026-11-20T18:13:59.432Z"
+    },
+    "openalex-work-fabricated": {
+      "file": "openalex-work-fabricated.json",
+      "url": "https://api.openalex.org/works/doi:10.9999/fake.2024.12345?select=id%2Cdoi%2Ctitle%2Cdisplay_name%2Cpublication_year%2Cpublication_date%2Ctype%2Clanguage%2Cbiblio%2Cprimary_location%2Cauthorships%2Cabstract_inverted_index",
+      "status": 404,
+      "contentType": "application/json",
+      "recordedAt": "2026-11-20T18:13:04.462Z"
+    },
+    "openalex-work-nature14539": {
+      "file": "openalex-work-nature14539.json",
+      "url": "https://api.openalex.org/works/doi:10.1038/nature14539?select=id%2Cdoi%2Ctitle%2Cdisplay_name%2Cpublication_year%2Cpublication_date%2Ctype%2Clanguage%2Cbiblio%2Cprimary_location%2Cauthorships%2Cabstract_inverted_index",
+      "status": 200,
+      "contentType": "application/json",
+      "recordedAt": "2026-11-20T18:13:04.306Z"
+    },
+    "orcid-person-carberry": {
+      "file": "orcid-person-carberry.json",
+      "url": "https://pub.orcid.org/v3.0/0000-0002-1825-0097/person",
+      "status": 200,
+      "contentType": "application/json;charset=UTF-8",
+      "recordedAt": "2026-11-20T18:13:18.775Z"
+    },
+    "orcid-works-carberry": {
+      "file": "orcid-works-carberry.json",
+      "url": "https://pub.orcid.org/v3.0/0000-0002-1825-0097/works",
+      "status": 200,
+      "contentType": "application/json;charset=UTF-8",
+      "recordedAt": "2026-11-20T18:13:18.920Z"
+    },
+    "pubmed-esearch-deep-learning": {
+      "file": "pubmed-esearch-deep-learning.json",
+      "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&retmode=json&term=deep+learning%5BTitle%5D+AND+LeCun+Y%5BAuthor%5D&retmax=5",
+      "status": 200,
+      "contentType": "application/json; charset=UTF-8",
+      "recordedAt": "2026-11-20T18:13:11.187Z"
+    },
+    "pubmed-esummary-26017442": {
+      "file": "pubmed-esummary-26017442.json",
+      "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&retmode=json&id=26017442",
+      "status": 200,
+      "contentType": "application/json; charset=UTF-8",
+      "recordedAt": "2026-11-20T18:13:11.364Z"
+    },
+    "pubmed-esummary-unknown": {
+      "file": "pubmed-esummary-unknown.json",
+      "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&retmode=json&id=9999999999",
+      "status": 200,
+      "contentType": "application/json; charset=UTF-8",
+      "recordedAt": "2026-11-20T18:13:11.500Z"
+    },
+    "semanticscholar-paper-attention": {
+      "file": "semanticscholar-paper-attention.json",
+      "url": "https://api.semanticscholar.org/graph/v1/paper/DOI%3A10.48550/arxiv.1706.03762?fields=paperId%2Ctitle%2Cauthors%2Cyear%2Cvenue%2CexternalIds%2Cabstract%2Curl%2CpublicationDate%2Cjournal%2CpublicationTypes",
+      "status": 200,
+      "contentType": "application/json",
+      "recordedAt": "2026-11-20T18:13:05.172Z"
+    },
+    "semanticscholar-paper-nature14539": {
+      "file": "semanticscholar-paper-nature14539.json",
+      "url": "https://api.semanticscholar.org/graph/v1/paper/DOI%3A10.1038/nature14539?fields=paperId%2Ctitle%2Cauthors%2Cyear%2Cvenue%2CexternalIds%2Cabstract%2Curl%2CpublicationDate%2Cjournal%2CpublicationTypes",
+      "status": 404,
+      "contentType": "application/json",
+      "recordedAt": "2026-11-20T18:13:05.742Z"
+    },
+    "semanticscholar-search-attention": {
+      "file": "semanticscholar-search-attention.json",
+      "url": "https://api.semanticscholar.org/graph/v1/paper/search?query=attention+is+all+you+need&limit=3&fields=paperId%2Ctitle%2Cauthors%2Cyear%2Cvenue%2CexternalIds%2Cabstract%2Curl%2CpublicationDate%2Cjournal%2CpublicationTypes",
+      "status": 200,
+      "contentType": "application/json",
+      "recordedAt": "2026-11-20T18:20:17.670Z"
+    },
+    "unpaywall-fabricated": {
+      "file": "unpaywall-fabricated.txt",
+      "url": "https://api.unpaywall.org/v2/10.9999/fake.2024.12345",
+      "status": 404,
+      "contentType": "text/html; charset=utf-8",
+      "recordedAt": "2026-11-20T18:13:19.762Z"
+    },
+    "unpaywall-nature14539": {
+      "file": "unpaywall-nature14539.json",
+      "url": "https://api.unpaywall.org/v2/10.1038/nature14539",
+      "status": 200,
+      "contentType": "application/json",
+      "recordedAt": "2026-11-20T18:13:19.668Z"
+    }
+  }
+}

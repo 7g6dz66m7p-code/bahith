@@ -1,0 +1,6 @@
+# Reviewed false positives only. Each entry is one exact finding (commit:file:rule:line).
+#
+# generic-api-key on a migration-tag assertion: '0004_auth_identity' contains "auth", so
+# the next migration name ('0003_sanad_provenance') was read as a key value. It is a
+# test expectation listing migration names; no secret is involved.
+e644ff30e99e684fe4722c90166c65921ad0366c:packages/db/test/integration/migrations.test.ts:generic-api-key:113

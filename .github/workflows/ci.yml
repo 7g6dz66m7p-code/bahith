@@ -1,0 +1,147 @@
+name: CI
+
+on:
+  push:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # Turborepo/Next.js telemetry off; no secrets are needed by any job.
+  TURBO_TELEMETRY_DISABLED: '1'
+  NEXT_TELEMETRY_DISABLED: '1'
+
+jobs:
+  quality:
+    name: Lint, format and typecheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - uses: astral-sh/setup-uv@v6
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm format:check
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - name: Schema and migrations are in sync
+        working-directory: packages/db
+        run: |
+          pnpm exec drizzle-kit check
+          pnpm exec drizzle-kit generate
+          git diff --exit-code -- migrations
+          test -z "$(git status --porcelain -- migrations)"
+
+  unit:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - uses: astral-sh/setup-uv@v6
+      # Local OCR for the document worker (Arabic + English traineddata).
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq tesseract-ocr tesseract-ocr-ara tesseract-ocr-eng
+      - run: sudo scripts/install-arabic-ocr-model.sh
+      - run: pnpm install --frozen-lockfile
+      # @bahith/export prints PDFs with Playwright Chromium in its unit tests.
+      - run: pnpm --filter @bahith/export exec playwright install --with-deps chromium
+      - run: pnpm test
+
+  integration:
+    name: Integration tests (Testcontainers)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - uses: astral-sh/setup-uv@v6
+      # Local OCR for the document worker; pg_dump/pg_restore 16 for the backup test.
+      # Ubuntu's own archive no longer ships client 16; the PGDG archive does (matches the Postgres 16 server).
+      - run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y -qq tesseract-ocr tesseract-ocr-ara tesseract-ocr-eng postgresql-client-16
+          sudo scripts/install-arabic-ocr-model.sh
+          # The runner also has a newer client; dumps must come from 16 to restore into 16.
+          echo /usr/lib/postgresql/16/bin >> "$GITHUB_PATH"
+      - run: pnpm install --frozen-lockfile
+      # Real Postgres 16 + pgvector, Redis and MinIO containers, and the real Python
+      # worker for the document pipeline test; includes the isolation tests.
+      - run: pnpm test:integration --concurrency=1
+      # Fixed SANAD evaluation (eval/sanad): fails below its retrieval, page and quote gates.
+      # Diagnostics for OCR reproducibility (synthetic corpus only): engine version, the
+      # SIMD paths it detected, and the recognised text of the scanned evaluation PDF.
+      - name: OCR diagnostics
+        run: |
+          tesseract --version
+          uv run --project apps/worker python -I eval/sanad/extract.py eval/sanad/corpus/ar-scanned-heritage.pdf application/pdf \
+            | python3 -c "import json,sys; [print(u['page'], repr(u['content'])) for u in json.load(sys.stdin)['units']]"
+      - run: pnpm eval
+
+  e2e:
+    name: End-to-end tests (Playwright, ar + en)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - uses: astral-sh/setup-uv@v6
+      # Local OCR for the document worker (Arabic + English traineddata).
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq tesseract-ocr tesseract-ocr-ara tesseract-ocr-eng
+      - run: sudo scripts/install-arabic-ocr-model.sh
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @bahith/web exec playwright install --with-deps chromium
+      - run: pnpm --filter @bahith/web run test:e2e
+      - name: Browser evidence (Arabic and English)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-evidence-ar-en
+          path: apps/web/test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  gitleaks:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GITLEAKS_VERSION: 8.24.3
+      GITLEAKS_SHA256: 9991e0b2903da4c8f6122b5c3186448b927a5da4deef1fe45271c3793f4ee29c
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install gitleaks
+        run: |
+          curl -fsSL -o gitleaks.tar.gz \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          echo "${GITLEAKS_SHA256}  gitleaks.tar.gz" | sha256sum --check
+          mkdir -p "$RUNNER_TEMP/gitleaks"
+          tar -xzf gitleaks.tar.gz -C "$RUNNER_TEMP/gitleaks" gitleaks
+          rm gitleaks.tar.gz
+          echo "$RUNNER_TEMP/gitleaks" >> "$GITHUB_PATH"
+      # Scans the whole history, not only the last commit.
+      - run: gitleaks git --redact --no-banner

@@ -1,0 +1,12 @@
+# gitleaks configuration: the default rule set plus one narrow, documented exception.
+[extend]
+useDefault = true
+
+# The recorded Crossref record for DOI 10.1038/nature14539 (public bibliographic metadata,
+# packages/scholarly/test/fixtures) lists its references with citation keys such as
+# "key":"BFnature14539_CR17", which the generic-api-key rule mistakes for secrets. Only that
+# exact key shape is allowed; every other finding, in fixtures or elsewhere, still fails.
+[allowlist]
+description = "Crossref citation keys of the nature14539 reference list"
+regexTarget = "match"
+regexes = ['''^key"\s*:\s*"BFnature14539_CR\d{1,3}"$''']

@@ -1,0 +1,4963 @@
+{
+  "schemaVersion": 1,
+  "name": "BAHITH fabricated-reference detection set",
+  "generatedAt": "2026-11-21T13:10:44.778Z",
+  "generator": "eval/references/build-dataset.ts",
+  "seed": 20261121,
+  "note": "Real items were sampled at random from the Crossref REST API on 2026-11-21 and carry their registered metadata unchanged. Fabricated items are invented on purpose and must be rejected; they are not real references. Mismatched items pair a real DOI with another real work's metadata.",
+  "crossref": {
+    "endpoint": "https://api.crossref.org/works?sample=100",
+    "sampledAt": "2026-11-21T13:06:29.215Z",
+    "requests": [
+      "https://api.crossref.org/works?sample=100&filter=type%3Ajournal-article&select=DOI%2Ctype%2Ctitle%2Csubtitle%2Ccontainer-title%2Cissued%2Cpublished%2Cpublished-print%2Cpublished-online%2Cauthor",
+      "https://api.crossref.org/works?sample=100&filter=type%3Ajournal-article&select=DOI%2Ctype%2Ctitle%2Csubtitle%2Ccontainer-title%2Cissued%2Cpublished%2Cpublished-print%2Cpublished-online%2Cauthor",
+      "https://api.crossref.org/works?sample=100&filter=type%3Ajournal-article&select=DOI%2Ctype%2Ctitle%2Csubtitle%2Ccontainer-title%2Cissued%2Cpublished%2Cpublished-print%2Cpublished-online%2Cauthor&query.bibliographic=%D8%AF%D8%B1%D8%A7%D8%B3%D8%A9",
+      "https://api.crossref.org/works?sample=100&filter=type%3Ajournal-article&select=DOI%2Ctype%2Ctitle%2Csubtitle%2Ccontainer-title%2Cissued%2Cpublished%2Cpublished-print%2Cpublished-online%2Cauthor&query.bibliographic=%D8%A3%D8%AB%D8%B1",
+      "https://api.crossref.org/works?sample=100&filter=type%3Ajournal-article&select=DOI%2Ctype%2Ctitle%2Csubtitle%2Ccontainer-title%2Cissued%2Cpublished%2Cpublished-print%2Cpublished-online%2Cauthor&query.bibliographic=%D8%AA%D8%AD%D9%84%D9%8A%D9%84",
+      "https://api.crossref.org/works?sample=100&filter=type%3Ajournal-article&select=DOI%2Ctype%2Ctitle%2Csubtitle%2Ccontainer-title%2Cissued%2Cpublished%2Cpublished-print%2Cpublished-online%2Cauthor&query.bibliographic=%D9%88%D8%A7%D9%82%D8%B9"
+    ]
+  },
+  "expectations": {
+    "real": "verified",
+    "fabricated": "not_found (mismatch also counts as rejected: the reference as written does not exist)",
+    "mismatched": "mismatch"
+  },
+  "buildChecks": {
+    "sampledGeneral": 180,
+    "sampledArabic": 375,
+    "realArabicScript": 15,
+    "fakeDoiRegisteredRedrawn": 0,
+    "inventedTitleTooCloseRedrawn": 0,
+    "mismatchPairsSkipped": 0
+  },
+  "counts": {
+    "real": 100,
+    "fabricated": 50,
+    "mismatched": 25
+  },
+  "items": [
+    {
+      "id": "real-001",
+      "kind": "real",
+      "input": {
+        "title": "Scanning tunneling microscopy and spectroscopy studies of superconducting boron-doped diamond films",
+        "authors": [
+          {
+            "family": "Nishizaki",
+            "given": "Terukazu"
+          },
+          {
+            "family": "Takano",
+            "given": "Yoshihiko"
+          },
+          {
+            "family": "Nagao",
+            "given": "Masanori"
+          },
+          {
+            "family": "Takenouchi",
+            "given": "Tomohiro"
+          },
+          {
+            "family": "Kawarada",
+            "given": "Hiroshi"
+          },
+          {
+            "family": "Kobayashi",
+            "given": "Norio"
+          }
+        ],
+        "year": 2006,
+        "container": "Science and Technology of Advanced Materials",
+        "doi": "doi:10.1016/j.stam.2006.05.008"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as \"doi:\" prefix"
+    },
+    {
+      "id": "real-002",
+      "kind": "real",
+      "input": {
+        "title": "Reflections on Aaron Levine's Economics and Jewish Law: Halakhic Perspectives",
+        "authors": [
+          {
+            "family": "Hill",
+            "given": "Peter J."
+          }
+        ],
+        "year": 1995,
+        "container": "Cultural Dynamics",
+        "doi": "10.1177/092137409500700309"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-003",
+      "kind": "real",
+      "input": {
+        "title": "Treatment of an Iatrogenic Left Internal Mammary Artery to Pulmonary Artery Fistula with a Bovine Pericardium Covered Stent",
+        "authors": [
+          {
+            "family": "Heper",
+            "given": "Gulumser"
+          },
+          {
+            "family": "Barcin",
+            "given": "Cem"
+          },
+          {
+            "family": "Iyisoy",
+            "given": "Atila"
+          },
+          {
+            "family": "Tore",
+            "given": "Hasan F."
+          }
+        ],
+        "year": 2006,
+        "container": "CardioVascular and Interventional Radiology",
+        "doi": "doi:10.1007/s00270-005-0149-2"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as \"doi:\" prefix"
+    },
+    {
+      "id": "real-004",
+      "kind": "real",
+      "input": {
+        "title": "S1248 A New Frontier: Endoscopic Ultrasound-Guided Portal Pressure Measurement: A Systematic Review and Meta-Analysis",
+        "authors": [
+          {
+            "family": "Dhindsa",
+            "given": "Banreet"
+          },
+          {
+            "family": "Tun",
+            "given": "Kyaw Min"
+          },
+          {
+            "family": "Fiedler",
+            "given": "Alexandra R."
+          },
+          {
+            "family": "Deliwala",
+            "given": "Smit"
+          },
+          {
+            "family": "Saghir",
+            "given": "Syed Mohsin"
+          },
+          {
+            "family": "Scholten",
+            "given": "Kyle"
+          },
+          {
+            "family": "Dhaliwal",
+            "given": "Amaninder"
+          },
+          {
+            "family": "Ramai",
+            "given": "Daryl"
+          },
+          {
+            "family": "Chandan",
+            "given": "Saurabh"
+          },
+          {
+            "family": "Girotra",
+            "given": "Mohit"
+          }
+        ],
+        "year": 2023,
+        "container": "American Journal of Gastroenterology",
+        "doi": "doi:10.14309/01.ajg.0000954632.85026.8f"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as \"doi:\" prefix"
+    },
+    {
+      "id": "real-005",
+      "kind": "real",
+      "input": {
+        "title": "Subgroup analyses from the phase 3 ASCENT study of sacituzumab govitecan in metastatic triple-negative breast cancer",
+        "authors": [
+          {
+            "family": "Hurvitz",
+            "given": "Sara A."
+          },
+          {
+            "family": "Bardia",
+            "given": "Aditya"
+          },
+          {
+            "family": "Punie",
+            "given": "Kevin"
+          },
+          {
+            "family": "Kalinsky",
+            "given": "Kevin"
+          },
+          {
+            "family": "Carey",
+            "given": "Lisa A."
+          },
+          {
+            "family": "Rugo",
+            "given": "Hope S."
+          },
+          {
+            "family": "Diéras",
+            "given": "Véronique"
+          },
+          {
+            "family": "Phan",
+            "given": "See"
+          },
+          {
+            "family": "Delaney",
+            "given": "Rosemary"
+          },
+          {
+            "family": "Zhu",
+            "given": "Yanni"
+          }
+        ],
+        "year": 2024,
+        "container": "npj Breast Cancer",
+        "doi": "https://doi.org/10.1038/s41523-024-00635-5"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as https://doi.org/ URL"
+    },
+    {
+      "id": "real-006",
+      "kind": "real",
+      "input": {
+        "title": "An Adaptive Lag Trap in Socio-Technical Systems: The Paradoxical Effect of Digitalization and Labor on Logistics Investment in China",
+        "authors": [
+          {
+            "family": "Chen",
+            "given": "Keming"
+          },
+          {
+            "family": "Huang",
+            "given": "Chunxiao"
+          },
+          {
+            "family": "Wang",
+            "given": "Ting"
+          },
+          {
+            "family": "Zhu",
+            "given": "Tianqi"
+          },
+          {
+            "family": "Li",
+            "given": "Tingting"
+          },
+          {
+            "family": "Zhao",
+            "given": "Dan"
+          }
+        ],
+        "year": 2025,
+        "container": "Systems",
+        "doi": "10.3390/systems13080693"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-007",
+      "kind": "real",
+      "input": {
+        "title": "MCI-154, a Ca2+sensitizer, decreases the oxygen cost of contractility in isolated canine hearts",
+        "authors": [
+          {
+            "family": "Onishi",
+            "given": "Katsuya"
+          },
+          {
+            "family": "Sekioka",
+            "given": "Kiyotsugu"
+          },
+          {
+            "family": "Ishisu",
+            "given": "Ryoichi"
+          },
+          {
+            "family": "Abe",
+            "given": "Yuji"
+          },
+          {
+            "family": "Tanaka",
+            "given": "Hideyuki"
+          },
+          {
+            "family": "Nakamura",
+            "given": "Mashio"
+          },
+          {
+            "family": "Ueda",
+            "given": "Yuji"
+          },
+          {
+            "family": "Nakano",
+            "given": "Takeshi"
+          }
+        ],
+        "year": 1997,
+        "container": "American Journal of Physiology-Heart and Circulatory Physiology",
+        "doi": "10.1152/ajpheart.1997.273.4.h1688"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-008",
+      "kind": "real",
+      "input": {
+        "title": "Industrielle Membrandestillationsanlage mit integrierter Energierückgewinnung zur effizienten Nutzung von Abwärme",
+        "authors": [
+          {
+            "family": "Hagedorn",
+            "given": "A."
+          },
+          {
+            "family": "Fieg",
+            "given": "G."
+          },
+          {
+            "family": "Koschikowski",
+            "given": "J."
+          },
+          {
+            "family": "Mann",
+            "given": "T."
+          }
+        ],
+        "year": 2016,
+        "container": "Chemie Ingenieur Technik",
+        "doi": "10.1002/cite.201650132"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-009",
+      "kind": "real",
+      "input": {
+        "title": "On-line Inspection Algorithm of Brown Rice Using Image Processing",
+        "authors": [
+          {
+            "family": "Kim",
+            "given": "Tae-Min"
+          },
+          {
+            "family": "Noh",
+            "given": "Sang-Ha"
+          }
+        ],
+        "year": 2010,
+        "container": "Journal of Biosystems Engineering",
+        "doi": "https://doi.org/10.5307/jbe.2010.35.2.138"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as https://doi.org/ URL"
+    },
+    {
+      "id": "real-010",
+      "kind": "real",
+      "input": {
+        "title": "Structural control and functional modification using peptide-based template inspired by biomineralization",
+        "authors": [
+          {
+            "family": "Murai",
+            "given": "Kazuki"
+          }
+        ],
+        "year": 2024,
+        "container": "Journal of the Ceramic Society of Japan",
+        "doi": "10.2109/jcersj2.24032"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-011",
+      "kind": "real",
+      "input": {
+        "title": "Performance evaluation of graphene-enhanced LPG in a vapour compression refrigeration system: An experimental approach",
+        "authors": [
+          {
+            "family": "Babarinde",
+            "given": "T.O."
+          },
+          {
+            "family": "Madyira",
+            "given": "D.M."
+          },
+          {
+            "family": "Mashinini",
+            "given": "P.M."
+          }
+        ],
+        "year": 2022,
+        "container": "Energy Reports",
+        "doi": "doi:10.1016/j.egyr.2022.07.140"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as \"doi:\" prefix"
+    },
+    {
+      "id": "real-012",
+      "kind": "real",
+      "input": {
+        "title": "Nasal administration of transforming growth factor-β1 induces dendritic cells and inhibits protracted-relapsing experimental allergic encephalomyelitis",
+        "authors": [
+          {
+            "family": "Ishikawa",
+            "given": "M."
+          },
+          {
+            "family": "Jin",
+            "given": "Y."
+          },
+          {
+            "family": "Guo",
+            "given": "H."
+          },
+          {
+            "family": "Link",
+            "given": "H."
+          },
+          {
+            "family": "Xiao",
+            "given": "B-G."
+          }
+        ],
+        "year": 1999,
+        "container": "Multiple Sclerosis",
+        "doi": "https://doi.org/10.1191/135245899678846050"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as https://doi.org/ URL"
+    },
+    {
+      "id": "real-013",
+      "kind": "real",
+      "input": {
+        "title": "Editorial: Use of small peptides in the treatment of inflammatory diseases",
+        "authors": [
+          {
+            "family": "Chemtob",
+            "given": "Sylvain"
+          },
+          {
+            "family": "Rosenstein",
+            "given": "Yvonne"
+          },
+          {
+            "family": "Auvynet",
+            "given": "Constance"
+          }
+        ],
+        "year": 2022,
+        "container": "Frontiers in Pharmacology",
+        "doi": "10.3389/fphar.2022.1090014"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-014",
+      "kind": "real",
+      "input": {
+        "title": "Variables in Successful Repair of Urethrocutaneous Fistula After Hypospadias Surgery",
+        "authors": [
+          {
+            "family": "Waterman",
+            "given": "Bradley J."
+          },
+          {
+            "family": "Renschler",
+            "given": "Todd"
+          },
+          {
+            "family": "Cartwright",
+            "given": "Patrick C."
+          },
+          {
+            "family": "Snow",
+            "given": "Brent W."
+          },
+          {
+            "family": "de Vries",
+            "given": "Catherine R."
+          }
+        ],
+        "year": 2002,
+        "container": "Journal of Urology",
+        "doi": "10.1016/s0022-5347(05)64734-9"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-015",
+      "kind": "real",
+      "input": {
+        "title": "Nanofluidic Diodes with Dynamic Rectification Properties Stemming from Reversible Electrochemical Conversions in Conducting Polymers",
+        "authors": [
+          {
+            "family": "Pérez-Mitta",
+            "given": "Gonzalo"
+          },
+          {
+            "family": "Marmisollé",
+            "given": "Waldemar A."
+          },
+          {
+            "family": "Trautmann",
+            "given": "Christina"
+          },
+          {
+            "family": "Toimil-Molares",
+            "given": "María Eugenia"
+          },
+          {
+            "family": "Azzaroni",
+            "given": "Omar"
+          }
+        ],
+        "year": 2015,
+        "container": "Journal of the American Chemical Society",
+        "doi": "10.1021/jacs.5b10692"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-016",
+      "kind": "real",
+      "input": {
+        "title": "Juvenile development of Dilocarcinus pagei Stimpson, 1861 (Brachyura, Trichodactylidae) reared in the laboratory, with emphasis on setae morphology",
+        "authors": [
+          {
+            "family": "Vieira",
+            "given": "Rony R. R."
+          },
+          {
+            "family": "Rieger",
+            "given": "Paulo J."
+          },
+          {
+            "family": "Cichowski",
+            "given": "Viviane"
+          },
+          {
+            "family": "Pinheiro",
+            "given": "Marcelo A. A."
+          }
+        ],
+        "year": 2013,
+        "container": "Crustaceana",
+        "doi": "10.1163/15685403-00003247"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as upper case"
+    },
+    {
+      "id": "real-017",
+      "kind": "real",
+      "input": {
+        "title": "A New Non-Singular Terminal Sliding Mode Control and Its Application to Chaos Suppression in Interconnected Power System",
+        "authors": [
+          {
+            "family": "Nian",
+            "given": "Wang"
+          },
+          {
+            "family": "Chen",
+            "given": "Hui"
+          },
+          {
+            "family": "Ding",
+            "given": "Dawei"
+          }
+        ],
+        "year": 2018,
+        "container": "International Journal of Advanced Network, Monitoring and Controls",
+        "doi": "10.21307/ijanmc-2018-026"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-018",
+      "kind": "real",
+      "input": {
+        "title": "Was there unmet mental health need after the September 11, 2001 terrorist attacks?",
+        "authors": [
+          {
+            "family": "Stuber",
+            "given": "Jennifer"
+          },
+          {
+            "family": "Galea",
+            "given": "Sandro"
+          },
+          {
+            "family": "Boscarino",
+            "given": "Joseph A."
+          },
+          {
+            "family": "Schlesinger",
+            "given": "Mark"
+          }
+        ],
+        "year": 2006,
+        "container": "Social Psychiatry and Psychiatric Epidemiology",
+        "doi": "https://doi.org/10.1007/s00127-005-0022-2"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as https://doi.org/ URL"
+    },
+    {
+      "id": "real-019",
+      "kind": "real",
+      "input": {
+        "title": "Nanoarchitectured Structure and Surface Biofunctionality of Mesoporous Silica Nanoparticles",
+        "authors": [
+          {
+            "family": "Kankala",
+            "given": "Ranjith Kumar"
+          },
+          {
+            "family": "Han",
+            "given": "Ya‐Hui"
+          },
+          {
+            "family": "Na",
+            "given": "Jongbeom"
+          },
+          {
+            "family": "Lee",
+            "given": "Chia‐Hung"
+          },
+          {
+            "family": "Sun",
+            "given": "Ziqi"
+          },
+          {
+            "family": "Wang",
+            "given": "Shi‐Bin"
+          },
+          {
+            "family": "Kimura",
+            "given": "Tatsuo"
+          },
+          {
+            "family": "Ok",
+            "given": "Yong Sik"
+          },
+          {
+            "family": "Yamauchi",
+            "given": "Yusuke"
+          },
+          {
+            "family": "Chen",
+            "given": "Ai‐Zheng"
+          }
+        ],
+        "year": 2020,
+        "container": "Advanced Materials",
+        "doi": "doi:10.1002/adma.201907035"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as \"doi:\" prefix"
+    },
+    {
+      "id": "real-020",
+      "kind": "real",
+      "input": {
+        "title": "Suboptimal glycemic control and prevalence of diabetes-related complications in Kenyan population with diabetes: cohort analysis of the seventh wave of the International Diabetes Management Practices Study (IDMPS)",
+        "authors": [
+          {
+            "family": "Otieno",
+            "given": "Fredrick C."
+          },
+          {
+            "family": "Mikhail",
+            "given": "Tamer"
+          },
+          {
+            "family": "Acharya",
+            "given": "Kirtida"
+          },
+          {
+            "family": "Muga",
+            "given": "Joseph"
+          },
+          {
+            "family": "Ngugi",
+            "given": "Nancy"
+          },
+          {
+            "family": "Njenga",
+            "given": "Eric"
+          }
+        ],
+        "year": 2021,
+        "container": "Endocrine and Metabolic Science",
+        "doi": "10.1016/j.endmts.2021.100093"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-021",
+      "kind": "real",
+      "input": {
+        "title": "Application of multi-omics approaches in deciphering drought resilience in maize: A review",
+        "authors": [
+          {
+            "family": "Wu",
+            "given": "Yuanming"
+          },
+          {
+            "family": "Zhuang",
+            "given": "Zelong"
+          },
+          {
+            "family": "Bian",
+            "given": "Jianwen"
+          },
+          {
+            "family": "Xu",
+            "given": "Boxiang"
+          },
+          {
+            "family": "Wang",
+            "given": "Jiaqi"
+          },
+          {
+            "family": "Zhang",
+            "given": "Xilan"
+          },
+          {
+            "family": "Wang",
+            "given": "Heng"
+          },
+          {
+            "family": "Han",
+            "given": "Mei"
+          },
+          {
+            "family": "Liu",
+            "given": "Shuang"
+          },
+          {
+            "family": "Ji",
+            "given": "Hongxiang"
+          }
+        ],
+        "year": 2026,
+        "container": "Journal of Integrative Agriculture",
+        "doi": "10.1016/j.jia.2026.05.002"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-022",
+      "kind": "real",
+      "input": {
+        "title": "Resinas compostas termo modificadas para cimentação de peças protéticas indiretas: revisão integrativa da literatura",
+        "authors": [
+          {
+            "family": "Pinheiro",
+            "given": "João Victor"
+          },
+          {
+            "family": "Almeida",
+            "given": "Hélvio Henrique Araújo de"
+          }
+        ],
+        "year": 2026,
+        "container": "Brazilian Journal of Development",
+        "doi": "10.34117/bjdv12n7-058"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-023",
+      "kind": "real",
+      "input": {
+        "title": "Consumer behavior toward acupuncture in surabaya: A deductive qualitative study based on the theory of reasoned action",
+        "authors": [
+          {
+            "family": "Indrawati",
+            "given": "Lilik"
+          },
+          {
+            "family": "Susanti",
+            "given": "Christina Esti"
+          },
+          {
+            "family": "Ardhanari",
+            "given": "Margaretha"
+          },
+          {
+            "family": "Hermanto",
+            "given": "Yustinus Budi"
+          }
+        ],
+        "year": 2026,
+        "container": "Multidisciplinary Science Journal",
+        "doi": "10.31893/multiscience.2026602"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-024",
+      "kind": "real",
+      "input": {
+        "title": "Patterns of development in young children with autism",
+        "authors": [
+          {
+            "family": "Malhi",
+            "given": "Prahbhjot"
+          },
+          {
+            "family": "Singhi",
+            "given": "Pratibha"
+          }
+        ],
+        "year": 2005,
+        "container": "The Indian Journal of Pediatrics",
+        "doi": "10.1007/bf02724176"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-025",
+      "kind": "real",
+      "input": {
+        "title": "Newly Developed Meta-Seal SP Underground Cable",
+        "authors": [
+          {
+            "family": "Kimura",
+            "given": "C."
+          },
+          {
+            "family": "Shinmoto",
+            "given": "T."
+          },
+          {
+            "family": "Koyama",
+            "given": "S."
+          },
+          {
+            "family": "Fujimoto",
+            "given": "I."
+          }
+        ],
+        "year": 1982,
+        "container": "IEEE Transactions on Power Apparatus and Systems",
+        "doi": "10.1109/tpas.1982.317463"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-026",
+      "kind": "real",
+      "input": {
+        "title": "Avant-propos",
+        "authors": [
+          {
+            "family": "Chabin",
+            "given": "André"
+          }
+        ],
+        "year": 2021,
+        "container": "La Revue des revues",
+        "doi": "10.3917/rdr.066.0004"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-027",
+      "kind": "real",
+      "input": {
+        "title": "Evaluation of clinical and laboratory parameters in patients with influenza pneumonia",
+        "authors": [
+          {
+            "family": "Yazıcı",
+            "given": "Onur"
+          },
+          {
+            "family": "Kırdar",
+            "given": "Sevin"
+          },
+          {
+            "family": "Gülen",
+            "given": "Şule Taş"
+          },
+          {
+            "family": "Aydın",
+            "given": "Neriman"
+          },
+          {
+            "family": "Ceylan",
+            "given": "Emel"
+          }
+        ],
+        "year": 2020,
+        "container": "Annals of Clinical and Analytical Medicine",
+        "doi": "10.4328/acam.6218"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-028",
+      "kind": "real",
+      "input": {
+        "title": "The Attitudes towards Autonomous Vehicles in a Medium-Sized Academic-Dominated U.S. Metropolitan Area With Cold Winters",
+        "authors": [
+          {
+            "family": "Mirzazadeh",
+            "given": "Babak"
+          },
+          {
+            "family": "Huang",
+            "given": "Ying"
+          },
+          {
+            "family": "Motuba",
+            "given": "Diomo"
+          }
+        ],
+        "year": 2022,
+        "container": "International Journal of Human–Computer Interaction",
+        "doi": "10.1080/10447318.2022.2074646"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-029",
+      "kind": "real",
+      "input": {
+        "title": "The Application of Material Flow Cost Accounting in Waste Reduction",
+        "authors": [
+          {
+            "family": "Huang",
+            "given": "Shaio Yan"
+          },
+          {
+            "family": "Chiu",
+            "given": "An An"
+          },
+          {
+            "family": "Chao",
+            "given": "Po Chi"
+          },
+          {
+            "family": "Wang",
+            "given": "Ni"
+          }
+        ],
+        "year": 2019,
+        "container": "Sustainability",
+        "doi": "10.3390/su11051270"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-030",
+      "kind": "real",
+      "input": {
+        "title": "Prevention of the first episode of psychosis: What have we reached by 2021?",
+        "authors": [
+          {
+            "family": "Rojnic-Kuzman",
+            "given": "M."
+          }
+        ],
+        "year": 2021,
+        "container": "European Psychiatry",
+        "doi": "10.1192/j.eurpsy.2021.221"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-031",
+      "kind": "real",
+      "input": {
+        "title": "Invited commentary",
+        "authors": [
+          {
+            "family": "Droese",
+            "given": "Manfred"
+          }
+        ],
+        "year": 1981,
+        "container": "World Journal of Surgery",
+        "doi": "10.1007/bf01657840"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-032",
+      "kind": "real",
+      "input": {
+        "title": "Ethical Climate in the Delivery Wards of Educational Hospitals in Southeast Iran",
+        "authors": [
+          {
+            "family": "Khajehpour",
+            "given": "Mahin"
+          },
+          {
+            "family": "Keramat",
+            "given": "Afsaneh"
+          },
+          {
+            "family": "Balouchi Mahani",
+            "given": "Mahin"
+          },
+          {
+            "family": "Shahinfar",
+            "given": "Sholeh"
+          }
+        ],
+        "year": 2023,
+        "container": "Policy, Politics, & Nursing Practice",
+        "doi": "10.1177/15271544231214527"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-033",
+      "kind": "real",
+      "input": {
+        "title": "Risk factors for contralateral hip fractures following femoral neck fractures in elderly: analysis of the Hungarian nationwide health insurance database",
+        "authors": [
+          {
+            "family": "Juhász",
+            "given": "Krisztina"
+          }
+        ],
+        "year": 2016,
+        "container": "Joint Diseases and Related Surgery",
+        "doi": "10.5606/ehc.2016.30"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-034",
+      "kind": "real",
+      "input": {
+        "title": "Sicoética y antropología en Fernando Rielo",
+        "authors": [
+          {
+            "family": "SÁNCHEZ-GEY VENEGAS",
+            "given": "Juana"
+          }
+        ],
+        "year": 2017,
+        "container": "Relectiones",
+        "doi": "10.32466/eufv-rel.2017.4.333.153-160"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-035",
+      "kind": "real",
+      "input": {
+        "title": "Leptomeningeal carcinomatosis from EGFR-mutated non-small cell lung cancer",
+        "authors": [
+          {
+            "family": "Iuchi",
+            "given": "T."
+          },
+          {
+            "family": "Shingyoji",
+            "given": "M."
+          },
+          {
+            "family": "Setoguchi",
+            "given": "T."
+          },
+          {
+            "family": "Yoshida",
+            "given": "Y."
+          },
+          {
+            "family": "Ashinuma",
+            "given": "H."
+          },
+          {
+            "family": "Hasegawa",
+            "given": "Y."
+          },
+          {
+            "family": "Sakaida",
+            "given": "T."
+          }
+        ],
+        "year": 2017,
+        "container": "Annals of Oncology",
+        "doi": "https://doi.org/10.1093/annonc/mdx380.054"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as https://doi.org/ URL"
+    },
+    {
+      "id": "real-036",
+      "kind": "real",
+      "input": {
+        "title": "Genetics of frost hardiness in Juglans regia L. and relationship with growth and phenology",
+        "authors": [
+          {
+            "family": "Guàrdia",
+            "given": "Mercè"
+          },
+          {
+            "family": "Charrier",
+            "given": "Guillaume"
+          },
+          {
+            "family": "Vilanova",
+            "given": "Antoni"
+          },
+          {
+            "family": "Savé",
+            "given": "Robert"
+          },
+          {
+            "family": "Ameglio",
+            "given": "Thierry"
+          },
+          {
+            "family": "Aletà",
+            "given": "Neus"
+          }
+        ],
+        "year": 2016,
+        "container": "Tree Genetics & Genomes",
+        "doi": "10.1007/s11295-016-1038-3"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-037",
+      "kind": "real",
+      "input": {
+        "title": "New Insights in the Research on Bioactive Compounds from Plant Origins with Nutraceutical and Pharmaceutical Potential II",
+        "authors": [
+          {
+            "family": "Dincheva",
+            "given": "Ivayla"
+          },
+          {
+            "family": "Badjakov",
+            "given": "Ilian"
+          },
+          {
+            "family": "Galunska",
+            "given": "Bistra"
+          }
+        ],
+        "year": 2025,
+        "container": "Plants",
+        "doi": "https://doi.org/10.3390/plants14040500"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as https://doi.org/ URL"
+    },
+    {
+      "id": "real-038",
+      "kind": "real",
+      "input": {
+        "title": "Autonomic nervous system testing",
+        "authors": [
+          {
+            "family": "Flachenecker",
+            "given": "Peter"
+          },
+          {
+            "family": "Reiners",
+            "given": "Karlheinz"
+          }
+        ],
+        "year": 1998,
+        "container": "Muscle & Nerve",
+        "doi": "https://doi.org/10.1002/(sici)1097-4598(199805)21:5<680::aid-mus25>3.3.co;2-f"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as https://doi.org/ URL"
+    },
+    {
+      "id": "real-039",
+      "kind": "real",
+      "input": {
+        "title": "Fabrication of Pd-decorated TiO2/MoS2 ternary nanocomposite for enhanced benzene gas sensing performance at room temperature",
+        "authors": [
+          {
+            "family": "Zhang",
+            "given": "Dongzhi"
+          },
+          {
+            "family": "Jiang",
+            "given": "Chuanxing"
+          },
+          {
+            "family": "Zhou",
+            "given": "Xiaoyan"
+          }
+        ],
+        "year": 2018,
+        "container": "Talanta",
+        "doi": "10.1016/j.talanta.2018.01.064"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-040",
+      "kind": "real",
+      "input": {
+        "title": "Studies on the Influences of a New Vitamin B Group on Bone Marrow Tissue Culture: II. Influences on Bone Marrow Megakaryocytes",
+        "authors": [
+          {
+            "family": "Shirai",
+            "given": "Kichiro"
+          }
+        ],
+        "year": 1965,
+        "container": "Okayama Igakkai Zasshi (Journal of Okayama Medical Association)",
+        "doi": "10.4044/JOMA1947.77.10-12_1363"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as upper case"
+    },
+    {
+      "id": "real-041",
+      "kind": "real",
+      "input": {
+        "title": "Alternative Approaches for the Management of Autism: A Narrative Review",
+        "authors": [
+          {
+            "family": "Shekhar",
+            "given": "Nikhila"
+          },
+          {
+            "family": "Tyagi",
+            "given": "Sakshi"
+          },
+          {
+            "family": "Thakur",
+            "given": "Ajit Kumar"
+          }
+        ],
+        "year": 2024,
+        "container": "Current Psychiatry Research and Reviews",
+        "doi": "10.2174/2666082219666230106143424"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-042",
+      "kind": "real",
+      "input": {
+        "title": "Fast TT transform and optimized probabilistic neural network-based power quality event detection and classification",
+        "authors": [
+          {
+            "family": "Samanta",
+            "given": "Indu Sekhar"
+          },
+          {
+            "family": "Rout",
+            "given": "Pravat Kumar"
+          },
+          {
+            "family": "Mishra",
+            "given": "Satyasis"
+          },
+          {
+            "family": "Swain",
+            "given": "Kunjabihari"
+          },
+          {
+            "family": "Cherukuri",
+            "given": "Murthy"
+          }
+        ],
+        "year": 2022,
+        "container": "Electrical Engineering",
+        "doi": "https://doi.org/10.1007/s00202-022-01505-8"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as https://doi.org/ URL"
+    },
+    {
+      "id": "real-043",
+      "kind": "real",
+      "input": {
+        "title": "Rationale and methodology of a collaborative learning project in congenital cardiac care",
+        "authors": [
+          {
+            "family": "Wolf",
+            "given": "Michael J."
+          },
+          {
+            "family": "Lee",
+            "given": "Eva K."
+          },
+          {
+            "family": "Nicolson",
+            "given": "Susan C."
+          },
+          {
+            "family": "Pearson",
+            "given": "Gail D."
+          },
+          {
+            "family": "Witte",
+            "given": "Madolin K."
+          },
+          {
+            "family": "Huckaby",
+            "given": "Jeryl"
+          },
+          {
+            "family": "Gaies",
+            "given": "Michael"
+          },
+          {
+            "family": "Shekerdemian",
+            "given": "Lara S."
+          },
+          {
+            "family": "Mahle",
+            "given": "William T."
+          }
+        ],
+        "year": 2016,
+        "container": "American Heart Journal",
+        "doi": "10.1016/j.ahj.2016.01.013"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-044",
+      "kind": "real",
+      "input": {
+        "title": "The Wild Pepper-plants of Continental United States",
+        "authors": [
+          {
+            "family": "Small",
+            "given": "John Kunkel"
+          }
+        ],
+        "year": 1931,
+        "container": "Journal of the New York Botanical Garden",
+        "doi": "10.5962/p.396157"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-045",
+      "kind": "real",
+      "input": {
+        "title": "A Fraunhofer-Based Approach for the Assessment of the Field Radiated in the Fresnel Region of an Antenna",
+        "authors": [
+          {
+            "family": "Trinchero",
+            "given": "D."
+          },
+          {
+            "family": "Galardini",
+            "given": "A."
+          },
+          {
+            "family": "Stefanelli",
+            "given": "R."
+          },
+          {
+            "family": "Fiorelli",
+            "given": "B."
+          },
+          {
+            "family": "Gianola",
+            "given": "P."
+          },
+          {
+            "family": "Scotti",
+            "given": "R."
+          },
+          {
+            "family": "Vallauri",
+            "given": "R."
+          }
+        ],
+        "year": 2009,
+        "container": "IEEE Antennas and Wireless Propagation Letters",
+        "doi": "10.1109/lawp.2008.2010960"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-046",
+      "kind": "real",
+      "input": {
+        "title": "Effect of different superimposed structures on the transparent electromagnetic interference shielding performance of graphene",
+        "authors": [
+          {
+            "family": "Shi",
+            "given": "Kai"
+          },
+          {
+            "family": "Su",
+            "given": "Junhong"
+          },
+          {
+            "family": "Liang",
+            "given": "Haifeng"
+          },
+          {
+            "family": "Hu",
+            "given": "Kai"
+          }
+        ],
+        "year": 2020,
+        "container": "Journal of Applied Physics",
+        "doi": "10.1063/5.0016475"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as upper case"
+    },
+    {
+      "id": "real-047",
+      "kind": "real",
+      "input": {
+        "title": "Neutrophils in Rat Dorsal Root Ganglion during Acute Systemic Inflammation",
+        "authors": [
+          {
+            "family": "Kolos",
+            "given": "E. A."
+          },
+          {
+            "family": "Korzhevskii",
+            "given": "D. E."
+          }
+        ],
+        "year": 2026,
+        "container": "Bulletin of Experimental Biology and Medicine",
+        "doi": "10.1007/s10517-026-06632-x"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-048",
+      "kind": "real",
+      "input": {
+        "title": "Angiographic Characteristics Associated with Rupture of Small Intracranial Aneurysms",
+        "authors": [
+          {
+            "family": "Goertz",
+            "given": "Lukas"
+          },
+          {
+            "family": "Zopfs",
+            "given": "David"
+          },
+          {
+            "family": "Pennig",
+            "given": "Lenhard"
+          },
+          {
+            "family": "Jünger",
+            "given": "Stephanie T."
+          },
+          {
+            "family": "Grunz",
+            "given": "Jan-Peter"
+          },
+          {
+            "family": "Timmer",
+            "given": "Marco"
+          },
+          {
+            "family": "Görtz",
+            "given": "Magdalena"
+          },
+          {
+            "family": "Huflage",
+            "given": "Henner"
+          },
+          {
+            "family": "Luetkens",
+            "given": "Karsten Sebastian"
+          },
+          {
+            "family": "Kabbasch",
+            "given": "Christoph"
+          }
+        ],
+        "year": 2023,
+        "container": "World Neurosurgery",
+        "doi": "10.1016/j.wneu.2023.06.081"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-049",
+      "kind": "real",
+      "input": {
+        "title": "Hemodynamic changes occurring with tracheal intubation by direct laryngoscopy compared with intubating laryngeal mask airway in adults: A randomized comparison trial",
+        "authors": [
+          {
+            "family": "Tabari",
+            "given": "Masoomeh"
+          },
+          {
+            "family": "Alipour",
+            "given": "Mohammad"
+          },
+          {
+            "family": "Ahmadi",
+            "given": "Mahdi"
+          }
+        ],
+        "year": 2013,
+        "container": "Egyptian Journal of Anaesthesia",
+        "doi": "10.1016/j.egja.2012.11.003"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-050",
+      "kind": "real",
+      "input": {
+        "title": "Synthesis, microstructure and mechanical properties of (Mo,Ti)Si2/Al2O3 composites prepared by thermite-reaction-assisted combustion synthesis",
+        "authors": [
+          {
+            "family": "Zhu",
+            "given": "Gaoming"
+          },
+          {
+            "family": "Wang",
+            "given": "Xiaohong"
+          },
+          {
+            "family": "Feng",
+            "given": "Peizhong"
+          },
+          {
+            "family": "Li",
+            "given": "Dehui"
+          },
+          {
+            "family": "Yang",
+            "given": "Ting"
+          },
+          {
+            "family": "Akhtar",
+            "given": "Farid"
+          }
+        ],
+        "year": 2016,
+        "container": "Journal of Alloys and Compounds",
+        "doi": "10.1016/j.jallcom.2016.07.096"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-051",
+      "kind": "real",
+      "input": {
+        "title": "LIBERTAD RELIGIOSA Y OBJECIÓN DE CONCIENCIA INSTITUCIONAL EN COLOMBIA: UN ANÁLISIS A PARTIR DE LA SENTENCIA T-738 DE 2015",
+        "authors": [
+          {
+            "family": "Rojas",
+            "given": "Cristián"
+          },
+          {
+            "family": "Contreras",
+            "given": "Pedro"
+          }
+        ],
+        "year": 2020,
+        "container": "Revista Latinoamericana de Derecho y Religión",
+        "doi": "doi:10.7764/rldr.10.129"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as \"doi:\" prefix"
+    },
+    {
+      "id": "real-052",
+      "kind": "real",
+      "input": {
+        "title": "Heritage Tourism in Southeast Asia",
+        "authors": [
+          {
+            "family": "Jenkins",
+            "given": "Carson L."
+          }
+        ],
+        "year": 2012,
+        "container": "Tourism Management",
+        "doi": "https://doi.org/10.1016/j.tourman.2011.02.018"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as https://doi.org/ URL"
+    },
+    {
+      "id": "real-053",
+      "kind": "real",
+      "input": {
+        "title": "Enhanced solar-driven photocatalytic degradation of organic dyes using sono-dispersed mesoporous MgAl2O4 over carbon based materials",
+        "authors": [
+          {
+            "family": "Abbasi Asl",
+            "given": "Ebrahim"
+          },
+          {
+            "family": "Haghighi",
+            "given": "Mohammad"
+          },
+          {
+            "family": "Talati",
+            "given": "Azadeh"
+          }
+        ],
+        "year": 2024,
+        "container": "Journal of the Taiwan Institute of Chemical Engineers",
+        "doi": "doi:10.1016/j.jtice.2024.105627"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as \"doi:\" prefix"
+    },
+    {
+      "id": "real-054",
+      "kind": "real",
+      "input": {
+        "title": "African green monkey model of Middle East respiratory syndrome coronavirus (MERS-CoV) infection",
+        "authors": [
+          {
+            "family": "Nalca",
+            "given": "A."
+          },
+          {
+            "family": "Totura",
+            "given": "A."
+          },
+          {
+            "family": "Livingston",
+            "given": "V."
+          },
+          {
+            "family": "Frick",
+            "given": "O."
+          },
+          {
+            "family": "Dyer",
+            "given": "D."
+          }
+        ],
+        "year": 2019,
+        "container": "International Journal of Infectious Diseases",
+        "doi": "https://doi.org/10.1016/j.ijid.2018.11.249"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as https://doi.org/ URL"
+    },
+    {
+      "id": "real-055",
+      "kind": "real",
+      "input": {
+        "title": "EXPERT COUNCIL: TOPICAL ISSUES OF DISEASES OF THE UPPER GASTROINTESTINAL TRACT",
+        "authors": [
+          {
+            "family": "Kaibullayeva",
+            "given": "D.A."
+          },
+          {
+            "family": "Kaliaskarova",
+            "given": "K.S."
+          },
+          {
+            "family": "Dzhumabaeva",
+            "given": "A.E."
+          },
+          {
+            "family": "Tanabaeva",
+            "given": "A.S."
+          },
+          {
+            "family": "Kaisina",
+            "given": "A.A."
+          },
+          {
+            "family": "Alimbetova",
+            "given": "M.S."
+          },
+          {
+            "family": "Laryushina",
+            "given": "E.M."
+          },
+          {
+            "family": "Muldasheva",
+            "given": "P.A."
+          },
+          {
+            "family": "Doszhan",
+            "given": "A."
+          },
+          {
+            "family": "Kravtsova",
+            "given": "E.V."
+          }
+        ],
+        "year": 2025,
+        "container": "Farmaciâ Kazahstana",
+        "doi": "10.53511/pharmkaz.2025.90.66.009"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-056",
+      "kind": "real",
+      "input": {
+        "title": "Feasibility and Initial Efficacy Evaluation of a Community-Based Cognitive-Behavioral Lifestyle Intervention to Prevent Excessive Weight Gain During Pregnancy in Latina Women",
+        "authors": [
+          {
+            "family": "Gesell",
+            "given": "Sabina B."
+          },
+          {
+            "family": "Katula",
+            "given": "Jeffrey A."
+          },
+          {
+            "family": "Strickland",
+            "given": "Carmen"
+          },
+          {
+            "family": "Vitolins",
+            "given": "Mara Z."
+          }
+        ],
+        "year": 2015,
+        "container": "Maternal and Child Health Journal",
+        "doi": "https://doi.org/10.1007/s10995-015-1698-x"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as https://doi.org/ URL"
+    },
+    {
+      "id": "real-057",
+      "kind": "real",
+      "input": {
+        "title": "Efficient gene correction of an aberrant splice site in β‐thalassaemia iPSCs by CRISPR/Cas9 and single‐strand oligodeoxynucleotides",
+        "authors": [
+          {
+            "family": "Xiong",
+            "given": "Zeyu"
+          },
+          {
+            "family": "Xie",
+            "given": "Yingjun"
+          },
+          {
+            "family": "Yang",
+            "given": "Yi"
+          },
+          {
+            "family": "Xue",
+            "given": "Yanting"
+          },
+          {
+            "family": "Wang",
+            "given": "Ding"
+          },
+          {
+            "family": "Lin",
+            "given": "Shouheng"
+          },
+          {
+            "family": "Chen",
+            "given": "Diyu"
+          },
+          {
+            "family": "Lu",
+            "given": "Dian"
+          },
+          {
+            "family": "He",
+            "given": "Lina"
+          },
+          {
+            "family": "Song",
+            "given": "Bing"
+          }
+        ],
+        "year": 2019,
+        "container": "Journal of Cellular and Molecular Medicine",
+        "doi": "10.1111/jcmm.14669"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-058",
+      "kind": "real",
+      "input": {
+        "title": "Phytophthora Identification and Sampling in Citrus Nurseries: SL431/SS645, 7/2015",
+        "authors": [
+          {
+            "family": "Burrow",
+            "given": "Jamie D."
+          },
+          {
+            "family": "Bright",
+            "given": "Diane B."
+          },
+          {
+            "family": "Riley",
+            "given": "Tim D."
+          },
+          {
+            "family": "Graham",
+            "given": "James H."
+          }
+        ],
+        "year": 2015,
+        "container": "EDIS",
+        "doi": "doi:10.32473/edis-ss645-2015"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as \"doi:\" prefix"
+    },
+    {
+      "id": "real-059",
+      "kind": "real",
+      "input": {
+        "title": "&quot;Patriarchal Colonialism&quot; and Indigenism: Implications for Native Feminist Spirituality and Native Womanism",
+        "authors": [
+          {
+            "family": "Jaimes",
+            "given": "M. Annette"
+          }
+        ],
+        "year": 2003,
+        "container": "Hypatia",
+        "doi": "10.1353/HYP.2003.0030"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as upper case"
+    },
+    {
+      "id": "real-060",
+      "kind": "real",
+      "input": {
+        "title": "Small‐Volume pH Sensing with a Capillary Optode Utilizing Dye‐Loaded Porous Nanocapsules in a Hydrogel Matrix",
+        "authors": [
+          {
+            "family": "Maclin",
+            "given": "Alex Q."
+          },
+          {
+            "family": "Kim",
+            "given": "Mariya D."
+          },
+          {
+            "family": "Dergunov",
+            "given": "Sergey A."
+          },
+          {
+            "family": "Pinkhassik",
+            "given": "Eugene"
+          },
+          {
+            "family": "Lindner",
+            "given": "Erno"
+          }
+        ],
+        "year": 2015,
+        "container": "Electroanalysis",
+        "doi": "https://doi.org/10.1002/elan.201400545"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as https://doi.org/ URL"
+    },
+    {
+      "id": "real-061",
+      "kind": "real",
+      "input": {
+        "title": "The composition and oxidative stability of lipids in longissimus muscle from grazing cattle supplemented with sunflower oil alone or with fishoil",
+        "authors": [
+          {
+            "family": "Moloney",
+            "given": "A.P."
+          },
+          {
+            "family": "Daly",
+            "given": "C.M."
+          },
+          {
+            "family": "Ermias",
+            "given": "E."
+          },
+          {
+            "family": "Shingfield",
+            "given": "K.J."
+          },
+          {
+            "family": "Monahan",
+            "given": "F.J."
+          }
+        ],
+        "year": 2007,
+        "container": "Proceedings of the British Society of Animal Science",
+        "doi": "10.1017/s1752756200019165"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-062",
+      "kind": "real",
+      "input": {
+        "title": "SymMap database and TMNP algorithm reveal Huanggui Tongqiao granules for Allergic rhinitis through IFN-mediated neuroimmuno-modulation",
+        "authors": [
+          {
+            "family": "Kong",
+            "given": "Yaru"
+          },
+          {
+            "family": "Hao",
+            "given": "Mengyao"
+          },
+          {
+            "family": "Chen",
+            "given": "Aiping"
+          },
+          {
+            "family": "Yi",
+            "given": "Tianxing"
+          },
+          {
+            "family": "Yang",
+            "given": "Ke"
+          },
+          {
+            "family": "Li",
+            "given": "Peng"
+          },
+          {
+            "family": "Wang",
+            "given": "Yi"
+          },
+          {
+            "family": "Li",
+            "given": "Pengfei"
+          },
+          {
+            "family": "Jia",
+            "given": "Xinbei"
+          },
+          {
+            "family": "Qin",
+            "given": "Han"
+          }
+        ],
+        "year": 2022,
+        "container": "Pharmacological Research",
+        "doi": "10.1016/j.phrs.2022.106483"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-063",
+      "kind": "real",
+      "input": {
+        "title": "The Importance of Molecular Opacities in Stellar Atmospheres",
+        "authors": [
+          {
+            "family": "Sharp",
+            "given": "Christoper M."
+          }
+        ],
+        "year": 1993,
+        "container": "International Astronomical Union Colloquium",
+        "doi": "10.1017/s0252921100017863"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-064",
+      "kind": "real",
+      "input": {
+        "title": "Decomposition of Methanol on Nickel and Copper Surfaces",
+        "authors": [
+          {
+            "family": "YASUMORI",
+            "given": "Iwao"
+          },
+          {
+            "family": "MIYAZAKI",
+            "given": "Eizo"
+          }
+        ],
+        "year": 1971,
+        "container": "Nippon kagaku zassi",
+        "doi": "10.1246/nikkashi1948.92.659"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-065",
+      "kind": "real",
+      "input": {
+        "title": "Fetal and maternal lipoproteins in uncomplicated and diabetic third trimester pregnancy",
+        "authors": [
+          {
+            "family": "Kilby",
+            "given": "M.D."
+          },
+          {
+            "family": "Durrington",
+            "given": "P."
+          },
+          {
+            "family": "Mackness",
+            "given": "M."
+          },
+          {
+            "family": "Neary",
+            "given": "R.H."
+          }
+        ],
+        "year": 1996,
+        "container": "Placenta",
+        "doi": "10.1016/s0143-4004(96)90178-2"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-066",
+      "kind": "real",
+      "input": {
+        "title": "Spatio-temporal patterns of palm endocarp use by three Amazonian forest mammals: granivory or ‘grubivory’?",
+        "authors": [
+          {
+            "family": "Silvius",
+            "given": "Kirsten M."
+          }
+        ],
+        "year": 2002,
+        "container": "Journal of Tropical Ecology",
+        "doi": "10.1017/s0266467402002468"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-067",
+      "kind": "real",
+      "input": {
+        "title": "Middle Pleistocene bird consumption at Level XI of Bolomor Cave (Valencia, Spain)",
+        "authors": [
+          {
+            "family": "Blasco",
+            "given": "Ruth"
+          },
+          {
+            "family": "Peris",
+            "given": "Josep Fernández"
+          }
+        ],
+        "year": 2009,
+        "container": "Journal of Archaeological Science",
+        "doi": "10.1016/j.jas.2009.06.006"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-068",
+      "kind": "real",
+      "input": {
+        "title": "Procedural and Educational Interventions Reduce Ventilator Associated Pneumonia (VAP) and Central Line Associated Bloodstream Infections (CLABSI",
+        "authors": [
+          {
+            "family": "Kellie",
+            "given": "Scott"
+          },
+          {
+            "family": "Scott",
+            "given": "Michael"
+          },
+          {
+            "family": "Saad",
+            "given": "Mohamed"
+          },
+          {
+            "family": "Cavallazzi",
+            "given": "Rodrigo"
+          },
+          {
+            "family": "Wiemken",
+            "given": "Timothy"
+          },
+          {
+            "family": "Parker",
+            "given": "Deanna"
+          }
+        ],
+        "year": 2011,
+        "container": "Chest",
+        "doi": "https://doi.org/10.1378/chest.1081447"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as https://doi.org/ URL"
+    },
+    {
+      "id": "real-069",
+      "kind": "real",
+      "input": {
+        "title": "On the sand surface stability in the southern part of Gurbantünggüt Desert",
+        "authors": [
+          {
+            "family": "Wang",
+            "given": "Xueqin"
+          },
+          {
+            "family": "Wang",
+            "given": "Tao"
+          },
+          {
+            "family": "Jiang",
+            "given": "Jin"
+          },
+          {
+            "family": "Zhao",
+            "given": "Congju"
+          }
+        ],
+        "year": 2005,
+        "container": "Science in China Series D: Earth Sciences",
+        "doi": "10.1360/03yd0340"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-070",
+      "kind": "real",
+      "input": {
+        "title": "Crucial considerations: Sex differences in the epidemiology, diagnosis, treatment, and outcomes of acute pulmonary embolism in non‐pregnant adult patients",
+        "authors": [
+          {
+            "family": "Jarman",
+            "given": "Angela F."
+          },
+          {
+            "family": "Mumma",
+            "given": "Bryn E."
+          },
+          {
+            "family": "Singh",
+            "given": "Kajol S."
+          },
+          {
+            "family": "Nowadly",
+            "given": "Craig D."
+          },
+          {
+            "family": "Maughan",
+            "given": "Brandon C."
+          }
+        ],
+        "year": 2021,
+        "container": "JACEP Open",
+        "doi": "10.1002/emp2.12378"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-071",
+      "kind": "real",
+      "input": {
+        "title": "An experiment in public choice: The miami conservancy district, 1913–1922",
+        "authors": [
+          {
+            "family": "Giertz",
+            "given": "J. Fred"
+          }
+        ],
+        "year": 1974,
+        "container": "Public Choice",
+        "doi": "10.1007/bf01718546"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-072",
+      "kind": "real",
+      "input": {
+        "title": "BLAST2SRS, a web server for flexible retrieval of related protein sequences in the SWISS-PROT and SPTrEMBL databases",
+        "authors": [
+          {
+            "family": "Bimpikis",
+            "given": "K."
+          }
+        ],
+        "year": 2003,
+        "container": "Nucleic Acids Research",
+        "doi": "10.1093/NAR/GKG535"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as upper case"
+    },
+    {
+      "id": "real-073",
+      "kind": "real",
+      "input": {
+        "title": "Changements linguistiques et historiographie",
+        "authors": [
+          {
+            "family": "VAN HOECKE",
+            "given": "Willy"
+          }
+        ],
+        "year": 1987,
+        "container": "Cahiers de l'Institut de Linguistique de Louvain",
+        "doi": "10.2143/cill.13.3.2016822"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-074",
+      "kind": "real",
+      "input": {
+        "title": "Analysis of up-regulating genes of “Lemont” rice accession in response to low nitrogen supply and accompanying barnyardgrass: Analysis of up-regulating genes of “Lemont” rice accession in response to low nitrogen supply and accompanying barnyardgrass",
+        "authors": [
+          {
+            "family": "FANG",
+            "given": "Chang-Xun"
+          },
+          {
+            "family": "XU",
+            "given": "Tie-Cheng"
+          },
+          {
+            "family": "HUANG",
+            "given": "Li-Kun"
+          },
+          {
+            "family": "WANG",
+            "given": "Qing-Shui"
+          },
+          {
+            "family": "HE",
+            "given": "Hai-Bin"
+          },
+          {
+            "family": "LIN",
+            "given": "Wen-Xiong"
+          }
+        ],
+        "year": 2013,
+        "container": "Chinese Journal of Eco-Agriculture",
+        "doi": "doi:10.3724/sp.j.1011.2012.01185"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as \"doi:\" prefix"
+    },
+    {
+      "id": "real-075",
+      "kind": "real",
+      "input": {
+        "title": "Penerapan Discovery Learning untuk Meningkatkan Kemampuan Berpikir Kritis dan Hasil Belajar Siswa Kelas X SMA Negeri 9 Kabupaten Sorong",
+        "authors": [
+          {
+            "family": "Sangaji",
+            "given": "Jumiati"
+          },
+          {
+            "family": "Jaharuddin",
+            "given": "Jaharuddin"
+          },
+          {
+            "family": "Prabawati",
+            "given": "Ratna"
+          }
+        ],
+        "year": 2026,
+        "container": "Jurnal Pendidikan Ilmu Pengetahuan Alam (JP-IPA)",
+        "doi": "10.56842/JP-IPA.V7I2.893"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as upper case"
+    },
+    {
+      "id": "real-076",
+      "kind": "real",
+      "input": {
+        "title": "Entrainment from bubble‐cap trays",
+        "authors": [
+          {
+            "family": "Atteridg",
+            "given": "P. T."
+          },
+          {
+            "family": "Lemieux",
+            "given": "E. J."
+          },
+          {
+            "family": "Schreiner",
+            "given": "W. C."
+          },
+          {
+            "family": "Sundback",
+            "given": "R. A."
+          }
+        ],
+        "year": 1956,
+        "container": "AIChE Journal",
+        "doi": "10.1002/aic.690020103"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-077",
+      "kind": "real",
+      "input": {
+        "title": "Export intensity and the productivity gains of exporting",
+        "authors": [
+          {
+            "family": "Antolín",
+            "given": "Miguel Manjón"
+          },
+          {
+            "family": "Máñez",
+            "given": "Juan A."
+          },
+          {
+            "family": "Rochina Barrachina",
+            "given": "María E."
+          },
+          {
+            "family": "Sanchis Llopis",
+            "given": "Juan A."
+          }
+        ],
+        "year": 2013,
+        "container": "Applied Economics Letters",
+        "doi": "10.1080/13504851.2012.748173"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as upper case"
+    },
+    {
+      "id": "real-078",
+      "kind": "real",
+      "input": {
+        "title": "Performance of Different Sources of Livestock and Poultry Waste as Organic Manures on Growth and Yield of Fodder Maize (Zea mays)",
+        "authors": [
+          {
+            "family": "Mithare",
+            "given": "Prasad"
+          },
+          {
+            "family": "Biradar",
+            "given": "U. S."
+          },
+          {
+            "family": "Jawarkar",
+            "given": "Pratik"
+          },
+          {
+            "family": "Vaishali",
+            "given": "M."
+          },
+          {
+            "family": "Ashwini",
+            "given": "Saste"
+          },
+          {
+            "family": "lakar",
+            "given": "Kam"
+          },
+          {
+            "family": "Karbari",
+            "given": "Avinash"
+          }
+        ],
+        "year": 2019,
+        "container": "International Journal of Current Microbiology and Applied Sciences",
+        "doi": "10.20546/ijcmas.2019.811.265"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-079",
+      "kind": "real",
+      "input": {
+        "title": "Metastatic Gallbladder Cancer Presenting as Forearm Pain with Radial Bone Metastasis",
+        "authors": [
+          {
+            "family": "Aashita"
+          },
+          {
+            "family": "Thakur",
+            "given": "Pragyat"
+          },
+          {
+            "family": "Yadav",
+            "given": "Vikas"
+          },
+          {
+            "family": "Fatima",
+            "given": "Yusra"
+          }
+        ],
+        "year": 2025,
+        "container": "Journal of Medical Sciences",
+        "doi": "10.4103/jmedsci.jmedsci_236_24"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-080",
+      "kind": "real",
+      "input": {
+        "title": "КІБЕРЗЛОЧИННІСТЬ: ПОНЯТТЯ ТА СОЦІАЛЬНО-ПРАВОВА ПРИРОДА",
+        "authors": [
+          {
+            "family": "ГАЛУШКО",
+            "given": "П.П."
+          }
+        ],
+        "year": 2025,
+        "container": "Вісник Кримінологічної асоціації України",
+        "doi": "10.32631/vca.2025.1.66"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-081",
+      "kind": "real",
+      "input": {
+        "title": "A review on emerging paradigm of nanomedicines in current scenario",
+        "authors": [
+          {
+            "family": "Dubey",
+            "given": "Shivam"
+          }
+        ],
+        "year": 2025,
+        "container": "Current Trends in Pharmacy and Pharmaceutical Chemistry",
+        "doi": "10.18231/j.ctppc.2025.005"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-082",
+      "kind": "real",
+      "input": {
+        "title": "Nucleophilic Acyl Substitutions of Anhydrides with Protic Nucleophiles Catalyzed by Amphoteric, Oxomolybdenum Species.",
+        "authors": [
+          {
+            "family": "Chen",
+            "given": "Chien‐Tien"
+          },
+          {
+            "family": "Kuo",
+            "given": "Jen‐Huang"
+          },
+          {
+            "family": "Pawar",
+            "given": "Vijay D."
+          },
+          {
+            "family": "Munot",
+            "given": "Yogesh S."
+          },
+          {
+            "family": "Weng",
+            "given": "Shieu‐Shien"
+          },
+          {
+            "family": "Ku",
+            "given": "Cheng‐Hsiu"
+          },
+          {
+            "family": "Liu",
+            "given": "Cheng‐Yuan"
+          }
+        ],
+        "year": 2005,
+        "container": "ChemInform",
+        "doi": "10.1002/chin.200528031"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-083",
+      "kind": "real",
+      "input": {
+        "title": "Expansion and Collapse of Domains With Reverse Magnetization in (Ga,Mn)As Epilayers With Perpendicular Magnetic Easy Axis",
+        "authors": [
+          {
+            "family": "Dourlat",
+            "given": "A."
+          },
+          {
+            "family": "Gourdon",
+            "given": "C."
+          },
+          {
+            "family": "Jeudy",
+            "given": "V."
+          },
+          {
+            "family": "Testelin",
+            "given": "C."
+          },
+          {
+            "family": "Khazen",
+            "given": "K."
+          },
+          {
+            "family": "Cantin",
+            "given": "J. L."
+          },
+          {
+            "family": "von Bardeleben",
+            "given": "H. J."
+          },
+          {
+            "family": "Thevenard",
+            "given": "L."
+          },
+          {
+            "family": "Lematre",
+            "given": "A."
+          }
+        ],
+        "year": 2007,
+        "container": "IEEE Transactions on Magnetics",
+        "doi": "10.1109/tmag.2007.893322"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-084",
+      "kind": "real",
+      "input": {
+        "title": "Actualización en sepsis materna: diagnóstico y tratamiento",
+        "authors": [
+          {
+            "family": "Villacís Uyaguari",
+            "given": "Carolina Elizabeth"
+          },
+          {
+            "family": "Escobar Suárez",
+            "given": "Carlos"
+          }
+        ],
+        "year": 2022,
+        "container": "INSPILIP",
+        "doi": "10.31790/inspilip.v6i1.274"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-085",
+      "kind": "real",
+      "input": {
+        "title": "Epitaxial growth of Mg 2 Si films on (111) Si substrates covered with epitaxial SiC layers",
+        "authors": [
+          {
+            "family": "Katagiri",
+            "given": "Atsuo"
+          },
+          {
+            "family": "Ogawa",
+            "given": "Shota"
+          },
+          {
+            "family": "Shimizu",
+            "given": "Takao"
+          },
+          {
+            "family": "Matsushima",
+            "given": "Masaaki"
+          },
+          {
+            "family": "Akiyama",
+            "given": "Kensuke"
+          },
+          {
+            "family": "Uchida",
+            "given": "Hiroshi"
+          },
+          {
+            "family": "Funakubo",
+            "given": "Hiroshi"
+          }
+        ],
+        "year": 2020,
+        "container": "Japanese Journal of Applied Physics",
+        "doi": "doi:10.7567/1347-4065/ab65b0"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (type:journal-article) on 2026-11-21; metadata as registered; DOI given as \"doi:\" prefix"
+    },
+    {
+      "id": "real-086",
+      "kind": "real",
+      "input": {
+        "title": "مدى توافر مهارات تحليل النصوص الأدبية في تحليل النصوص الواردة في دروس الأدب في كتب اللغة العربية للمرحلة الإعدادية",
+        "authors": [
+          {
+            "family": "الأسدي",
+            "given": "عقيل رشيد عبدالشهيد"
+          }
+        ],
+        "year": 2025,
+        "container": "مجلة العلوم الانسانية",
+        "doi": "doi:10.33855/0905-032-001-077"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (Arabic-word query) on 2026-11-21; metadata as registered; DOI given as \"doi:\" prefix"
+    },
+    {
+      "id": "real-087",
+      "kind": "real",
+      "input": {
+        "title": "أثر التوبة في جرائم الحدود",
+        "authors": [
+          {
+            "family": "محمود الفاخري",
+            "given": "د.غيث"
+          }
+        ],
+        "year": 2009,
+        "container": "مجلة دراسات قانونية",
+        "doi": "10.37376/jols.vi18.2388"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (Arabic-word query) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-088",
+      "kind": "real",
+      "input": {
+        "title": "تأهيل المؤسسات الصناعية بمنطقة المغرب العربي:, واقع وآفاق",
+        "authors": [
+          {
+            "family": "بن عناية",
+            "given": "جلول"
+          },
+          {
+            "family": "بن شرقي",
+            "given": "حاج صدوق"
+          },
+          {
+            "family": "أغروت",
+            "given": "أحمد"
+          }
+        ],
+        "year": 2013,
+        "container": "مجلة الإبداع",
+        "doi": "10.53999/2297-000-003-008"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (Arabic-word query) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-089",
+      "kind": "real",
+      "input": {
+        "title": "تحليل الإطار المفاهيمي والوظيفي لتنمية المواهب وفق منظور تنمية الموارد البشرية",
+        "authors": [
+          {
+            "family": "سملالي",
+            "given": "يحضيه"
+          }
+        ],
+        "year": 2020,
+        "container": "المجلة الدولية للأداء الاقتصادي",
+        "doi": "https://doi.org/10.54241/2065-000-005-003"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (Arabic-word query) on 2026-11-21; metadata as registered; DOI given as https://doi.org/ URL"
+    },
+    {
+      "id": "real-090",
+      "kind": "real",
+      "input": {
+        "title": "دور إدارة الموارد البشرية الخضراء في تحقيق التنمية المستدامة: دراسة تطبيقية على الشركات الصناعية - دراسة حالة: الشركة الليبية للحديد والصلب مصراته",
+        "authors": [
+          {
+            "family": "البنداق",
+            "given": "سليمان مصباح"
+          }
+        ],
+        "year": 2026,
+        "container": "Al-Qurtas",
+        "doi": "10.66045/alqurtas.v10i28.1860"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (Arabic-word query) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-091",
+      "kind": "real",
+      "input": {
+        "title": "مصداقية تقارير المنظمات الدولية غير الحكومية حول واقع حقوق الإنسان في الدول العربية",
+        "authors": [
+          {
+            "family": "بوشامة",
+            "given": "علي"
+          }
+        ],
+        "year": 2017,
+        "container": "المجلة الجزائرية للحقوق والعلوم السياسية",
+        "doi": "10.51840/2115-000-004-005"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (Arabic-word query) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-092",
+      "kind": "real",
+      "input": {
+        "title": "المستوى الزماني والمكاني في تحليل الخطاب القرآني لدى عبد الملك مرتاض",
+        "authors": [
+          {
+            "family": "فضيل",
+            "given": "شارف"
+          }
+        ],
+        "year": 2021,
+        "container": "دراسات معاصرة",
+        "doi": "10.37172/1901-005-001-010"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (Arabic-word query) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-093",
+      "kind": "real",
+      "input": {
+        "title": "دراسة وتقييم مقومات البيئة القانونية لاستخدام بدائل القياس المحاسبي في البيئة المحاسبية الجزائرية:, دراسة ميدانية لعينة من الأكاديميين والمهنيين",
+        "authors": [
+          {
+            "family": "شلغام",
+            "given": "هشام"
+          },
+          {
+            "family": "بن يدير",
+            "given": "فارس"
+          },
+          {
+            "family": "سعيدات",
+            "given": "مختار"
+          }
+        ],
+        "year": 2022,
+        "container": "مجلة أداء المؤسسات الجزائرية",
+        "doi": "https://doi.org/10.35156/1193-011-001-006"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (Arabic-word query) on 2026-11-21; metadata as registered; DOI given as https://doi.org/ URL"
+    },
+    {
+      "id": "real-094",
+      "kind": "real",
+      "input": {
+        "title": "تحليل ونقد النظريات الاقتصادية لتبرير الفائدة",
+        "authors": [
+          {
+            "family": "كبوط",
+            "given": "عبدالرزاق"
+          }
+        ],
+        "year": 2016,
+        "container": "أبحاث اقتصادية وإدارية",
+        "doi": "10.37136/0504-000-020-004"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (Arabic-word query) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-095",
+      "kind": "real",
+      "input": {
+        "title": "المعجم والقاموس:, دراسة تطبيقية في علم المصطلح",
+        "authors": [
+          {
+            "family": "القاسمي",
+            "given": "علي"
+          }
+        ],
+        "year": 2002,
+        "container": "اللغة العربية",
+        "doi": "10.33705/0114-000-006-005"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (Arabic-word query) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-096",
+      "kind": "real",
+      "input": {
+        "title": "واقع التحول الرقمي للبنوك في إفريقيا:, الخدمات عبر الهاتف المحمول نموذجا",
+        "authors": [
+          {
+            "family": "ضيف",
+            "given": "روفية"
+          }
+        ],
+        "year": 2023,
+        "container": "مجلة اقتصاديات المال والأعمال",
+        "doi": "10.37170/1986-007-004-003"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (Arabic-word query) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-097",
+      "kind": "real",
+      "input": {
+        "title": "تشخيص واقع الإشهار بالسوق الجزائرى",
+        "authors": [
+          {
+            "family": "زهيوة",
+            "given": "كريمة"
+          }
+        ],
+        "year": 2017,
+        "container": "دراسات",
+        "doi": "10.34118/0136-000-055-007"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (Arabic-word query) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-098",
+      "kind": "real",
+      "input": {
+        "title": "تحليل واقع الحماية الاجتماعية في الجزائر",
+        "authors": [
+          {
+            "family": "مجاهد",
+            "given": "نسيمة لعرج"
+          },
+          {
+            "family": "طويطى",
+            "given": "مصطفى"
+          }
+        ],
+        "year": 2017,
+        "container": "مجلة البحوث الاقتصادية المتقدمة",
+        "doi": "10.38170/1993-000-002-004"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (Arabic-word query) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-099",
+      "kind": "real",
+      "input": {
+        "title": "واقع الإدمان بأشكاله وتداعياته على صحة الرياضي",
+        "authors": [
+          {
+            "family": "حسان",
+            "given": "أحمد شوقى"
+          }
+        ],
+        "year": 2020,
+        "container": "مجلة أنسنة للبحوث والدراسات",
+        "doi": "10.46217/1065-011-001-035"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (Arabic-word query) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "real-100",
+      "kind": "real",
+      "input": {
+        "title": "المنهج في دراسة التاريخ: اتجاهات ومنهجيات وأهداف جديدة في دراسة التاريخ الحديث (د.ميلاد .أ. المقرحي)",
+        "authors": [
+          {
+            "family": "د.سليمان خطاب سويكر"
+          }
+        ],
+        "year": 2022,
+        "container": "مجلة كلية الاداب",
+        "doi": "10.37376/jofoa.vi23.2929"
+      },
+      "expected": "verified",
+      "accepted": ["verified"],
+      "source": "Crossref /works?sample (Arabic-word query) on 2026-11-21; metadata as registered; DOI given as bare"
+    },
+    {
+      "id": "fab-doi-01",
+      "kind": "fabricated",
+      "input": {
+        "doi": "10.1378/bgby.950815",
+        "title": "Mesoscale hysteresis of saffron futures contracts in nineteenth-century lighthouse logs",
+        "authors": [
+          {
+            "family": "Abernathy",
+            "given": "Saoirse"
+          }
+        ],
+        "year": 2007,
+        "container": "Chest"
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): real registrant prefix 10.1378 + random suffix, Crossref 404 confirmed at build; journal name borrowed from a real work with that prefix; title/authors from word lists"
+    },
+    {
+      "id": "fab-doi-02",
+      "kind": "fabricated",
+      "input": {
+        "doi": "10.33855/zrlj.751319",
+        "title": "أثر هجرة الجراد الصحراوي في تعليم الخط الكوفي: دراسة طولية على صانعي الساعات المتجولين",
+        "authors": [
+          {
+            "family": "القبّاني",
+            "given": "حسام"
+          }
+        ],
+        "year": 2016,
+        "container": "مجلة العلوم الانسانية"
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): real registrant prefix 10.33855 + random suffix, Crossref 404 confirmed at build; journal name borrowed from a real work with that prefix; title/authors from word lists"
+    },
+    {
+      "id": "fab-doi-03",
+      "kind": "fabricated",
+      "input": {
+        "doi": "10.1016/daex.107851",
+        "title": "Modelling medieval bookbinding glue with wavelet ethnography: lessons from a multi-site pilot",
+        "authors": [
+          {
+            "family": "Thistlewood",
+            "given": "Tobias"
+          },
+          {
+            "family": "Ferreira-Dunn",
+            "given": "Saoirse"
+          }
+        ],
+        "year": 2020,
+        "container": "World Neurosurgery"
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): real registrant prefix 10.1016 + random suffix, Crossref 404 confirmed at build; journal name borrowed from a real work with that prefix; title/authors from word lists"
+    },
+    {
+      "id": "fab-doi-04",
+      "kind": "fabricated",
+      "input": {
+        "doi": "10.37376/fxsz.950946",
+        "title": "قياس ألوان الخزف الفاطمي وعلاقته بأداء محطات الأرصاد القطبية لدى حراس المنارات المتقاعدين",
+        "authors": [
+          {
+            "family": "البنّاء",
+            "given": "حسام"
+          },
+          {
+            "family": "الحدّاد",
+            "given": "هالة"
+          },
+          {
+            "family": "السقّاف",
+            "given": "يوسف"
+          }
+        ],
+        "year": 2021,
+        "container": "مجلة كلية الاداب"
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): real registrant prefix 10.37376 + random suffix, Crossref 404 confirmed at build; journal name borrowed from a real work with that prefix; title/authors from word lists"
+    },
+    {
+      "id": "fab-doi-05",
+      "kind": "fabricated",
+      "input": {
+        "doi": "10.2109/ummp.435282",
+        "title": "Modelling tidal mill ledgers with wavelet ethnography: a preregistered replication",
+        "authors": [
+          {
+            "family": "Kowalczyk",
+            "given": "Tobias"
+          },
+          {
+            "family": "Castellanos",
+            "given": "Rowan"
+          },
+          {
+            "family": "Abernathy",
+            "given": "Felix"
+          },
+          {
+            "family": "Lindqvist",
+            "given": "Keiko"
+          }
+        ],
+        "year": 2019,
+        "container": "Journal of the Ceramic Society of Japan"
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): real registrant prefix 10.2109 + random suffix, Crossref 404 confirmed at build; journal name borrowed from a real work with that prefix; title/authors from word lists"
+    },
+    {
+      "id": "fab-doi-06",
+      "kind": "fabricated",
+      "input": {
+        "doi": "10.1007/nmjh.307209",
+        "title": "Toward a stochastic theory of ceramic glaze microbiomes among urban falconers",
+        "authors": [
+          {
+            "family": "Ferreira-Dunn",
+            "given": "Tobias"
+          },
+          {
+            "family": "Abernathy",
+            "given": "Saoirse"
+          }
+        ],
+        "year": 2004,
+        "container": "Electrical Engineering"
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): real registrant prefix 10.1007 + random suffix, Crossref 404 confirmed at build; journal name borrowed from a real work with that prefix; title/authors from word lists"
+    },
+    {
+      "id": "fab-doi-07",
+      "kind": "fabricated",
+      "input": {
+        "doi": "10.33705/wbpg.194946",
+        "title": "أثر هجرة الجراد الصحراوي في تعليم الخط الكوفي: دراسة طولية على هواة علم الفطريات",
+        "authors": [
+          {
+            "family": "القبّاني",
+            "given": "حسام"
+          },
+          {
+            "family": "الحدّاد",
+            "given": "سامر"
+          }
+        ],
+        "year": 2003,
+        "container": "اللغة العربية"
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): real registrant prefix 10.33705 + random suffix, Crossref 404 confirmed at build; journal name borrowed from a real work with that prefix; title/authors from word lists"
+    },
+    {
+      "id": "fab-doi-08",
+      "kind": "fabricated",
+      "input": {
+        "doi": "10.1007/oilb.649310",
+        "title": "Hermeneutic drift of lichen bioluminescence in high-altitude beekeeping cooperatives",
+        "authors": [
+          {
+            "family": "Nakashima-Roe",
+            "given": "Amara"
+          },
+          {
+            "family": "Albrecht",
+            "given": "Mateo"
+          },
+          {
+            "family": "Prendergast",
+            "given": "Tobias"
+          },
+          {
+            "family": "Thistlewood",
+            "given": "Tobias"
+          }
+        ],
+        "year": 2003,
+        "container": "The Indian Journal of Pediatrics"
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): real registrant prefix 10.1007 + random suffix, Crossref 404 confirmed at build; journal name borrowed from a real work with that prefix; title/authors from word lists"
+    },
+    {
+      "id": "fab-doi-09",
+      "kind": "fabricated",
+      "input": {
+        "doi": "10.38170/voec.913075",
+        "title": "قياس أحبار المخطوطات الأندلسية وعلاقته بفقه المعاملات المصرفية لدى بحارة الصيد الساحلي",
+        "authors": [
+          {
+            "family": "النحّاس",
+            "given": "نور"
+          },
+          {
+            "family": "الدبّاغ",
+            "given": "يوسف"
+          }
+        ],
+        "year": 2006,
+        "container": "مجلة البحوث الاقتصادية المتقدمة"
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): real registrant prefix 10.38170 + random suffix, Crossref 404 confirmed at build; journal name borrowed from a real work with that prefix; title/authors from word lists"
+    },
+    {
+      "id": "fab-doi-10",
+      "kind": "fabricated",
+      "input": {
+        "doi": "10.56842/fwfu.561624",
+        "title": "Ethnographic polarization of tram timetable folklore in high-altitude beekeeping cooperatives",
+        "authors": [
+          {
+            "family": "Marchetti",
+            "given": "Rowan"
+          },
+          {
+            "family": "Kowalczyk",
+            "given": "Ines"
+          },
+          {
+            "family": "Prendergast",
+            "given": "Amara"
+          },
+          {
+            "family": "Castellanos",
+            "given": "Henrik"
+          }
+        ],
+        "year": 2007,
+        "container": "Jurnal Pendidikan Ilmu Pengetahuan Alam (JP-IPA)"
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): real registrant prefix 10.56842 + random suffix, Crossref 404 confirmed at build; journal name borrowed from a real work with that prefix; title/authors from word lists"
+    },
+    {
+      "id": "fab-doi-11",
+      "kind": "fabricated",
+      "input": {
+        "doi": "10.18231/sllg.299565",
+        "title": "Thermodynamic resonance of medieval bookbinding glue in coastal Andalusian monasteries",
+        "authors": [
+          {
+            "family": "Albrecht",
+            "given": "Amara"
+          }
+        ],
+        "year": 1999,
+        "container": "Current Trends in Pharmacy and Pharmaceutical Chemistry"
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): real registrant prefix 10.18231 + random suffix, Crossref 404 confirmed at build; journal name borrowed from a real work with that prefix; title/authors from word lists"
+    },
+    {
+      "id": "fab-doi-12",
+      "kind": "fabricated",
+      "input": {
+        "doi": "10.37170/adxe.896889",
+        "title": "قياس أحبار المخطوطات الأندلسية وعلاقته بأداء محطات الأرصاد القطبية لدى طلبة الخط العربي",
+        "authors": [
+          {
+            "family": "الشمّري",
+            "given": "هالة"
+          },
+          {
+            "family": "العطّار",
+            "given": "سلمى"
+          },
+          {
+            "family": "النحّاس",
+            "given": "مازن"
+          },
+          {
+            "family": "الورّاق",
+            "given": "مازن"
+          }
+        ],
+        "year": 2013,
+        "container": "مجلة اقتصاديات المال والأعمال"
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): real registrant prefix 10.37170 + random suffix, Crossref 404 confirmed at build; journal name borrowed from a real work with that prefix; title/authors from word lists"
+    },
+    {
+      "id": "fab-doi-13",
+      "kind": "fabricated",
+      "input": {
+        "doi": "10.3724/yciv.457958",
+        "title": "Thermodynamic drift of ceramic glaze microbiomes in rural telegraph offices",
+        "authors": [
+          {
+            "family": "Thistlewood",
+            "given": "Rowan"
+          }
+        ],
+        "year": 2004,
+        "container": "Chinese Journal of Eco-Agriculture"
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): real registrant prefix 10.3724 + random suffix, Crossref 404 confirmed at build; journal name borrowed from a real work with that prefix; title/authors from word lists"
+    },
+    {
+      "id": "fab-doi-14",
+      "kind": "fabricated",
+      "input": {
+        "doi": "10.37170/cmxe.151243",
+        "title": "أثر ضوء الفطريات الليلية في تسعير تذاكر الترام: دراسة تجريبية على حراس المنارات المتقاعدين",
+        "authors": [
+          {
+            "family": "الشمّري",
+            "given": "ريم"
+          },
+          {
+            "family": "الحدّاد",
+            "given": "نور"
+          }
+        ],
+        "year": 2001,
+        "container": "مجلة اقتصاديات المال والأعمال"
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): real registrant prefix 10.37170 + random suffix, Crossref 404 confirmed at build; journal name borrowed from a real work with that prefix; title/authors from word lists"
+    },
+    {
+      "id": "fab-doi-15",
+      "kind": "fabricated",
+      "input": {
+        "doi": "10.1002/pbkn.618960",
+        "title": "Toward a topological theory of tidal mill ledgers among amateur mycologists",
+        "authors": [
+          {
+            "family": "Kowalczyk",
+            "given": "Priya"
+          },
+          {
+            "family": "Whitcombe",
+            "given": "Keiko"
+          },
+          {
+            "family": "Okonkwo-Hale",
+            "given": "Tobias"
+          },
+          {
+            "family": "Castellanos",
+            "given": "Keiko"
+          }
+        ],
+        "year": 2010,
+        "container": "Advanced Materials"
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): real registrant prefix 10.1002 + random suffix, Crossref 404 confirmed at build; journal name borrowed from a real work with that prefix; title/authors from word lists"
+    },
+    {
+      "id": "fab-doi-16",
+      "kind": "fabricated",
+      "input": {
+        "doi": "10.1007/pfem.153668",
+        "title": "Toward a bayesian theory of glacial meltwater sermons among harbour pilots",
+        "authors": [
+          {
+            "family": "Castellanos",
+            "given": "Amara"
+          },
+          {
+            "family": "Haverford",
+            "given": "Henrik"
+          },
+          {
+            "family": "Oyelaran",
+            "given": "Dmitri"
+          },
+          {
+            "family": "Okonkwo-Hale",
+            "given": "Amara"
+          }
+        ],
+        "year": 2004,
+        "container": "Social Psychiatry and Psychiatric Epidemiology"
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): real registrant prefix 10.1007 + random suffix, Crossref 404 confirmed at build; journal name borrowed from a real work with that prefix; title/authors from word lists"
+    },
+    {
+      "id": "fab-doi-17",
+      "kind": "fabricated",
+      "input": {
+        "doi": "10.33855/oxsj.707999",
+        "title": "قياس إيقاع التهاليل الشعبية وعلاقته بصيانة الطواحين المائية لدى صانعي الساعات المتجولين",
+        "authors": [
+          {
+            "family": "السقّاف",
+            "given": "سامر"
+          },
+          {
+            "family": "الشمّري",
+            "given": "ليلى"
+          },
+          {
+            "family": "العطّار",
+            "given": "حسام"
+          },
+          {
+            "family": "الدبّاغ",
+            "given": "طارق"
+          }
+        ],
+        "year": 2011,
+        "container": "مجلة العلوم الانسانية"
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): real registrant prefix 10.33855 + random suffix, Crossref 404 confirmed at build; journal name borrowed from a real work with that prefix; title/authors from word lists"
+    },
+    {
+      "id": "fab-doi-18",
+      "kind": "fabricated",
+      "input": {
+        "doi": "10.1007/fxdy.508845",
+        "title": "Modelling lichen bioluminescence with Monte Carlo hermeneutics: evidence from a longitudinal cohort",
+        "authors": [
+          {
+            "family": "Varga",
+            "given": "Felix"
+          },
+          {
+            "family": "Haverford",
+            "given": "Keiko"
+          },
+          {
+            "family": "Oyelaran",
+            "given": "Keiko"
+          }
+        ],
+        "year": 2002,
+        "container": "World Journal of Surgery"
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): real registrant prefix 10.1007 + random suffix, Crossref 404 confirmed at build; journal name borrowed from a real work with that prefix; title/authors from word lists"
+    },
+    {
+      "id": "fab-doi-19",
+      "kind": "fabricated",
+      "input": {
+        "doi": "10.66045/tgae.439388",
+        "title": "قياس ضوء الفطريات الليلية وعلاقته بتسعير تذاكر الترام لدى صانعي الساعات المتجولين",
+        "authors": [
+          {
+            "family": "السقّاف",
+            "given": "نور"
+          }
+        ],
+        "year": 2018,
+        "container": "Al-Qurtas"
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): real registrant prefix 10.66045 + random suffix, Crossref 404 confirmed at build; journal name borrowed from a real work with that prefix; title/authors from word lists"
+    },
+    {
+      "id": "fab-doi-20",
+      "kind": "fabricated",
+      "input": {
+        "doi": "10.1007/ilru.567838",
+        "title": "Toward a ethnographic theory of ceramic glaze microbiomes among amateur mycologists",
+        "authors": [
+          {
+            "family": "Nakashima-Roe",
+            "given": "Keiko"
+          }
+        ],
+        "year": 2007,
+        "container": "World Journal of Surgery"
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): real registrant prefix 10.1007 + random suffix, Crossref 404 confirmed at build; journal name borrowed from a real work with that prefix; title/authors from word lists"
+    },
+    {
+      "id": "fab-doi-21",
+      "kind": "fabricated",
+      "input": {
+        "doi": "10.1080/thbc.317631",
+        "title": "Modelling lullaby meter with wavelet ethnography: lessons from a multi-site pilot",
+        "authors": [
+          {
+            "family": "Lindqvist",
+            "given": "Imogen"
+          }
+        ],
+        "year": 2013,
+        "container": "International Journal of Human–Computer Interaction"
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): real registrant prefix 10.1080 + random suffix, Crossref 404 confirmed at build; journal name borrowed from a real work with that prefix; title/authors from word lists"
+    },
+    {
+      "id": "fab-doi-22",
+      "kind": "fabricated",
+      "input": {
+        "doi": "10.37376/akeb.230218",
+        "title": "أثر هجرة الجراد الصحراوي في نسج السجاد اليدوي: دراسة ميدانية على طلبة الخط العربي",
+        "authors": [
+          {
+            "family": "الزيّات",
+            "given": "سلمى"
+          },
+          {
+            "family": "الدبّاغ",
+            "given": "يوسف"
+          }
+        ],
+        "year": 2008,
+        "container": "مجلة دراسات قانونية"
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): real registrant prefix 10.37376 + random suffix, Crossref 404 confirmed at build; journal name borrowed from a real work with that prefix; title/authors from word lists"
+    },
+    {
+      "id": "fab-doi-23",
+      "kind": "fabricated",
+      "input": {
+        "doi": "10.2109/jdzr.770575",
+        "title": "Toward a stochastic theory of lullaby meter among urban falconers",
+        "authors": [
+          {
+            "family": "Ferreira-Dunn",
+            "given": "Priya"
+          },
+          {
+            "family": "Castellanos",
+            "given": "Tobias"
+          }
+        ],
+        "year": 2010,
+        "container": "Journal of the Ceramic Society of Japan"
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): real registrant prefix 10.2109 + random suffix, Crossref 404 confirmed at build; journal name borrowed from a real work with that prefix; title/authors from word lists"
+    },
+    {
+      "id": "fab-doi-24",
+      "kind": "fabricated",
+      "input": {
+        "doi": "10.51840/wrqs.850104",
+        "title": "نحو نموذج طوبولوجي لتآكل الفسيفساء البحرية في قوافل الصحراء الكبرى",
+        "authors": [
+          {
+            "family": "النحّاس",
+            "given": "حسام"
+          }
+        ],
+        "year": 2015,
+        "container": "المجلة الجزائرية للحقوق والعلوم السياسية"
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): real registrant prefix 10.51840 + random suffix, Crossref 404 confirmed at build; journal name borrowed from a real work with that prefix; title/authors from word lists"
+    },
+    {
+      "id": "fab-doi-25",
+      "kind": "fabricated",
+      "input": {
+        "doi": "10.1017/mfpj.615237",
+        "title": "Modelling glacial meltwater sermons with participatory spectroscopy: evidence from a longitudinal cohort",
+        "authors": [
+          {
+            "family": "Albrecht",
+            "given": "Amara"
+          },
+          {
+            "family": "Prendergast",
+            "given": "Rowan"
+          },
+          {
+            "family": "Whitcombe",
+            "given": "Dmitri"
+          },
+          {
+            "family": "Thistlewood",
+            "given": "Keiko"
+          }
+        ],
+        "year": 2021,
+        "container": "Proceedings of the British Society of Animal Science"
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): real registrant prefix 10.1017 + random suffix, Crossref 404 confirmed at build; journal name borrowed from a real work with that prefix; title/authors from word lists"
+    },
+    {
+      "id": "fab-title-01",
+      "kind": "fabricated",
+      "input": {
+        "title": "Toward a stochastic theory of lullaby meter among organ tuners",
+        "authors": [
+          {
+            "family": "Nakashima-Roe",
+            "given": "Rowan"
+          }
+        ],
+        "year": 2003,
+        "container": "AIChE Journal"
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): title-only, no DOI; title/authors from word lists, no close Crossref hit at build; journal name borrowed from a real work"
+    },
+    {
+      "id": "fab-title-02",
+      "kind": "fabricated",
+      "input": {
+        "title": "نحو نموذج تأويلي لتآكل الفسيفساء البحرية في مخابز المدن الصناعية",
+        "authors": [
+          {
+            "family": "الورّاق",
+            "given": "سامر"
+          },
+          {
+            "family": "السقّاف",
+            "given": "سامر"
+          },
+          {
+            "family": "البنّاء",
+            "given": "ريم"
+          }
+        ],
+        "year": 2005,
+        "container": "دراسات معاصرة"
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): title-only, no DOI; title/authors from word lists, no close Crossref hit at build; journal name borrowed from a real work"
+    },
+    {
+      "id": "fab-title-03",
+      "kind": "fabricated",
+      "input": {
+        "title": "Toward a postcolonial theory of ceramic glaze microbiomes among organ tuners",
+        "authors": [
+          {
+            "family": "Marchetti",
+            "given": "Mateo"
+          }
+        ],
+        "year": 2022,
+        "container": "CardioVascular and Interventional Radiology"
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): title-only, no DOI; title/authors from word lists, no close Crossref hit at build; journal name borrowed from a real work"
+    },
+    {
+      "id": "fab-title-04",
+      "kind": "fabricated",
+      "input": {
+        "title": "أثر إيقاع التهاليل الشعبية في أداء محطات الأرصاد القطبية: دراسة طولية على طلبة الخط العربي",
+        "authors": [
+          {
+            "family": "الدبّاغ",
+            "given": "هالة"
+          },
+          {
+            "family": "الزيّات",
+            "given": "هالة"
+          },
+          {
+            "family": "القبّاني",
+            "given": "هالة"
+          }
+        ],
+        "year": 2012
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): title-only, no DOI; title/authors from word lists, no close Crossref hit at build"
+    },
+    {
+      "id": "fab-title-05",
+      "kind": "fabricated",
+      "input": {
+        "title": "Hermeneutic polarization of cuttlefish chromatophores in Saharan caravan inns",
+        "authors": [
+          {
+            "family": "Haverford",
+            "given": "Tobias"
+          },
+          {
+            "family": "Marchetti",
+            "given": "Saoirse"
+          },
+          {
+            "family": "Kowalczyk",
+            "given": "Imogen"
+          }
+        ],
+        "year": 2008
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): title-only, no DOI; title/authors from word lists, no close Crossref hit at build"
+    },
+    {
+      "id": "fab-title-06",
+      "kind": "fabricated",
+      "input": {
+        "title": "Modelling lichen bioluminescence with graph neural surrogates: lessons from a multi-site pilot",
+        "authors": [
+          {
+            "family": "Whitcombe",
+            "given": "Tobias"
+          },
+          {
+            "family": "Kowalczyk",
+            "given": "Mateo"
+          }
+        ],
+        "year": 2021
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): title-only, no DOI; title/authors from word lists, no close Crossref hit at build"
+    },
+    {
+      "id": "fab-title-07",
+      "kind": "fabricated",
+      "input": {
+        "title": "نحو نموذج تأويلي لضوء الفطريات الليلية في ورش الكهرمان البلطيقي",
+        "authors": [
+          {
+            "family": "الشمّري",
+            "given": "نور"
+          },
+          {
+            "family": "الدبّاغ",
+            "given": "حسام"
+          },
+          {
+            "family": "الزيّات",
+            "given": "مازن"
+          }
+        ],
+        "year": 1999
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): title-only, no DOI; title/authors from word lists, no close Crossref hit at build"
+    },
+    {
+      "id": "fab-title-08",
+      "kind": "fabricated",
+      "input": {
+        "title": "Modelling tidal mill ledgers with agent-based philology: a quasi-experimental reassessment",
+        "authors": [
+          {
+            "family": "Lindqvist",
+            "given": "Rowan"
+          },
+          {
+            "family": "Prendergast",
+            "given": "Amara"
+          },
+          {
+            "family": "Albrecht",
+            "given": "Saoirse"
+          },
+          {
+            "family": "Whitcombe",
+            "given": "Priya"
+          }
+        ],
+        "year": 2018
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): title-only, no DOI; title/authors from word lists, no close Crossref hit at build"
+    },
+    {
+      "id": "fab-title-09",
+      "kind": "fabricated",
+      "input": {
+        "title": "نحو نموذج طوبولوجي لرطوبة الكهوف الجيرية في قوافل الصحراء الكبرى",
+        "authors": [
+          {
+            "family": "الورّاق",
+            "given": "مازن"
+          },
+          {
+            "family": "السقّاف",
+            "given": "مازن"
+          }
+        ],
+        "year": 2005
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): title-only, no DOI; title/authors from word lists, no close Crossref hit at build"
+    },
+    {
+      "id": "fab-title-10",
+      "kind": "fabricated",
+      "input": {
+        "title": "Bayesian sedimentation of glacial meltwater sermons in high-altitude beekeeping cooperatives",
+        "authors": [
+          {
+            "family": "Varga",
+            "given": "Felix"
+          },
+          {
+            "family": "Marchetti",
+            "given": "Amara"
+          },
+          {
+            "family": "Albrecht",
+            "given": "Amara"
+          }
+        ],
+        "year": 2017,
+        "container": "Science in China Series D: Earth Sciences"
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): title-only, no DOI; title/authors from word lists, no close Crossref hit at build; journal name borrowed from a real work"
+    },
+    {
+      "id": "fab-title-11",
+      "kind": "fabricated",
+      "input": {
+        "title": "Toward a topological theory of tram timetable folklore among retired lighthouse keepers",
+        "authors": [
+          {
+            "family": "Thistlewood",
+            "given": "Mateo"
+          },
+          {
+            "family": "Kowalczyk",
+            "given": "Henrik"
+          }
+        ],
+        "year": 2009,
+        "container": "Placenta"
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): title-only, no DOI; title/authors from word lists, no close Crossref hit at build; journal name borrowed from a real work"
+    },
+    {
+      "id": "fab-title-12",
+      "kind": "fabricated",
+      "input": {
+        "title": "أثر أسعار الزعفران الآجلة في جودة الخبز البلدي: دراسة ميدانية على هواة علم الفطريات",
+        "authors": [
+          {
+            "family": "البنّاء",
+            "given": "ريم"
+          },
+          {
+            "family": "الدبّاغ",
+            "given": "هالة"
+          },
+          {
+            "family": "الزيّات",
+            "given": "ريم"
+          },
+          {
+            "family": "العطّار",
+            "given": "سامر"
+          }
+        ],
+        "year": 1998
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): title-only, no DOI; title/authors from word lists, no close Crossref hit at build"
+    },
+    {
+      "id": "fab-title-13",
+      "kind": "fabricated",
+      "input": {
+        "title": "Toward a mesoscale theory of tidal mill ledgers among retired lighthouse keepers",
+        "authors": [
+          {
+            "family": "Oyelaran",
+            "given": "Mateo"
+          },
+          {
+            "family": "Lindqvist",
+            "given": "Tobias"
+          },
+          {
+            "family": "Albrecht",
+            "given": "Imogen"
+          },
+          {
+            "family": "Ferreira-Dunn",
+            "given": "Mateo"
+          }
+        ],
+        "year": 2016
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): title-only, no DOI; title/authors from word lists, no close Crossref hit at build"
+    },
+    {
+      "id": "fab-title-14",
+      "kind": "fabricated",
+      "input": {
+        "title": "أثر أسعار الزعفران الآجلة في تسعير تذاكر الترام: دراسة استكشافية على حراس المنارات المتقاعدين",
+        "authors": [
+          {
+            "family": "الحدّاد",
+            "given": "طارق"
+          },
+          {
+            "family": "القبّاني",
+            "given": "سامر"
+          },
+          {
+            "family": "الورّاق",
+            "given": "يوسف"
+          },
+          {
+            "family": "العطّار",
+            "given": "ريم"
+          }
+        ],
+        "year": 1999,
+        "container": "مجلة دراسات قانونية"
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): title-only, no DOI; title/authors from word lists, no close Crossref hit at build; journal name borrowed from a real work"
+    },
+    {
+      "id": "fab-title-15",
+      "kind": "fabricated",
+      "input": {
+        "title": "Stochastic resonance of tram timetable folklore in post-industrial sourdough bakeries",
+        "authors": [
+          {
+            "family": "Abernathy",
+            "given": "Ines"
+          }
+        ],
+        "year": 2012
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): title-only, no DOI; title/authors from word lists, no close Crossref hit at build"
+    },
+    {
+      "id": "fab-title-16",
+      "kind": "fabricated",
+      "input": {
+        "title": "Toward a ethnographic theory of municipal pigeon censuses among itinerant clockmakers",
+        "authors": [
+          {
+            "family": "Haverford",
+            "given": "Rowan"
+          },
+          {
+            "family": "Albrecht",
+            "given": "Tobias"
+          },
+          {
+            "family": "Whitcombe",
+            "given": "Rowan"
+          },
+          {
+            "family": "Castellanos",
+            "given": "Henrik"
+          }
+        ],
+        "year": 2000,
+        "container": "Brazilian Journal of Development"
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): title-only, no DOI; title/authors from word lists, no close Crossref hit at build; journal name borrowed from a real work"
+    },
+    {
+      "id": "fab-title-17",
+      "kind": "fabricated",
+      "input": {
+        "title": "أثر التذبذب الكمومي في صيانة الطواحين المائية: دراسة طولية على بحارة الصيد الساحلي",
+        "authors": [
+          {
+            "family": "الدبّاغ",
+            "given": "ريم"
+          }
+        ],
+        "year": 2006
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): title-only, no DOI; title/authors from word lists, no close Crossref hit at build"
+    },
+    {
+      "id": "fab-title-18",
+      "kind": "fabricated",
+      "input": {
+        "title": "Topological attenuation of tram timetable folklore in Baltic amber workshops",
+        "authors": [
+          {
+            "family": "Kowalczyk",
+            "given": "Keiko"
+          },
+          {
+            "family": "Ferreira-Dunn",
+            "given": "Felix"
+          }
+        ],
+        "year": 2014
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): title-only, no DOI; title/authors from word lists, no close Crossref hit at build"
+    },
+    {
+      "id": "fab-title-19",
+      "kind": "fabricated",
+      "input": {
+        "title": "قياس ذاكرة الحمام الزاجل وعلاقته بصيانة الطواحين المائية لدى صانعي الساعات المتجولين",
+        "authors": [
+          {
+            "family": "القبّاني",
+            "given": "ريم"
+          }
+        ],
+        "year": 2024,
+        "container": "مجلة أنسنة للبحوث والدراسات"
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): title-only, no DOI; title/authors from word lists, no close Crossref hit at build; journal name borrowed from a real work"
+    },
+    {
+      "id": "fab-title-20",
+      "kind": "fabricated",
+      "input": {
+        "title": "Modelling ceramic glaze microbiomes with participatory spectroscopy: a mixed-methods appraisal",
+        "authors": [
+          {
+            "family": "Albrecht",
+            "given": "Mateo"
+          },
+          {
+            "family": "Castellanos",
+            "given": "Mateo"
+          },
+          {
+            "family": "Abernathy",
+            "given": "Amara"
+          },
+          {
+            "family": "Lindqvist",
+            "given": "Mateo"
+          }
+        ],
+        "year": 2020
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): title-only, no DOI; title/authors from word lists, no close Crossref hit at build"
+    },
+    {
+      "id": "fab-title-21",
+      "kind": "fabricated",
+      "input": {
+        "title": "Toward a spectral theory of tidal mill ledgers among retired lighthouse keepers",
+        "authors": [
+          {
+            "family": "Ferreira-Dunn",
+            "given": "Mateo"
+          },
+          {
+            "family": "Haverford",
+            "given": "Priya"
+          },
+          {
+            "family": "Nakashima-Roe",
+            "given": "Amara"
+          },
+          {
+            "family": "Varga",
+            "given": "Dmitri"
+          }
+        ],
+        "year": 2016,
+        "container": "AIChE Journal"
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): title-only, no DOI; title/authors from word lists, no close Crossref hit at build; journal name borrowed from a real work"
+    },
+    {
+      "id": "fab-title-22",
+      "kind": "fabricated",
+      "input": {
+        "title": "قياس أحبار المخطوطات الأندلسية وعلاقته بأداء محطات الأرصاد القطبية لدى صانعي الساعات المتجولين",
+        "authors": [
+          {
+            "family": "البنّاء",
+            "given": "هالة"
+          },
+          {
+            "family": "الدبّاغ",
+            "given": "طارق"
+          },
+          {
+            "family": "الورّاق",
+            "given": "سامر"
+          },
+          {
+            "family": "السقّاف",
+            "given": "نور"
+          }
+        ],
+        "year": 1999
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): title-only, no DOI; title/authors from word lists, no close Crossref hit at build"
+    },
+    {
+      "id": "fab-title-23",
+      "kind": "fabricated",
+      "input": {
+        "title": "Spectral drift of saffron futures contracts in post-industrial sourdough bakeries",
+        "authors": [
+          {
+            "family": "Marchetti",
+            "given": "Mateo"
+          },
+          {
+            "family": "Haverford",
+            "given": "Mateo"
+          }
+        ],
+        "year": 2018
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): title-only, no DOI; title/authors from word lists, no close Crossref hit at build"
+    },
+    {
+      "id": "fab-title-24",
+      "kind": "fabricated",
+      "input": {
+        "title": "قياس ذاكرة الحمام الزاجل وعلاقته بتسعير تذاكر الترام لدى طلبة الخط العربي",
+        "authors": [
+          {
+            "family": "العطّار",
+            "given": "ريم"
+          },
+          {
+            "family": "البنّاء",
+            "given": "مازن"
+          },
+          {
+            "family": "النحّاس",
+            "given": "ليلى"
+          },
+          {
+            "family": "القبّاني",
+            "given": "طارق"
+          }
+        ],
+        "year": 2014,
+        "container": "مجلة دراسات قانونية"
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): title-only, no DOI; title/authors from word lists, no close Crossref hit at build; journal name borrowed from a real work"
+    },
+    {
+      "id": "fab-title-25",
+      "kind": "fabricated",
+      "input": {
+        "title": "Bayesian drift of cuttlefish chromatophores in rural telegraph offices",
+        "authors": [
+          {
+            "family": "Whitcombe",
+            "given": "Tobias"
+          },
+          {
+            "family": "Ferreira-Dunn",
+            "given": "Ines"
+          }
+        ],
+        "year": 2006,
+        "container": "Advanced Materials"
+      },
+      "expected": "not_found",
+      "accepted": ["not_found", "mismatch"],
+      "source": "invented (seed 20261121): title-only, no DOI; title/authors from word lists, no close Crossref hit at build; journal name borrowed from a real work"
+    },
+    {
+      "id": "mis-01",
+      "kind": "mismatched",
+      "input": {
+        "title": "Bacteriological examinations of chilled, cured canned pork hams and shoulders using a conventional microbiological technique and the DEFT method",
+        "authors": [
+          {
+            "family": "Liberski",
+            "given": "Dorota J.A."
+          }
+        ],
+        "year": 1990,
+        "container": "International Journal of Food Microbiology",
+        "doi": "10.5902/1983465913930"
+      },
+      "expected": "mismatch",
+      "accepted": ["mismatch"],
+      "source": "real DOI of one sampled Crossref work (general pool) with the title/authors/year/journal of another (10.1016/0168-1605(90)90003-n)"
+    },
+    {
+      "id": "mis-02",
+      "kind": "mismatched",
+      "input": {
+        "title": "Da favela para o mundo: articulações entre o local e o global no funk brasileiro2",
+        "authors": [
+          {
+            "family": "Faria",
+            "given": "Debora Costa de"
+          }
+        ],
+        "year": 2015,
+        "container": "Brasiliana: Journal for Brazilian Studies",
+        "doi": "10.1016/j.psep.2022.01.083"
+      },
+      "expected": "mismatch",
+      "accepted": ["mismatch"],
+      "source": "real DOI of one sampled Crossref work (general pool) with the title/authors/year/journal of another (10.25160/bjbs.v4i1.20657)"
+    },
+    {
+      "id": "mis-03",
+      "kind": "mismatched",
+      "input": {
+        "title": "Distributive Justice and the Problem of Friendship",
+        "authors": [
+          {
+            "family": "Cordelli",
+            "given": "Chiara"
+          }
+        ],
+        "year": 2014,
+        "container": "Political Studies",
+        "doi": "10.21500/22563202.2765"
+      },
+      "expected": "mismatch",
+      "accepted": ["mismatch"],
+      "source": "real DOI of one sampled Crossref work (general pool) with the title/authors/year/journal of another (10.1111/1467-9248.12115)"
+    },
+    {
+      "id": "mis-04",
+      "kind": "mismatched",
+      "input": {
+        "title": "Pengaruh Penggunaan Media E-Komik Untuk Menarik Minat Siswa Dalam Pembelajaran Qira’ah",
+        "authors": [
+          {
+            "family": "Fardiyah",
+            "given": "Handini"
+          },
+          {
+            "family": "Hayati",
+            "given": "Salma"
+          },
+          {
+            "family": "Fajriah",
+            "given": "Fajriah"
+          }
+        ],
+        "year": 2024,
+        "container": "Jurnal Ihtimam",
+        "doi": "10.1016/j.jcat.2017.04.021"
+      },
+      "expected": "mismatch",
+      "accepted": ["mismatch"],
+      "source": "real DOI of one sampled Crossref work (general pool) with the title/authors/year/journal of another (10.36668/jih.v7i02.1025)"
+    },
+    {
+      "id": "mis-05",
+      "kind": "mismatched",
+      "input": {
+        "title": "A Brief History and Emerging Frontiers of Battery Technologies for Modern Energy Applications: The Evolution of Battery Technology",
+        "authors": [
+          {
+            "family": "Hui",
+            "given": "Kwan San"
+          },
+          {
+            "family": "Luo",
+            "given": "Shiqiang"
+          },
+          {
+            "family": "Hui",
+            "given": "Kwun Nam"
+          },
+          {
+            "family": "Su",
+            "given": "Wencong"
+          },
+          {
+            "family": "Souza",
+            "given": "M. M. De"
+          }
+        ],
+        "year": 2026,
+        "container": "IEEE Electron Devices Magazine",
+        "doi": "10.26512/ser_social.v15i32.13036"
+      },
+      "expected": "mismatch",
+      "accepted": ["mismatch"],
+      "source": "real DOI of one sampled Crossref work (general pool) with the title/authors/year/journal of another (10.1109/med.2026.3654536)"
+    },
+    {
+      "id": "mis-06",
+      "kind": "mismatched",
+      "input": {
+        "title": "To aggregate or not to aggregate: Effect variant measurement models and their advantages for questionnaire data in experimental psychology",
+        "authors": [
+          {
+            "family": "Tosi",
+            "given": "Giorgia"
+          },
+          {
+            "family": "Gallucci",
+            "given": "Marcello"
+          },
+          {
+            "family": "Romano",
+            "given": "Daniele"
+          }
+        ],
+        "year": 2026,
+        "container": "Methods in Psychology",
+        "doi": "10.1080/0967828x.2022.2027634"
+      },
+      "expected": "mismatch",
+      "accepted": ["mismatch"],
+      "source": "real DOI of one sampled Crossref work (general pool) with the title/authors/year/journal of another (10.1016/j.metip.2026.100275)"
+    },
+    {
+      "id": "mis-07",
+      "kind": "mismatched",
+      "input": {
+        "title": "A manual for the use of focus groups",
+        "authors": [
+          {
+            "family": "Eyles",
+            "given": "John"
+          }
+        ],
+        "year": 1995,
+        "container": "Social Science & Medicine",
+        "doi": "10.1525/curh.1928.27.5.645"
+      },
+      "expected": "mismatch",
+      "accepted": ["mismatch"],
+      "source": "real DOI of one sampled Crossref work (general pool) with the title/authors/year/journal of another (10.1016/0277-9536(95)90209-0)"
+    },
+    {
+      "id": "mis-08",
+      "kind": "mismatched",
+      "input": {
+        "title": "9.63% efficient flexible Cu 2 ZnSn(S,Se) 4 solar cells fabricated via scalable doctor-blading under ambient conditions",
+        "authors": [
+          {
+            "family": "Xu",
+            "given": "Han"
+          },
+          {
+            "family": "Ge",
+            "given": "Sijie"
+          },
+          {
+            "family": "Yang",
+            "given": "Wentao"
+          },
+          {
+            "family": "Khan",
+            "given": "Saqib Nawaz"
+          },
+          {
+            "family": "Huang",
+            "given": "Yuxiang"
+          },
+          {
+            "family": "Mai",
+            "given": "Yaohua"
+          },
+          {
+            "family": "Gu",
+            "given": "Ening"
+          },
+          {
+            "family": "Lin",
+            "given": "Xianzhong"
+          },
+          {
+            "family": "Yang",
+            "given": "Guowei"
+          }
+        ],
+        "year": 2021,
+        "container": "Journal of Materials Chemistry A",
+        "doi": "10.1002/jps.10288"
+      },
+      "expected": "mismatch",
+      "accepted": ["mismatch"],
+      "source": "real DOI of one sampled Crossref work (general pool) with the title/authors/year/journal of another (10.1039/d1ta07073h)"
+    },
+    {
+      "id": "mis-09",
+      "kind": "mismatched",
+      "input": {
+        "title": "A neuropathological study of paraparetic rats injected with HTLV-I-producing T cells",
+        "authors": [
+          {
+            "family": "Mizusawa",
+            "given": "Hidehiro"
+          },
+          {
+            "family": "Kushida",
+            "given": "Shigeki"
+          },
+          {
+            "family": "Matsumura",
+            "given": "Masayuki"
+          },
+          {
+            "family": "Tanaka",
+            "given": "Hiroko"
+          },
+          {
+            "family": "Ami",
+            "given": "Yoshihiko"
+          },
+          {
+            "family": "Hori",
+            "given": "Mitsuo"
+          },
+          {
+            "family": "Kobayashi",
+            "given": "Mikirou"
+          },
+          {
+            "family": "Uchida",
+            "given": "Kazuhiko"
+          },
+          {
+            "family": "Yagami",
+            "given": "Kenichi"
+          },
+          {
+            "family": "Yoshizawa",
+            "given": "Toshihiro"
+          }
+        ],
+        "year": 1994,
+        "container": "Journal of the Neurological Sciences",
+        "doi": "10.26618/exposure.v14i1.15869"
+      },
+      "expected": "mismatch",
+      "accepted": ["mismatch"],
+      "source": "real DOI of one sampled Crossref work (general pool) with the title/authors/year/journal of another (10.1016/0022-510x(94)90258-5)"
+    },
+    {
+      "id": "mis-10",
+      "kind": "mismatched",
+      "input": {
+        "title": "Narrativa filosófica o filosofía estetizada: rasgos del humanismo alemán en la obra de Jorge Luis Borges.",
+        "authors": [
+          {
+            "family": "Herrera Ruíz",
+            "given": "Juan Carlos"
+          }
+        ],
+        "year": 2025,
+        "container": "Revista Ciencias y Humanidades",
+        "doi": "10.1111/j.1469-7998.1954.tb07807.x"
+      },
+      "expected": "mismatch",
+      "accepted": ["mismatch"],
+      "source": "real DOI of one sampled Crossref work (general pool) with the title/authors/year/journal of another (10.61497/qztejz97)"
+    },
+    {
+      "id": "mis-11",
+      "kind": "mismatched",
+      "input": {
+        "title": "Expansion dynamics, metabolite composition and substance transfer of the primary root growth zone ofZea maysL. grown in different external nutrient availabilities",
+        "authors": [
+          {
+            "family": "WALTER",
+            "given": "A."
+          },
+          {
+            "family": "FEIL",
+            "given": "R."
+          },
+          {
+            "family": "SCHURR",
+            "given": "U."
+          }
+        ],
+        "year": 2003,
+        "container": "Plant, Cell & Environment",
+        "doi": "10.1109/jsen.2025.3602686"
+      },
+      "expected": "mismatch",
+      "accepted": ["mismatch"],
+      "source": "real DOI of one sampled Crossref work (general pool) with the title/authors/year/journal of another (10.1046/j.0016-8025.2003.01068.x)"
+    },
+    {
+      "id": "mis-12",
+      "kind": "mismatched",
+      "input": {
+        "title": "Reform of Medical Education",
+        "authors": [
+          {
+            "family": "&NA;"
+          }
+        ],
+        "year": 1934,
+        "container": "Academic Medicine",
+        "doi": "10.1007/s11229-011-9899-3"
+      },
+      "expected": "mismatch",
+      "accepted": ["mismatch"],
+      "source": "real DOI of one sampled Crossref work (general pool) with the title/authors/year/journal of another (10.1097/00001888-193405000-00012)"
+    },
+    {
+      "id": "mis-13",
+      "kind": "mismatched",
+      "input": {
+        "title": "T cell-derived B cell growth and differentiation factors. Dichotomy between the responsiveness of B cells from adult and neonatal mice.",
+        "authors": [
+          {
+            "family": "Pure",
+            "given": "E"
+          },
+          {
+            "family": "Isakson",
+            "given": "P C"
+          },
+          {
+            "family": "Kappler",
+            "given": "J W"
+          },
+          {
+            "family": "Marrack",
+            "given": "P"
+          },
+          {
+            "family": "Krammer",
+            "given": "P H"
+          },
+          {
+            "family": "Vitetta",
+            "given": "E S"
+          }
+        ],
+        "year": 1983,
+        "container": "The Journal of experimental medicine",
+        "doi": "10.1177/107769907405100210"
+      },
+      "expected": "mismatch",
+      "accepted": ["mismatch"],
+      "source": "real DOI of one sampled Crossref work (general pool) with the title/authors/year/journal of another (10.1084/jem.157.2.600)"
+    },
+    {
+      "id": "mis-14",
+      "kind": "mismatched",
+      "input": {
+        "title": "Electroencephalographic Desynchronization in Irradiated Rats with Transected Spinal Cords",
+        "authors": [
+          {
+            "family": "Cooper",
+            "given": "G. P."
+          },
+          {
+            "family": "Kimeldorf",
+            "given": "D. J."
+          }
+        ],
+        "year": 1964,
+        "container": "Science",
+        "doi": "10.1016/s0022-3476(78)80462-4"
+      },
+      "expected": "mismatch",
+      "accepted": ["mismatch"],
+      "source": "real DOI of one sampled Crossref work (general pool) with the title/authors/year/journal of another (10.1126/science.143.3610.1040)"
+    },
+    {
+      "id": "mis-15",
+      "kind": "mismatched",
+      "input": {
+        "title": "Apoptosis Induction by KX-01 in Human Salivary Mucoepidermoid Carcinoma Cells",
+        "authors": [
+          {
+            "family": "Choi",
+            "given": "Su-Jung"
+          },
+          {
+            "family": "Woo",
+            "given": "Joong-Seok"
+          },
+          {
+            "family": "Hong",
+            "given": "Seong-Doo"
+          },
+          {
+            "family": "Cho",
+            "given": "Sung-Dae"
+          }
+        ],
+        "year": 2025,
+        "container": "The Korean Journal of Oral and Maxillofacial Pathology",
+        "doi": "10.1016/j.jtho.2019.08.2105"
+      },
+      "expected": "mismatch",
+      "accepted": ["mismatch"],
+      "source": "real DOI of one sampled Crossref work (general pool) with the title/authors/year/journal of another (10.17779/kaomp.2025.49.6.003)"
+    },
+    {
+      "id": "mis-16",
+      "kind": "mismatched",
+      "input": {
+        "title": "Treatment of avulsion fractures of the pelvis in adolescent athletes: A scoping literature review",
+        "authors": [
+          {
+            "family": "Di Maria",
+            "given": "Fabrizio"
+          },
+          {
+            "family": "Testa",
+            "given": "Gianluca"
+          },
+          {
+            "family": "Sammartino",
+            "given": "Fabio"
+          },
+          {
+            "family": "Sorrentino",
+            "given": "Marco"
+          },
+          {
+            "family": "Petrantoni",
+            "given": "Vincenzo"
+          },
+          {
+            "family": "Pavone",
+            "given": "Vito"
+          }
+        ],
+        "year": 2022,
+        "container": "Frontiers in Pediatrics",
+        "doi": "10.1107/s1600536805023469"
+      },
+      "expected": "mismatch",
+      "accepted": ["mismatch"],
+      "source": "real DOI of one sampled Crossref work (general pool) with the title/authors/year/journal of another (10.3389/fped.2022.947463)"
+    },
+    {
+      "id": "mis-17",
+      "kind": "mismatched",
+      "input": {
+        "title": "New species and record in the genus Carbacanthographis (lichenized Ascomycota, Graphidaceae) from China",
+        "authors": [
+          {
+            "family": "JIANG",
+            "given": "SHU-HAO"
+          },
+          {
+            "family": "HAO",
+            "given": "CHENG-YUE"
+          },
+          {
+            "family": "ZHAO",
+            "given": "XIN"
+          },
+          {
+            "family": "JIA",
+            "given": "ZE-FENG"
+          }
+        ],
+        "year": 2024,
+        "container": "Phytotaxa",
+        "doi": "10.1111/bph.12321"
+      },
+      "expected": "mismatch",
+      "accepted": ["mismatch"],
+      "source": "real DOI of one sampled Crossref work (general pool) with the title/authors/year/journal of another (10.11646/phytotaxa.670.4.6)"
+    },
+    {
+      "id": "mis-18",
+      "kind": "mismatched",
+      "input": {
+        "title": "High-Rise Building 3D Reconstruction with the Wrapped Interferometric Phase",
+        "authors": [
+          {
+            "family": "Guo",
+            "given": "Rui"
+          },
+          {
+            "family": "Wang",
+            "given": "Fan"
+          },
+          {
+            "family": "Zang",
+            "given": "Bo"
+          },
+          {
+            "family": "Jing",
+            "given": "GuoBin"
+          },
+          {
+            "family": "Xing",
+            "given": "Mengdao"
+          }
+        ],
+        "year": 2019,
+        "container": "Sensors",
+        "doi": "10.1159/000168909"
+      },
+      "expected": "mismatch",
+      "accepted": ["mismatch"],
+      "source": "real DOI of one sampled Crossref work (general pool) with the title/authors/year/journal of another (10.3390/s19061439)"
+    },
+    {
+      "id": "mis-19",
+      "kind": "mismatched",
+      "input": {
+        "title": "Heterogeneity of Mitochondrial Membrane Potential: A Novel Tool to Isolate and Identify Cancer Stem Cells from a Tumor Mass?",
+        "authors": [
+          {
+            "family": "Ye",
+            "given": "Xiao-Qun"
+          },
+          {
+            "family": "Wang",
+            "given": "Guang-Hui"
+          },
+          {
+            "family": "Huang",
+            "given": "Gui-Jun"
+          },
+          {
+            "family": "Bian",
+            "given": "Xiu-Wu"
+          },
+          {
+            "family": "Qian",
+            "given": "Gui-Sheng"
+          },
+          {
+            "family": "Yu",
+            "given": "Shi-Cang"
+          }
+        ],
+        "year": 2010,
+        "container": "Stem Cell Reviews and Reports",
+        "doi": "10.52034/lanstts.v0i12.233"
+      },
+      "expected": "mismatch",
+      "accepted": ["mismatch"],
+      "source": "real DOI of one sampled Crossref work (general pool) with the title/authors/year/journal of another (10.1007/s12015-010-9122-9)"
+    },
+    {
+      "id": "mis-20",
+      "kind": "mismatched",
+      "input": {
+        "title": "Vulnerable Transgender Community During COVID-19 and Lockdown in India",
+        "authors": [
+          {
+            "family": "Chaudary",
+            "given": "Jatin"
+          }
+        ],
+        "year": 2021,
+        "container": "Indian Journal of Social Psychiatry",
+        "doi": "10.3905/jai.2009.11.4.024"
+      },
+      "expected": "mismatch",
+      "accepted": ["mismatch"],
+      "source": "real DOI of one sampled Crossref work (general pool) with the title/authors/year/journal of another (10.4103/ijsp.ijsp_165_20)"
+    },
+    {
+      "id": "mis-21",
+      "kind": "mismatched",
+      "input": {
+        "title": "مزالق المستشرقين في دراسة القرآن الكريم:, دراسة تحليلية-نقدية",
+        "authors": [
+          {
+            "family": "سرائب",
+            "given": "محمود علي"
+          }
+        ],
+        "year": 2024,
+        "container": "مجلة دراسات استشراقية",
+        "doi": "10.37136/1003-000-043-070"
+      },
+      "expected": "mismatch",
+      "accepted": ["mismatch"],
+      "source": "real DOI of one sampled Crossref work (Arabic pool) with the title/authors/year/journal of another (10.35518/1401-000-040-002)"
+    },
+    {
+      "id": "mis-22",
+      "kind": "mismatched",
+      "input": {
+        "title": "غزوة الأحزاب \" الخندق \" 5 هجرية :, تحليل وأبعاد",
+        "authors": [
+          {
+            "family": "حميد",
+            "given": "غسان عبدالقادر"
+          }
+        ],
+        "year": 2013,
+        "container": "مجلة كلية المأمون",
+        "doi": "10.35217/0048-024-095-002"
+      },
+      "expected": "mismatch",
+      "accepted": ["mismatch"],
+      "source": "real DOI of one sampled Crossref work (Arabic pool) with the title/authors/year/journal of another (10.36458/1253-000-022-001)"
+    },
+    {
+      "id": "mis-23",
+      "kind": "mismatched",
+      "input": {
+        "title": "تحليل الميزة الضريبية للرافعة المالية",
+        "authors": [
+          {
+            "family": "اسماعيل",
+            "given": "سحر خليل"
+          },
+          {
+            "family": "إبراهيم",
+            "given": "أ.د.محمد علي"
+          }
+        ],
+        "year": 2019,
+        "container": "مجلة دراسات محاسبية ومالية",
+        "doi": "10.35157/0578-012-004-037"
+      },
+      "expected": "mismatch",
+      "accepted": ["mismatch"],
+      "source": "real DOI of one sampled Crossref work (Arabic pool) with the title/authors/year/journal of another (10.34093/jafs.v11i37.201)"
+    },
+    {
+      "id": "mis-24",
+      "kind": "mismatched",
+      "input": {
+        "title": "أثر الأنماط القيادية على الأداء الوظيفي :, دراسة حالة مؤسسة الجرارات الفلاحية ETRAG",
+        "authors": [
+          {
+            "family": "بلكرمي",
+            "given": "وداد"
+          }
+        ],
+        "year": 2013,
+        "container": "مجلة العلوم الإنسانية",
+        "doi": "10.37144/0298-004-014-004"
+      },
+      "expected": "mismatch",
+      "accepted": ["mismatch"],
+      "source": "real DOI of one sampled Crossref work (Arabic pool) with the title/authors/year/journal of another (10.34174/0079-000-040-024)"
+    },
+    {
+      "id": "mis-25",
+      "kind": "mismatched",
+      "input": {
+        "title": "واقع التنمية البشرية في العراق",
+        "authors": [
+          {
+            "family": "أحمد",
+            "given": "أحمد صالح"
+          }
+        ],
+        "year": 2020,
+        "container": "مجلة آداب الفراهيدي",
+        "doi": "10.35553/1699-023-032-034"
+      },
+      "expected": "mismatch",
+      "accepted": ["mismatch"],
+      "source": "real DOI of one sampled Crossref work (Arabic pool) with the title/authors/year/journal of another (10.51990/2228-012-042-018)"
+    }
+  ]
+}
