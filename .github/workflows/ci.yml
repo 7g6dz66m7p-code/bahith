@@ -85,6 +85,13 @@ jobs:
       # worker for the document pipeline test; includes the isolation tests.
       - run: pnpm test:integration --concurrency=1
       # Fixed SANAD evaluation (eval/sanad): fails below its retrieval, page and quote gates.
+      # Diagnostics for OCR reproducibility (synthetic corpus only): engine version, the
+      # SIMD paths it detected, and the recognised text of the scanned evaluation PDF.
+      - name: OCR diagnostics
+        run: |
+          tesseract --version
+          uv run --project apps/worker python -I eval/sanad/extract.py eval/sanad/corpus/ar-scanned-heritage.pdf application/pdf \
+            | python3 -c "import json,sys; [print(u['page'], repr(u['content'])) for u in json.load(sys.stdin)['units']]"
       - run: pnpm eval
 
   e2e:

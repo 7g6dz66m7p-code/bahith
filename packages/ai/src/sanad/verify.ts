@@ -124,7 +124,13 @@ export type QuotationRequest = z.infer<typeof quotationRequestSchema>;
 export interface QuotationMatch {
   status: 'exact_quote_match';
   reviewStatus: 'needs_human_review';
-  method: 'verbatim-v1';
+  /**
+   * verbatim-v2: every character must match exactly; only runs of whitespace (spaces,
+   * tabs, line breaks) are treated as one space while searching. Nothing else is folded.
+   */
+  method: 'verbatim-v2';
+  /** True when the passage's whitespace differs from the quote's (e.g. an OCR line break). */
+  whitespaceNormalized: boolean;
   chunkId: string;
   sourceId: string;
   fileId: string | null;
@@ -133,10 +139,42 @@ export interface QuotationMatch {
   sourceVerificationStatus: QuotationEvidence['sourceVerificationStatus'];
   pageStart: number | null;
   pageEnd: number | null;
+  /** The quote as requested (unchanged). */
   quote: string;
-  /** First exact occurrence, in Unicode code points relative to chunk content. */
+  /** The matched text exactly as stored in the passage, original whitespace included. */
+  sourceText: string;
+  /** First occurrence, in Unicode code points of the ORIGINAL chunk content. */
   charStart: number;
   charEnd: number;
+}
+
+const WHITESPACE = /^\s$/u;
+const WORD_PART = /^[\p{L}\p{M}\p{N}]$/u;
+
+/**
+ * Collapses each run of whitespace to one space and trims the ends, remembering for every
+ * kept code point its index in the original text. Letters, diacritics, digits,
+ * punctuation and invisible format marks (e.g. RLM) are kept as they are.
+ */
+function collapseWhitespace(text: string): { text: string; origin: number[] } {
+  const points = Array.from(text);
+  const out: string[] = [];
+  const origin: number[] = [];
+  let pendingSpace = -1;
+  points.forEach((point, index) => {
+    if (WHITESPACE.test(point)) {
+      if (pendingSpace < 0) pendingSpace = index;
+      return;
+    }
+    if (pendingSpace >= 0 && out.length > 0) {
+      out.push(' ');
+      origin.push(pendingSpace);
+    }
+    pendingSpace = -1;
+    out.push(point);
+    origin.push(index);
+  });
+  return { text: out.join(''), origin };
 }
 
 /**
@@ -145,8 +183,10 @@ export interface QuotationMatch {
  * or quote scientifically supports any claim. Pages and version hashes are copied
  * only from stored evidence. The request cannot supply citations or metadata.
  *
- * No normalization is used: changing Arabic diacritics, whitespace, punctuation,
- * or word order fails the match. Untrusted document instructions remain text.
+ * Only whitespace is normalized, and only for finding the match (approved change,
+ * 2026-11-25): an OCR line break where the quote has a space still matches. Changing a
+ * letter, an Arabic diacritic, a digit, punctuation or word order fails. Offsets and
+ * `sourceText` always refer to the original stored text. A match may not cut a word. Untrusted document instructions remain text.
  */
 export function verifyQuotation(request: unknown, allowedEvidence: unknown): QuotationMatch {
   const parsedRequest = quotationRequestSchema.safeParse(request);
@@ -163,13 +203,38 @@ export function verifyQuotation(request: unknown, allowedEvidence: unknown): Quo
   if (evidence === undefined) throw new SanadVerifyError('SANAD_UNKNOWN_CHUNK');
   const { quote } = parsedRequest.data;
   if (quote.trim().length === 0) throw new SanadVerifyError('SANAD_VERIFY_INVALID_INPUT');
-  const utf16Start = evidence.content.indexOf(quote);
-  if (utf16Start < 0) throw new SanadVerifyError('SANAD_QUOTE_NOT_FOUND');
-  const charStart = Array.from(evidence.content.slice(0, utf16Start)).length;
+  const needle = collapseWhitespace(quote).text;
+  const haystack = collapseWhitespace(evidence.content);
+  // The match may not begin or end inside a word: a cut word (e.g. a dropped tanween
+  // or suffix) is a different text. Letters, combining marks and digits are word parts.
+  const contentPoints = Array.from(evidence.content);
+  const needleLength = Array.from(needle).length;
+  const quotePoints = Array.from(needle);
+  const wordPart = (point: string | undefined) => point !== undefined && WORD_PART.test(point);
+  let charStart = -1;
+  let charEnd = -1;
+  for (let from = 0; ;) {
+    const utf16Start = haystack.text.indexOf(needle, from);
+    if (utf16Start < 0) break;
+    const first = Array.from(haystack.text.slice(0, utf16Start)).length;
+    const start = haystack.origin[first] ?? 0;
+    const end = (haystack.origin[first + needleLength - 1] ?? start) + 1;
+    const cutsStart = wordPart(quotePoints[0]) && wordPart(contentPoints[start - 1]);
+    const cutsEnd = wordPart(quotePoints[needleLength - 1]) && wordPart(contentPoints[end]);
+    if (!cutsStart && !cutsEnd) {
+      charStart = start;
+      charEnd = end;
+      break;
+    }
+    from = utf16Start + 1;
+  }
+  if (charStart < 0) throw new SanadVerifyError('SANAD_QUOTE_NOT_FOUND');
+  const sourceText = contentPoints.slice(charStart, charEnd).join('');
   return {
     status: 'exact_quote_match',
     reviewStatus: 'needs_human_review',
-    method: 'verbatim-v1',
+    method: 'verbatim-v2',
+    whitespaceNormalized: sourceText !== quote,
     chunkId: evidence.chunkId,
     sourceId: evidence.sourceId,
     fileId: evidence.fileId,
@@ -179,7 +244,8 @@ export function verifyQuotation(request: unknown, allowedEvidence: unknown): Quo
     pageStart: evidence.pageStart,
     pageEnd: evidence.pageEnd,
     quote,
+    sourceText,
     charStart,
-    charEnd: charStart + Array.from(quote).length,
+    charEnd,
   };
 }

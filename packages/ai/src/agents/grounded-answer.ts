@@ -137,7 +137,8 @@ export function groundAnswer(
             kind: match.kind,
             pageStart: match.pageStart,
             pageEnd: match.pageEnd,
-            quote: match.quote,
+            // The source's own text (original whitespace), never the model's rendering.
+            quote: match.sourceText,
             charStart: match.charStart,
             charEnd: match.charEnd,
           });
