@@ -12,11 +12,26 @@ const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '::1', '[::1]']);
  * Names (never values) of the parts of a role URL that do not match what provisioning
  * needs: the expected role, a password, and the migration database's host, port, name.
  */
+/**
+ * Neon serves one compute endpoint on two hosts: direct `ep-x.<region>…` and pooled
+ * `ep-x-pooler.<region>…`. They are the same database, so they compare equal here.
+ */
+export function endpointHost(hostname: string): string {
+  const [first = '', ...rest] = hostname.split('.');
+  return [first.replace(/-pooler$/u, ''), ...rest].join('.');
+}
+
+export function isPooledHost(hostname: string): boolean {
+  return /-pooler$/u.test(hostname.split('.')[0] ?? '');
+}
+
 export function roleUrlMismatches(url: URL, admin: URL, role: string): string[] {
   const problems: string[] = [];
   if (decodeURIComponent(url.username) !== role) problems.push(`user is not ${role}`);
   if (url.password === '') problems.push('password is missing');
-  if (url.hostname !== admin.hostname) problems.push('host differs from DATABASE_ADMIN_URL');
+  if (endpointHost(url.hostname) !== endpointHost(admin.hostname)) {
+    problems.push('host differs from DATABASE_ADMIN_URL');
+  }
   if (url.port !== admin.port) problems.push('port differs from DATABASE_ADMIN_URL');
   if (url.pathname !== admin.pathname) {
     problems.push('database name differs from DATABASE_ADMIN_URL');
@@ -71,6 +86,12 @@ export function loadCliEnv(
       `Refusing to touch the non-local database host "${admin.hostname}". ` +
         'Changing a shared or production database requires explicit written approval; ' +
         'pass --allow-remote only once you have it.',
+    );
+  }
+  if (isPooledHost(admin.hostname)) {
+    throw new DbError(
+      'DB_CONFIG_INVALID',
+      'DATABASE_ADMIN_URL uses the pooled host (-pooler): migrations need the direct host.',
     );
   }
   const appProblems = roleUrlMismatches(app, admin, 'bahith_app');

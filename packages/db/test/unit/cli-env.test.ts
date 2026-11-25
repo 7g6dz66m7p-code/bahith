@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { loadCliEnv, roleUrlMismatches } from '../../src/cli/env';
+import { endpointHost, isPooledHost, loadCliEnv, roleUrlMismatches } from '../../src/cli/env';
 
 // Placeholder credentials for parsing tests only; nothing connects anywhere.
 const pw = 'x'.repeat(8);
@@ -98,9 +98,7 @@ describe('roleUrlMismatches (names of problems only, never values)', () => {
   });
 
   it('names every mismatch without echoing any part of the URL', () => {
-    const wrong = new URL(
-      'postgresql://neondb_owner@ep-x-pooler.eu-central-1.aws.neon.tech:6543/other',
-    );
+    const wrong = new URL('postgresql://neondb_owner@ep-y.eu-central-1.aws.neon.tech:6543/other');
     const problems = roleUrlMismatches(wrong, admin, 'bahith_auth');
     expect(problems).toEqual([
       'user is not bahith_auth',
@@ -109,6 +107,23 @@ describe('roleUrlMismatches (names of problems only, never values)', () => {
       'port differs from DATABASE_ADMIN_URL',
       'database name differs from DATABASE_ADMIN_URL',
     ]);
-    expect(problems.join(' ')).not.toMatch(/pooler|neondb_owner|other|6543/u);
+    expect(problems.join(' ')).not.toMatch(/ep-y|neondb_owner|other|6543/u);
+  });
+});
+
+describe('Neon direct and pooled hosts', () => {
+  it('treat ep-x and ep-x-pooler as the same endpoint, and nothing else', () => {
+    expect(endpointHost('ep-x-pooler.c-10.eu-central-1.aws.neon.tech')).toBe(
+      endpointHost('ep-x.c-10.eu-central-1.aws.neon.tech'),
+    );
+    expect(endpointHost('ep-y.c-10.eu-central-1.aws.neon.tech')).not.toBe(
+      endpointHost('ep-x.c-10.eu-central-1.aws.neon.tech'),
+    );
+    expect(isPooledHost('ep-x-pooler.c-10.eu-central-1.aws.neon.tech')).toBe(true);
+    expect(isPooledHost('ep-x.c-10.eu-central-1.aws.neon.tech')).toBe(false);
+    const pooledApp = new URL(
+      'postgresql://bahith_app:p@ep-x-pooler.eu-central-1.aws.neon.tech/neondb?sslmode=require',
+    );
+    expect(roleUrlMismatches(pooledApp, admin, 'bahith_app')).toEqual([]);
   });
 });

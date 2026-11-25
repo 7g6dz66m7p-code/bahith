@@ -1,1 +1,1 @@
-2026-11-25 run 3: field-level diagnostics for DATABASE_URL / AUTH_DATABASE_URL
+2026-11-25 run 4: Neon pooled and direct hosts of one endpoint accepted; admin must be direct
