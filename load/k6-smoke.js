@@ -1,5 +1,5 @@
 // k6 load test against the LOCAL harness only (see prepare.ts and docs/runbooks/load-security.md).
-// 50 virtual users for 60 s over pages and APIs a researcher uses; no AI provider calls.
+// VUS virtual users (default 50) for DURATION (default 60 s) over pages and APIs a researcher uses; no AI provider calls.
 import http from 'k6/http';
 import { check } from 'k6';
 
@@ -10,7 +10,11 @@ const project = `${BASE}/api/projects/${__ENV.PROJECT_ID}`;
 
 export const options = {
   scenarios: {
-    researchers: { executor: 'constant-vus', vus: 50, duration: '60s' },
+    researchers: {
+      executor: 'constant-vus',
+      vus: Number(__ENV.VUS ?? '50'),
+      duration: __ENV.DURATION ?? '60s',
+    },
   },
   thresholds: {
     http_req_failed: ['rate<0.01'],

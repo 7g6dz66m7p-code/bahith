@@ -12,16 +12,52 @@ x-app-env: &app-env
   env_file: .env.staging
 
 services:
+  # Staging-only CA and certificate for the mail capture's STARTTLS. The app requires TLS
+  # for any non-local SMTP server and that rule is not relaxed for staging: web trusts
+  # this CA explicitly (NODE_EXTRA_CA_CERTS). Generated once into a volume, never tracked.
+  certs:
+    image: bahith-node:staging-web
+    user: root
+    command:
+      - sh
+      - -c
+      - >-
+        [ -s /certs/mailpit.crt ] || (openssl req -x509 -newkey rsa:2048 -nodes -days 365 -subj "/CN=bahith-staging-ca"
+        -keyout /certs/ca.key -out /certs/ca.crt &&
+        openssl req -newkey rsa:2048 -nodes -subj "/CN=mailpit" -addext "subjectAltName=DNS:mailpit"
+        -keyout /certs/mailpit.key -out /certs/mailpit.csr &&
+        printf 'subjectAltName=DNS:mailpit\n' > /certs/ext.cnf &&
+        openssl x509 -req -in /certs/mailpit.csr -CA /certs/ca.crt -CAkey /certs/ca.key
+        -CAcreateserial -days 365 -extfile /certs/ext.cnf -out /certs/mailpit.crt &&
+        chmod 644 /certs/*.crt /certs/mailpit.key && rm /certs/ca.key)
+    volumes:
+      - staging-certs:/certs
+
   # Staging never sends real e-mail: messages land in this inbox (http://127.0.0.1:8225).
-  # `web` shares this container's network namespace so SMTP is genuinely on localhost:
-  # the app requires TLS for any non-local SMTP server and that rule stays unchanged.
-  # The web port is therefore published here.
   mailpit:
     image: axllent/mailpit:v1.33.1
     restart: unless-stopped
+    environment:
+      MP_SMTP_TLS_CERT: /certs/mailpit.crt
+      MP_SMTP_TLS_KEY: /certs/mailpit.key
+      MP_SMTP_REQUIRE_STARTTLS: 'true'
+    volumes:
+      - staging-certs:/certs:ro
     ports:
       - '127.0.0.1:${STAGING_MAIL_PORT:-8225}:8025'
+    depends_on:
+      certs: { condition: service_completed_successfully }
+
+  # TLS terminator / load balancer in front of the web instances (production uses the
+  # same pattern with a real certificate for al-bahith.com).
+  proxy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    command: ['caddy', 'reverse-proxy', '--from', ':3000', '--to', 'web:3000']
+    ports:
       - '127.0.0.1:${STAGING_WEB_PORT:-3200}:3000'
+    depends_on:
+      - web
 
   postgres:
     image: pgvector/pgvector:pg16
@@ -98,14 +134,18 @@ services:
     build: { context: ., dockerfile: docker/node.Dockerfile, target: web }
     image: bahith-node:staging-web
     restart: unless-stopped
-    network_mode: 'service:mailpit'
+    # Several instances behind the proxy: one Node process uses one CPU core.
+    deploy:
+      replicas: ${STAGING_WEB_REPLICAS:-3}
     environment:
-      SMTP_HOST: localhost
+      SMTP_HOST: mailpit
+      NODE_EXTRA_CA_CERTS: /certs/ca.crt
       # The image's Chromium for PDF export (an empty value in .env.staging would hide it).
       PDF_CHROMIUM_PATH: /usr/bin/chromium
+    volumes:
+      - staging-certs:/certs:ro
     depends_on:
-      # Joined to mailpit's network namespace: restart together with it.
-      mailpit: { condition: service_started, restart: true }
+      mailpit: { condition: service_started }
       migrate: { condition: service_completed_successfully }
       redis: { condition: service_healthy }
 
@@ -128,6 +168,7 @@ services:
       redis: { condition: service_healthy }
 
 volumes:
+  staging-certs:
   staging-postgres:
   staging-redis:
   staging-minio:
