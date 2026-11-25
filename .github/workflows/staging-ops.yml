@@ -22,8 +22,8 @@ jobs:
     environment: staging
     env:
       DATABASE_ADMIN_URL: ${{ secrets.DATABASE_ADMIN_URL }}
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      AUTH_DATABASE_URL: ${{ secrets.AUTH_DATABASE_URL }}
+      SECRET_DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      SECRET_AUTH_DATABASE_URL: ${{ secrets.AUTH_DATABASE_URL }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -34,9 +34,11 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Secrets present (names only)
         run: |
-          for v in DATABASE_ADMIN_URL DATABASE_URL AUTH_DATABASE_URL; do
+          for v in DATABASE_ADMIN_URL SECRET_DATABASE_URL SECRET_AUTH_DATABASE_URL; do
             [ -n "${!v}" ] || { echo "::error::$v is not set in environment staging"; exit 1; }
           done
+      - name: Role URLs from DATABASE_ADMIN_URL's host + the secrets' passwords (masked)
+        run: pnpm --filter @bahith/db exec tsx src/cli/role-urls.ts
       - name: Migrate, provision roles, revoke foreign privileges
         run: pnpm --filter @bahith/db exec tsx src/cli/migrate.ts --allow-remote
       - name: Reference data
@@ -71,8 +73,8 @@ jobs:
     environment: staging
     env:
       DATABASE_ADMIN_URL: ${{ secrets.DATABASE_ADMIN_URL }}
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      AUTH_DATABASE_URL: ${{ secrets.AUTH_DATABASE_URL }}
+      SECRET_DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      SECRET_AUTH_DATABASE_URL: ${{ secrets.AUTH_DATABASE_URL }}
     services:
       restore-target:
         image: pgvector/pgvector:pg18
@@ -95,6 +97,8 @@ jobs:
           sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
           sudo apt-get install -y -qq postgresql-client-18
           echo /usr/lib/postgresql/18/bin >> "$GITHUB_PATH"
+      - name: Role URLs from DATABASE_ADMIN_URL's host + the secrets' passwords (masked)
+        run: pnpm --filter @bahith/db exec tsx src/cli/role-urls.ts
       - name: Backup Neon staging
         run: pnpm --filter @bahith/db exec tsx src/cli/backup.ts --allow-remote --dir="$RUNNER_TEMP/backup"
       - name: Restore into an empty server and verify checksums, migrations, row counts
@@ -129,8 +133,8 @@ jobs:
         ports: ['1025:1025', '8025:8025']
     env:
       DATABASE_ADMIN_URL: ${{ secrets.DATABASE_ADMIN_URL }}
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      AUTH_DATABASE_URL: ${{ secrets.AUTH_DATABASE_URL }}
+      SECRET_DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      SECRET_AUTH_DATABASE_URL: ${{ secrets.AUTH_DATABASE_URL }}
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       BETTER_AUTH_URL: http://localhost:3000
       REDIS_URL: redis://localhost:6379
@@ -158,6 +162,8 @@ jobs:
           sudo apt-get update -qq && sudo apt-get install -y -qq tesseract-ocr tesseract-ocr-ara tesseract-ocr-eng postgresql-client
           sudo scripts/install-arabic-ocr-model.sh
       - run: pnpm install --frozen-lockfile
+      - name: Role URLs from DATABASE_ADMIN_URL's host + the secrets' passwords (masked)
+        run: pnpm --filter @bahith/db exec tsx src/cli/role-urls.ts
       - name: Local object storage for this run
         run: |
           docker run -d --name minio -p 9000:9000 -e MINIO_ROOT_USER="$S3_ACCESS_KEY_ID" -e MINIO_ROOT_PASSWORD="$S3_SECRET_ACCESS_KEY" \
