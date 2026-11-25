@@ -1,11 +1,14 @@
 import { execFile } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import os from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
 
 import pg from 'pg';
 import { z } from 'zod';
+
+import { loadMigrations } from './migrator';
 
 const run = promisify(execFile);
 
@@ -83,6 +86,48 @@ export function referencedRoles(script: string): string[] {
     );
   }
   return [...roles].sort();
+}
+
+/** Extensions BAHITH's own migrations create (e.g. vector): a restore needs every one. */
+export function requiredExtensions(migrationSql: readonly string[]): string[] {
+  const names = new Set<string>();
+  for (const sql of migrationSql) {
+    for (const m of sql.matchAll(
+      /\bCREATE EXTENSION (?:IF NOT EXISTS )?("(?:[^"]|"")+"|[\w-]+)/giu,
+    )) {
+      names.add(unquote(m[1] ?? ''));
+    }
+  }
+  return [...names].sort();
+}
+
+/**
+ * The pg_restore list (`pg_restore -l`) without the extensions this server cannot install
+ * that BAHITH does not need — e.g. Neon's own pg_session_jwt, which no BAHITH object uses.
+ * A missing extension the migrations need refuses the restore instead.
+ */
+export function restoreList(
+  toc: string,
+  available: ReadonlySet<string>,
+  required: ReadonlySet<string>,
+): { list: string; skipped: string[] } {
+  const skipped = new Set<string>();
+  for (const line of toc.split('\n')) {
+    const name = /^\d+; \d+ \d+ EXTENSION - (\S+)/u.exec(line)?.[1];
+    if (name === undefined || available.has(name)) continue;
+    if (required.has(name)) {
+      throw new Error(`Extension ${name} is required but not available on this server.`);
+    }
+    skipped.add(name);
+  }
+  const list = toc
+    .split('\n')
+    .filter((line) => {
+      const ext = /^\d+; \d+ \d+ (?:COMMENT - )?EXTENSION (?:- )?(\S+)/u.exec(line)?.[1];
+      return ext === undefined || !skipped.has(ext);
+    })
+    .join('\n');
+  return { list, skipped: [...skipped].sort() };
 }
 
 export const backupManifestSchema = z.strictObject({
@@ -170,6 +215,8 @@ export interface RestoreReport {
   tables: Record<string, number>;
   /** Source-server roles (e.g. neondb_owner) whose objects now belong to the target admin. */
   rolesMapped: string[];
+  /** Source-server extensions BAHITH does not use and this server lacks (e.g. pg_session_jwt). */
+  extensionsSkipped: string[];
 }
 
 /**
@@ -189,6 +236,7 @@ export async function restoreDatabase(adminUrl: string, directory: string): Prom
     }
   }
   const standIns: string[] = [];
+  let restore: { list: string; skipped: string[] } = { list: '', skipped: [] };
   const client = new pg.Client({ connectionString: adminUrl });
   await client.connect();
   try {
@@ -230,19 +278,39 @@ export async function restoreDatabase(adminUrl: string, directory: string): Prom
       await client.query(`CREATE ROLE ${pg.escapeIdentifier(role)} NOLOGIN`);
       standIns.push(role);
     }
+    const { stdout: toc } = await run(
+      'pg_restore',
+      ['--list', '--file=-', path.join(directory, 'database.dump')],
+      { env: pgEnv(adminUrl), maxBuffer: 64 * 1024 * 1024 },
+    );
+    const available = new Set(
+      (await client.query<{ name: string }>('SELECT name FROM pg_available_extensions')).rows.map(
+        (row) => row.name,
+      ),
+    );
+    const required = new Set(requiredExtensions((await loadMigrations()).map((m) => m.upSql)));
+    restore = restoreList(toc, available, required);
   } finally {
     await client.end();
   }
-  await run(
-    'pg_restore',
-    [
-      '--exit-on-error',
-      '--no-password',
-      `--dbname=${pgEnv(adminUrl).PGDATABASE ?? ''}`,
-      path.join(directory, 'database.dump'),
-    ],
-    { env: pgEnv(adminUrl), maxBuffer: 16 * 1024 * 1024 },
-  );
+  const scratch = await mkdtemp(path.join(os.tmpdir(), 'bahith-restore-'));
+  try {
+    const listPath = path.join(scratch, 'restore.list');
+    await writeFile(listPath, restore.list);
+    await run(
+      'pg_restore',
+      [
+        '--exit-on-error',
+        '--no-password',
+        `--use-list=${listPath}`,
+        `--dbname=${pgEnv(adminUrl).PGDATABASE ?? ''}`,
+        path.join(directory, 'database.dump'),
+      ],
+      { env: pgEnv(adminUrl), maxBuffer: 16 * 1024 * 1024 },
+    );
+  } finally {
+    await rm(scratch, { recursive: true, force: true });
+  }
   const check = new pg.Client({ connectionString: adminUrl });
   await check.connect();
   try {
@@ -264,7 +332,13 @@ export async function restoreDatabase(adminUrl: string, directory: string): Prom
       if (tables[table] !== count)
         throw new Error(`Restored row count differs for table ${table}.`);
     }
-    return { manifest, durationMs: Date.now() - started, tables, rolesMapped: standIns };
+    return {
+      manifest,
+      durationMs: Date.now() - started,
+      tables,
+      rolesMapped: standIns,
+      extensionsSkipped: restore.skipped,
+    };
   } finally {
     await check.end();
   }

@@ -1,1 +1,1 @@
-run 10: restore maps the source server's roles (neondb_owner) to the target admin; per-run auth secret masked
+run 11: restore skips Neon-only extensions BAHITH does not use (pg_session_jwt)

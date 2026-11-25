@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { referencedRoles } from '../../src/backup';
+import { referencedRoles, requiredExtensions, restoreList } from '../../src/backup';
 
 describe('referencedRoles', () => {
   it('finds owners, grantees, grantors, default-privilege owners and policy roles', () => {
@@ -33,5 +33,55 @@ describe('referencedRoles', () => {
 
   it('returns nothing for a script without roles', () => {
     expect(referencedRoles('CREATE TABLE public.t (id integer);\nSELECT 1;')).toEqual([]);
+  });
+});
+
+describe('restoreList', () => {
+  const toc = [
+    ';',
+    '; Archive created at 2026-11-25 16:57:47 UTC',
+    ';',
+    '3; 3079 16390 EXTENSION - pg_session_jwt ',
+    '4571; 0 0 COMMENT - EXTENSION pg_session_jwt ',
+    '2; 3079 16400 EXTENSION - vector ',
+    '4572; 0 0 COMMENT - EXTENSION vector ',
+    '230; 1259 16500 TABLE public projects neondb_owner',
+  ].join('\n');
+
+  it('drops an unavailable extension BAHITH does not need, with its comment', () => {
+    const { list, skipped } = restoreList(toc, new Set(['vector', 'plpgsql']), new Set(['vector']));
+    expect(skipped).toEqual(['pg_session_jwt']);
+    expect(list).not.toContain('pg_session_jwt');
+    expect(list).toContain('EXTENSION - vector');
+    expect(list).toContain('COMMENT - EXTENSION vector');
+    expect(list).toContain('TABLE public projects');
+  });
+
+  it('keeps everything when every extension is available', () => {
+    const { list, skipped } = restoreList(
+      toc,
+      new Set(['vector', 'pg_session_jwt']),
+      new Set(['vector']),
+    );
+    expect(skipped).toEqual([]);
+    expect(list).toBe(toc);
+  });
+
+  it('refuses when an extension the migrations need is unavailable', () => {
+    expect(() => restoreList(toc, new Set(['pg_session_jwt']), new Set(['vector']))).toThrow(
+      /vector is required/u,
+    );
+  });
+});
+
+describe('requiredExtensions', () => {
+  it('reads the extensions the migrations create', () => {
+    expect(
+      requiredExtensions([
+        'CREATE EXTENSION IF NOT EXISTS vector;',
+        'create extension "uuid-ossp";\nSELECT 1;',
+        'CREATE TABLE t (id int);',
+      ]),
+    ).toEqual(['uuid-ossp', 'vector']);
   });
 });

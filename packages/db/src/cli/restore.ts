@@ -18,6 +18,9 @@ runCli(async () => {
       `(${String(report.manifest.migrations.length)} migrations, row counts match).\n` +
       (report.rolesMapped.length === 0
         ? ''
-        : `Source-server roles mapped to this server's admin: ${report.rolesMapped.join(', ')}.\n`),
+        : `Source-server roles mapped to this server's admin: ${report.rolesMapped.join(', ')}.\n`) +
+      (report.extensionsSkipped.length === 0
+        ? ''
+        : `Source-server extensions not used by BAHITH, skipped: ${report.extensionsSkipped.join(', ')}.\n`),
   );
 });
