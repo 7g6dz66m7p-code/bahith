@@ -1,7 +1,7 @@
 import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, inject, it } from 'vitest';
 
-import { revokeForeignPrivileges } from '../../src/provision';
+import { foreignGrantees, revokeForeignPrivileges } from '../../src/provision';
 
 /**
  * Reproduces what Neon's Data API does on a project (observed on BAHITH's staging
@@ -25,6 +25,11 @@ describe('privileges of roles outside BAHITH (hosted Postgres add-ons)', () => {
     await admin.query(
       'GRANT SELECT, INSERT, UPDATE, DELETE ON users, projects, payments TO authenticated',
     );
+    // Beyond tables: a function, a column and the schema itself.
+    await admin.query(
+      'GRANT EXECUTE ON FUNCTION app.provision_personal_workspace() TO authenticated',
+    );
+    await admin.query('GRANT SELECT (email) ON users TO authenticated');
   });
 
   afterAll(async () => {
@@ -41,8 +46,21 @@ describe('privileges of roles outside BAHITH (hosted Postgres add-ons)', () => {
 
   it('revokes existing and default privileges, so new tables are not exposed either', async () => {
     expect(Number(await grants())).toBeGreaterThan(0);
+    expect(await foreignGrantees(admin)).toContain('authenticated');
     expect(await revokeForeignPrivileges(admin)).toContain('authenticated');
     expect(await grants()).toBe('0');
+    expect(await foreignGrantees(admin)).toEqual([]);
+    const left = await admin.query<{ schema: boolean; fn: boolean; col: boolean }>(
+      `SELECT EXISTS (SELECT 1 FROM pg_namespace n, aclexplode(n.nspacl) x
+                       WHERE n.nspname = 'public'
+                         AND x.grantee = 'authenticated'::regrole) AS schema,
+              has_function_privilege('authenticated', 'app.provision_personal_workspace()',
+                                     'EXECUTE') AS fn,
+              has_column_privilege('authenticated', 'users', 'email', 'SELECT') AS col`,
+    );
+    // EXECUTE may remain through PUBLIC only if the function grants it to PUBLIC; BAHITH's
+    // migrations revoke that, so all three are gone.
+    expect(left.rows).toEqual([{ schema: false, fn: false, col: false }]);
     await admin.query('CREATE TABLE public.after_revoke_probe (id int)');
     try {
       expect(await grants()).toBe('0');

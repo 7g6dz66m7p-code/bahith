@@ -1,1 +1,1 @@
-run 11: restore skips Neon-only extensions BAHITH does not use (pg_session_jwt)
+run 12: foreign-role check covers schemas, columns, sequences, functions, default privileges

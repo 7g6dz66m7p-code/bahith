@@ -1,14 +1,15 @@
 import pg from 'pg';
 
 import { loadMigrations } from '../migrator';
+import { foreignGrantees } from '../provision';
 
 import { loadCliEnv, runCli } from './env';
 
 /**
  * pnpm --filter @bahith/db exec tsx src/cli/verify-deployment.ts --allow-remote
  * Checks after a deployment: every migration applied, every tenant table under forced
- * RLS, the application roles without BYPASSRLS, no table granted to a role outside
- * BAHITH, pgvector and the HNSW index present. With --isolation-smoke it also proves
+ * RLS, the application roles without BYPASSRLS, no privilege of a role outside BAHITH
+ * (schemas, tables, sequences, columns, functions, default privileges), pgvector and the HNSW index present. With --isolation-smoke it also proves
  * tenant isolation on the live server with two synthetic users, inside one transaction
  * that is always rolled back (nothing is left behind). Prints counts only.
  */
@@ -37,14 +38,7 @@ runCli(async () => {
           WHERE rolname IN ('bahith_app', 'bahith_auth') AND (rolbypassrls OR rolsuper)`,
       )
     ).rows.map((r) => r.name);
-    const foreign = (
-      await client.query<{ name: string }>(
-        `SELECT DISTINCT grantee AS name FROM information_schema.role_table_grants
-          WHERE table_schema IN ('public', 'app') AND grantee <> 'PUBLIC'
-            AND grantee NOT IN ('bahith_app', 'bahith_auth', 'bahith_identity_provisioner',
-                                'neon_superuser', 'cloud_admin', current_user)`,
-      )
-    ).rows.map((r) => r.name);
+    const foreign = await foreignGrantees(client);
     const vector = (
       await client.query<{ v: string }>(
         `SELECT extversion AS v FROM pg_extension WHERE extname = 'vector'`,

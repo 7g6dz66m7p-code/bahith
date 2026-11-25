@@ -1,21 +1,32 @@
 # SESSION HANDOFF — BAHITH
 
-> اقرأ هذا أولاً. آخر تحديث: 2026-11-25. ا## الحالة
+> اقرأ هذا أولاً. آخر تحديث: 2026-11-25.
 
-- الفرع `claude/new-session-tv7vfk` مدفوع إلى GitHub؛ PR ‏#2 مسودة؛ CI أخضر كاملاً منذ التشغيل 23.
-- OpenAI يعمل (سرّ شبكي)؛ Neon: إنتاج `floral-rice-81079531` (فارغ) وStaging `proud-cloud-29680152` (فارغ)؛
-  الترحيل عبر workflow ‏`db-deploy.yml` بعد إضافة أسرار GitHub (لا اتصال Postgres مباشر من هذه البيئة).
-- R2: ‏`bahith-private-files` (إنتاج)، ‏`bahith-staging-files`.
+## الحالة
 
-ياً، لكن الحساب بلا رصيد (`credit_balance_exhausted`).
+- الفرع `claude/new-session-tv7vfk` مدفوع؛ PR ‏#2 مسودة؛ لا دمج في `main` ولا نشر إنتاجي.
+- Neon: إنتاج `floral-rice-81079531` (فارغ، لم يُلمس)؛ Staging `proud-cloud-29680152` مُرحَّل ومُتحقق.
+- R2: ‏`bahith-private-files` (إنتاج، لم يُلمس)، ‏`bahith-staging-files` (Staging، بلا رمز API بعد).
+- لا اتصال Postgres مباشر من هذه البيئة: كل عمل على Neon عبر `staging-ops.yml`
+  (يُطلق بتعديل `ops/staging-run.txt` ودفعه).
 
-## 2026-11-25 (تشغيل Neon Staging)
+## 2026-11-25 (Staging operations، التشغيلات 8–12)
 
-- التشغيل 7 (45653142876): اتصال Neon ناجح؛ **17/17 هجرة مطبقة**؛ RLS إجباري 28/28؛ pgvector 0.8.7.
-- توقف عند تفعيل `bahith_app`: Neon رفض كلمة المرور (`insecure password`). الأدوار الثلاثة NOLOGIN بلا صلاحيات.
-- المطلوب: كلمتان جديدتان (أحرف كبيرة/صغيرة/أرقام/`-_`) في سرّي `DATABASE_URL` و`AUTH_DATABASE_URL`
-  ثم تعديل `ops/staging-run.txt` ودفعه. الـworkflow يأخذ كلمة المرور فقط ويبني بقية الرابط من `DATABASE_ADMIN_URL`.
-- لم يُشغَّل بعد: إلغاء صلاحيات `authenticated`، البذر، التحقق والعزل، R2، النسخ الاحتياطي، رحلة التطبيق.
+- **migrate ناجح (8 و9):** 17/17 هجرة، RLS إجباري (0 جداول بلا حماية)، 0 أدوار تطبيق بـbypass،
+  0 صلاحيات لأدوار غريبة (أُلغي `authenticated`)، pgvector 0.8.7، HNSW 1، 90 مفتاحاً أجنبياً.
+  دخول فعلي: `bahith_app` (بلا bypass/superuser، مرفوض على `sessions`)، `bahith_auth` (مرفوض على
+  `projects`)، `bahith_identity_provisioner` لا يستطيع الدخول. عزل: قراءة/كتابة عابرة = 0 / 42501.
+- **journey ناجح (9):** تسجيل، تأكيد بريد، دخول، رفع ومعالجة، بحث (3 مقاطع، صفحة 1)، مستند، DOCX، PDF
+  (بعد تثبيت Chromium). المساعد والتحقق من الادعاءات يرفضان بوضوح `503 AI_NOT_CONFIGURED`: لا
+  `OPENAI_API_KEY` في بيئة `staging` على GitHub. الحسابات الاختبارية تُحذف (0 متبقية).
+- **backup ناجح حتى الاستعادة (11):** نسخ Neon ← استعادة في خادم pg18 فارغ ← تحقق (17 هجرة، تطابق
+  الأعداد). أُصلح: روابط الأدوار المحلية (9)، أدوار Neon غير الموجودة (`neondb_owner` وغيره) بأدوار
+  بديلة NOLOGIN ثم REASSIGN/DROP (10)، وتخطي `pg_session_jwt` (امتداد Neon لا يستخدمه BAHITH) (11).
+  رفع النسخة إلى R2 يفشل لغياب أسرار R2.
+- **storage:** لا أسرار R2 في بيئة `staging` (يفشل بوضوح بأسماء المتغيرات الناقصة).
+- **Data API:** بقيت `USAGE` على مخطط `public` للدور `authenticated` (بلا صلاحيات جداول). فحص الأدوار
+  الغريبة صار يشمل المخططات والأعمدة والتسلسلات والدوال والصلاحيات الافتراضية، والإلغاء يشمل `public` (12).
+- بقايا Neon Auth لم تُحذف (بلا موافقة): مخطط `neon_auth` (جداول فارغة)، والدور `authenticator` (LOGIN).
 
 ## 2026-11-25 (الجولة الثالثة)
 
