@@ -43,14 +43,25 @@ GitHub → المستودع `7g6dz66m7p-code/bahith` → **Settings → Environm
 
 Cloudflare → **R2 → Manage R2 API Tokens → Create API token**:
 الصلاحية **Object Read & Write**، والنطاق **Apply to specific buckets only → `bahith-staging-files`**.
+(أُنشئ الرمز `BAHITH-Staging-R2` بهذه الإعدادات في 2026-11-25.) عند الإنشاء تعرض Cloudflare القيمتين
+**مرة واحدة فقط**؛ تُنسخان مباشرة إلى GitHub ولا تُرسلان في أي محادثة.
 
-| النوع    | الاسم                  | القيمة                        |
-| -------- | ---------------------- | ----------------------------- |
-| Secret   | `R2_ACCOUNT_ID`        | معرف الحساب (يظهر في صفحة R2) |
-| Secret   | `R2_ACCESS_KEY_ID`     | Access Key ID من الرمز        |
-| Secret   | `R2_SECRET_ACCESS_KEY` | Secret Access Key من الرمز    |
-| Variable | `R2_BUCKET`            | `bahith-staging-files`        |
-| Variable | `R2_BACKUP_BUCKET`     | `bahith-staging-files`        |
+GitHub → Settings → Environments → `staging` → **Environment secrets**:
+
+| الاسم                  | القيمة                                                   |
+| ---------------------- | -------------------------------------------------------- |
+| `R2_ACCOUNT_ID`        | معرف الحساب (R2 → Overview، أو جزء الرابط `…/<ID>/r2/…`) |
+| `R2_ACCESS_KEY_ID`     | Access Key ID من صفحة الرمز                              |
+| `R2_SECRET_ACCESS_KEY` | Secret Access Key من صفحة الرمز                          |
+
+لا متغيرات مطلوبة: الحاوية الافتراضية `bahith-staging-files` (يمكن تغييرها بالمتغيرين `R2_BUCKET`
+و`R2_BACKUP_BUCKET`، ويُرفض أي اسم لا يحتوي `staging`). النسخ الاحتياطية تحت البادئة `db-backups/` في
+الحاوية نفسها، لأن الرمز مقيّد بها وحدها. لفصلها في حاوية مستقلة: أنشئ الحاوية، وأضفها إلى نطاق الرمز،
+واضبط `R2_BACKUP_BUCKET`.
+
+ما يفعله التشغيل بعد إضافتها: فحص التخزين (رفع، قراءة مطابقة، بث، رفض الوصول المجهول، حذف، تأكيد الغياب)،
+ورحلة التطبيق بملفات حقيقية على R2 ثم حذف ملفات الحسابات الاختبارية وإثبات خلو بادئتها، ونسخة احتياطية تُرفع
+إلى R2 ثم تُنزَّل إلى مجلد فارغ وتُستعاد منها وحدها.
 
 ## 4. بعد الإضافة
 

@@ -1,1 +1,1 @@
-run 15: R2 token and OPENAI_API_KEY added by the owner — presence check
+run 16: journey on R2 when configured, retrieval check, R2 delete-and-prove, backup restored from its R2 copy

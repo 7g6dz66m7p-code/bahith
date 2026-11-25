@@ -4,6 +4,7 @@
  * search, quotation verification, a document and DOCX/PDF export. Prints a pass/fail
  * line per step; exits non-zero on the first failure. Local stacks only.
  */
+import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 
 const env = JSON.parse(await readFile(process.argv[2] ?? '', 'utf8')) as {
@@ -41,6 +42,40 @@ step(
   search.ok && top !== undefined,
   `${String(found.results.length)} passages, page ${String(top?.pageStart)}`,
 );
+
+// Retrieval through the app: the stored object (R2 on staging) streams back to the member
+// byte-for-byte, and another workspace id is refused.
+{
+  const library = (await (
+    await fetch(`${env.BASE}/api/projects/${env.PROJECT_ID}/sources?${q}`, { headers })
+  ).json()) as { sources: { files: { id: string; originalName: string }[] }[] };
+  const file = library.sources
+    .flatMap((source) => source.files)
+    .find((f) => f.originalName === 'ar-elearning.pdf');
+  const original = await readFile(
+    new URL('../../../eval/sanad/corpus/ar-elearning.pdf', import.meta.url),
+  );
+  const fetched = await fetch(
+    `${env.BASE}/api/projects/${env.PROJECT_ID}/files/${file?.id ?? ''}?${q}`,
+    { headers: { origin: env.BASE, cookie: env.COOKIE } },
+  );
+  const bytes = Buffer.from(await fetched.arrayBuffer());
+  const digest = (data: Uint8Array) => createHash('sha256').update(data).digest('hex');
+  step(
+    'retrieve stored document',
+    fetched.ok && digest(bytes) === digest(original),
+    `HTTP ${String(fetched.status)}, ${String(bytes.length)} bytes, SHA-256 ${digest(bytes) === digest(original) ? 'matches' : 'DIFFERS'}`,
+  );
+  const foreign = await fetch(
+    `${env.BASE}/api/projects/${env.PROJECT_ID}/files/${file?.id ?? ''}?workspaceId=${crypto.randomUUID()}`,
+    { headers: { origin: env.BASE, cookie: env.COOKIE } },
+  );
+  step(
+    'stored document refused to another workspace',
+    !foreign.ok,
+    `HTTP ${String(foreign.status)}`,
+  );
+}
 
 const liveAi = process.env.STAGING_EXPECT_AI === '1';
 await fetch(`${env.BASE}/api/projects/${env.PROJECT_ID}/ai-consent?${q}`, {
