@@ -9,6 +9,14 @@
 
 ياً، لكن الحساب بلا رصيد (`credit_balance_exhausted`).
 
+## 2026-11-25 (تشغيل Neon Staging)
+
+- التشغيل 7 (45653142876): اتصال Neon ناجح؛ **17/17 هجرة مطبقة**؛ RLS إجباري 28/28؛ pgvector 0.8.7.
+- توقف عند تفعيل `bahith_app`: Neon رفض كلمة المرور (`insecure password`). الأدوار الثلاثة NOLOGIN بلا صلاحيات.
+- المطلوب: كلمتان جديدتان (أحرف كبيرة/صغيرة/أرقام/`-_`) في سرّي `DATABASE_URL` و`AUTH_DATABASE_URL`
+  ثم تعديل `ops/staging-run.txt` ودفعه. الـworkflow يأخذ كلمة المرور فقط ويبني بقية الرابط من `DATABASE_ADMIN_URL`.
+- لم يُشغَّل بعد: إلغاء صلاحيات `authenticated`، البذر، التحقق والعزل، R2، النسخ الاحتياطي، رحلة التطبيق.
+
 ## 2026-11-25 (الجولة الثالثة)
 
 - Neon Staging (proud-cloud): عُطّل Data API وNeon Auth (404 بعد الحذف). الإنتاج floral-rice فارغ.
