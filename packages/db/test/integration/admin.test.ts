@@ -5,6 +5,7 @@ import { z } from 'zod';
 import type { Database } from '../../src/index';
 import {
   createDatabase,
+  finishAssistantRun,
   getPlatformStats,
   getWorkspaceUsage,
   listPlans,
@@ -101,5 +102,29 @@ describe('platform administration and workspace usage', () => {
     await expect(
       getWorkspaceUsage(database, { userId: b.userId, workspaceId: a.workspaceId }),
     ).rejects.toEqual(new MemberError('MEMBER_FORBIDDEN'));
+  });
+
+  it('platform stats report tokens per model this month, for cost monitoring', async () => {
+    const ctx = { userId: a.userId, workspaceId: a.workspaceId, projectId: a.projectId };
+    const model = `usage-${crypto.randomUUID().slice(0, 8)}`;
+    const { runId } = await startAssistantRun(database, ctx, {
+      agent: 'grounded-answer',
+      promptVersion: 'v',
+      provider: 'p',
+      model,
+    });
+    await finishAssistantRun(database, ctx, runId, {
+      status: 'succeeded',
+      inputTokens: 120,
+      outputTokens: 30,
+      latencyMs: 5,
+      errorCode: null,
+    });
+    const stats = await getPlatformStats(database);
+    expect(stats.aiTokensThisMonth[`p:${model}`]).toEqual({
+      runs: 1,
+      inputTokens: 120,
+      outputTokens: 30,
+    });
   });
 });

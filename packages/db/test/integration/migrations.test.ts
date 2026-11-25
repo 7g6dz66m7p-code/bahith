@@ -101,6 +101,17 @@ describe('migrations', () => {
     expect(await migrateUp(client)).toEqual(tags);
   }
 
+  it('rolls back the per-model token stats on their own', async () => {
+    const keys = `SELECT jsonb_object_keys(app.platform_stats()) AS name ORDER BY 1`;
+    expect(await listNames(client, keys)).toContain('aiTokensThisMonth');
+    const tags = await rollBackThrough('0016_ai_usage_stats');
+    expect(tags).toEqual(['0016_ai_usage_stats']);
+    expect(await listNames(client, keys)).not.toContain('aiTokensThisMonth');
+    expect(await listNames(client, keys)).toContain('aiRequestsThisMonth');
+    await reapply(tags);
+    expect(await listNames(client, keys)).toContain('aiTokensThisMonth');
+  });
+
   it('rolls back Telegram links and users.legacy_id on their own', async () => {
     const table = `SELECT tablename AS name FROM pg_tables WHERE tablename = 'telegram_links'`;
     const legacy = `SELECT column_name AS name FROM information_schema.columns
@@ -115,7 +126,7 @@ describe('migrations', () => {
     expect(await listNames(client, legacy)).toEqual(['legacy_id']);
     expect(await listNames(client, grants)).toEqual(expectedGrants);
     const tags = await rollBackThrough('0015_telegram_links');
-    expect(tags).toEqual(['0015_telegram_links']);
+    expect(tags[0]).toBe('0015_telegram_links');
     expect(await listNames(client, table)).toEqual([]);
     expect(await listNames(client, legacy)).toEqual([]);
     await reapply(tags);

@@ -52,6 +52,9 @@ test('platform admin needs 2FA, sees aggregate stats and sets plan limits; other
 
   await page.goto(`/${locale}/admin`);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(t.title);
+  // Consumption per model is shown (empty in e2e: no AI provider is configured there).
+  await expect(page.getByRole('heading', { name: t.usageTitle })).toBeVisible();
+  await expect(page.getByText(t.usageNone)).toBeVisible();
   await expect(page.getByTestId('stat-users')).toBeVisible();
   await page.getByLabel(t.limitFor.replace('{plan}', 'Free')).fill('5');
   await page.getByRole('button', { name: t.save }).first().click();

@@ -1,7 +1,7 @@
 'use client';
 
 import type { PlatformStats } from '@bahith/db';
-import { useTranslations } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 import type { SubmitEvent } from 'react';
 import { useState } from 'react';
 
@@ -24,8 +24,25 @@ const COUNTS = [
 ] as const;
 
 /** Aggregate platform numbers (bento grid) and per-plan monthly AI limits. */
-export function AdminPanel({ stats, plans }: { stats: PlatformStats; plans: PlanView[] }) {
+export interface ModelUsageView {
+  label: string;
+  runs: number;
+  inputTokens: number;
+  outputTokens: number;
+  costUsd: number | null;
+}
+
+export function AdminPanel({
+  stats,
+  plans,
+  usage,
+}: {
+  stats: PlatformStats;
+  plans: PlanView[];
+  usage: ModelUsageView[];
+}) {
   const t = useTranslations('Admin');
+  const format = useFormatter();
   const [notice, setNotice] = useState<{ kind: 'error' | 'success'; text: string } | null>(null);
 
   const save = async (event: SubmitEvent<HTMLFormElement>, code: string) => {
@@ -72,6 +89,50 @@ export function AdminPanel({ stats, plans }: { stats: PlatformStats; plans: Plan
           </li>
         ))}
       </ul>
+      <section className="surface space-y-4 p-5 sm:p-6" aria-labelledby="usage-title">
+        <h2 className="section-title" id="usage-title">
+          {t('usageTitle')}
+        </h2>
+        <p className="muted text-sm">{t('usageHelp')}</p>
+        {usage.length === 0 ? (
+          <p className="text-sm">{t('usageNone')}</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm" data-testid="ai-usage">
+              <thead>
+                <tr className="text-start">
+                  <th className="pe-4 text-start">{t('usageModel')}</th>
+                  <th className="pe-4 text-start">{t('usageRuns')}</th>
+                  <th className="pe-4 text-start">{t('usageInput')}</th>
+                  <th className="pe-4 text-start">{t('usageOutput')}</th>
+                  <th className="text-start">{t('usageCost')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {usage.map((row) => (
+                  <tr key={row.label}>
+                    <td dir="ltr" className="pe-4 text-start">
+                      {row.label}
+                    </td>
+                    <td className="pe-4 tabular-nums">{format.number(row.runs)}</td>
+                    <td className="pe-4 tabular-nums">{format.number(row.inputTokens)}</td>
+                    <td className="pe-4 tabular-nums">{format.number(row.outputTokens)}</td>
+                    <td className="tabular-nums">
+                      {row.costUsd === null
+                        ? t('usageCostUnknown')
+                        : format.number(row.costUsd, {
+                            style: 'currency',
+                            currency: 'USD',
+                            maximumFractionDigits: 4,
+                          })}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
       <section className="surface space-y-4 p-5 sm:p-6" aria-labelledby="plans-title">
         <h2 className="section-title" id="plans-title">
           {t('plans')}

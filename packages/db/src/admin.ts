@@ -19,6 +19,11 @@ export const platformStatsSchema = z.object({
   documents: z.number(),
   agentRunsThisMonth: z.record(z.string(), z.number()),
   aiRequestsThisMonth: z.number(),
+  /** "provider:model" → runs and tokens this calendar month (UTC). */
+  aiTokensThisMonth: z.record(
+    z.string(),
+    z.object({ runs: z.number(), inputTokens: z.number(), outputTokens: z.number() }),
+  ),
 });
 
 export type PlatformStats = z.infer<typeof platformStatsSchema>;

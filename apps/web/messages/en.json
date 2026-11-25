@@ -489,7 +489,16 @@
     "notSet": "not set",
     "save": "Save",
     "saved": "Limit saved.",
-    "error": "Could not save. Check the value."
+    "error": "Could not save. Check the value.",
+    "usageTitle": "AI consumption this month",
+    "usageHelp": "Tokens per model from recorded runs. Cost is estimated only from prices the owner configured (AI_MODEL_PRICES_JSON).",
+    "usageNone": "No AI runs this month.",
+    "usageModel": "Model",
+    "usageRuns": "Runs",
+    "usageInput": "Input tokens",
+    "usageOutput": "Output tokens",
+    "usageCost": "Estimated cost",
+    "usageCostUnknown": "price not configured"
   },
   "Usage": {
     "title": "Plan and usage",
