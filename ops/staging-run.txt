@@ -1,1 +1,1 @@
-run 13: backup dump and manifest from one snapshot
+run 14: clear R2 message before the backup upload
