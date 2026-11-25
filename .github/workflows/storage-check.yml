@@ -30,4 +30,4 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @bahith/pipeline exec tsx src/cli/storage-check.ts
+      - run: pnpm --filter @bahith/jobs exec tsx ../../packages/pipeline/src/cli/storage-check.ts

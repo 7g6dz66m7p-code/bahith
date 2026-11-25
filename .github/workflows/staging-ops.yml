@@ -65,7 +65,17 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @bahith/pipeline exec tsx src/cli/storage-check.ts
+      - name: R2 settings present (names only)
+        run: |
+          missing=""
+          for v in S3_BUCKET S3_ACCESS_KEY_ID S3_SECRET_ACCESS_KEY; do [ -n "${!v}" ] || missing="$missing $v"; done
+          [ "$S3_ENDPOINT" != "https://.r2.cloudflarestorage.com" ] || missing="$missing R2_ACCOUNT_ID"
+          if [ -n "$missing" ]; then
+            echo "::error::R2 is not configured in environment staging (missing:$missing). Secrets R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY; variable R2_BUCKET."
+            exit 1
+          fi
+      # tsx is a dependency of @bahith/jobs (which depends on @bahith/pipeline).
+      - run: pnpm --filter @bahith/jobs exec tsx ../../packages/pipeline/src/cli/storage-check.ts
 
   backup:
     needs: migrate
@@ -104,7 +114,14 @@ jobs:
       - name: Restore into an empty server and verify checksums, migrations, row counts
         env:
           DATABASE_ADMIN_URL: postgresql://postgres:restore-check-only@localhost:5432/postgres
-        run: pnpm --filter @bahith/db exec tsx src/cli/restore.ts --dir="$RUNNER_TEMP/backup"
+          # The restore target is a throwaway local server: its role URLs must point at it
+          # too (the CLI refuses a mix of servers). Passwords here are local-only.
+          RESTORE_APP_URL: postgresql://bahith_app:Restore-Check-App-1@localhost:5432/postgres
+          RESTORE_AUTH_URL: postgresql://bahith_auth:Restore-Check-Auth-1@localhost:5432/postgres
+        # Exported in the shell so they win over the Neon role URLs in GITHUB_ENV.
+        run: |
+          export DATABASE_URL="$RESTORE_APP_URL" AUTH_DATABASE_URL="$RESTORE_AUTH_URL"
+          pnpm --filter @bahith/db exec tsx src/cli/restore.ts --dir="$RUNNER_TEMP/backup"
       - name: Upload the verified backup to R2
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
@@ -182,6 +199,8 @@ jobs:
           else
             echo "::notice::OPENAI_API_KEY is not set in environment staging: the assistant is checked to refuse clearly, not to answer."
           fi
+      - name: Chromium for PDF export
+        run: pnpm --filter @bahith/export exec playwright install --with-deps chromium
       - name: Build the web application
         run: pnpm --filter @bahith/web build
       - name: Start web, jobs and worker

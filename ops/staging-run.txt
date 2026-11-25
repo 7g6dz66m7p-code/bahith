@@ -1,1 +1,1 @@
-2026-11-25 run 8: new Neon-compliant role passwords; role login checks
+run 9: restore uses local role URLs, Chromium for PDF, storage check via @bahith/jobs

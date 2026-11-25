@@ -62,6 +62,10 @@ jobs:
         if: env.DATABASE_ADMIN_URL != ''
         env:
           DATABASE_ADMIN_URL: postgresql://postgres:restore-check-only@localhost:5432/postgres
+          # The restore target is a throwaway local server: its role URLs must point at it
+          # too (the CLI refuses a mix of servers). Passwords here are local-only.
+          DATABASE_URL: postgresql://bahith_app:Restore-Check-App-1@localhost:5432/postgres
+          AUTH_DATABASE_URL: postgresql://bahith_auth:Restore-Check-Auth-1@localhost:5432/postgres
         run: pnpm --filter @bahith/db exec tsx src/cli/restore.ts --dir="$RUNNER_TEMP/backup"
       - name: Upload to R2
         if: env.DATABASE_ADMIN_URL != ''
