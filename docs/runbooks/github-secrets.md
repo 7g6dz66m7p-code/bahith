@@ -22,10 +22,13 @@ GitHub → المستودع `7g6dz66m7p-code/bahith` → **Settings → Environm
 
 ### بناء الرابطين (على جهازك، لا في المحادثة)
 
-1. ولّد كلمتين مختلفتين (حروف hex فقط، فلا حاجة لترميز داخل الرابط):
-   - macOS/Linux: `openssl rand -hex 32` (مرتين)
-   - Windows PowerShell: `-join ((1..32) | % { '{0:x2}' -f (Get-Random -Max 256) })` (مرتين)
-2. خذ `DATABASE_ADMIN_URL` الذي أضفته وغيّر **الجزء بين `://` و`@` فقط**؛ المضيف واسم القاعدة
+1. ولّد كلمتين مختلفتين. Neon يرفض الكلمات الضعيفة (رُفضت كلمات hex فقط في التشغيل 7)، فاستخدم
+   أحرفاً كبيرة وصغيرة وأرقاماً و`-` `_` (64 حرفاً، آمنة داخل الرابط):
+   - macOS/Linux: `openssl rand -base64 48 | tr '+/' '-_' | tr -d '=\n'` (مرتين)
+   - Windows PowerShell:
+     `[Convert]::ToBase64String((1..48 | % { [byte](Get-Random -Max 256) })).Replace('+','-').Replace('/','_').TrimEnd('=')` (مرتين)
+2. (يكفي أن تكون الكلمة صحيحة: الـworkflow يأخذ **كلمة المرور فقط** من السرّين ويبني المضيف والقاعدة
+   والمعاملات من `DATABASE_ADMIN_URL`.) خذ `DATABASE_ADMIN_URL` وغيّر **الجزء بين `://` و`@` فقط**؛ المضيف واسم القاعدة
    وما بعد `?` (مثل `sslmode=require`) تبقى كما هي، والمضيف هو المباشر (بلا `-pooler`):
    - `DATABASE_URL` = `postgresql://bahith_app:<الكلمة الأولى>@<المضيف نفسه>/neondb?<المعاملات نفسها>`
    - `AUTH_DATABASE_URL` = `postgresql://bahith_auth:<الكلمة الثانية>@<المضيف نفسه>/neondb?<المعاملات نفسها>`
