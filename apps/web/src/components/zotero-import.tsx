@@ -79,6 +79,7 @@ export function ZoteroImport({
 
   return (
     <form
+      method="post"
       className="space-y-3 rounded-xl border border-border p-4"
       onSubmit={(event) => void submit(event)}
       data-testid="zotero-import"

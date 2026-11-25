@@ -138,7 +138,12 @@ export function HighlightablePassage({
             {t('open')}
           </button>
           {open ? (
-            <form id={formId} className="space-y-3" onSubmit={(event) => void save(event)}>
+            <form
+              method="post"
+              id={formId}
+              className="space-y-3"
+              onSubmit={(event) => void save(event)}
+            >
               <fieldset className="space-y-1">
                 <legend className="text-sm font-medium">{t('scopeLegend')}</legend>
                 <label className="flex items-center gap-2 text-sm">
@@ -382,6 +387,7 @@ export function HighlightsPanel({
               </div>
               {editing === item.id ? (
                 <form
+                  method="post"
                   className="mt-3 space-y-2"
                   onSubmit={(event) => void saveNote(event, item.id)}
                 >

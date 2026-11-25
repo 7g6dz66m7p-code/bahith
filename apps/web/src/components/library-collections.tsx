@@ -153,7 +153,11 @@ export function CollectionsToolbar({
       )}
 
       {canWrite ? (
-        <form className="flex flex-wrap items-end gap-2" onSubmit={(event) => void create(event)}>
+        <form
+          method="post"
+          className="flex flex-wrap items-end gap-2"
+          onSubmit={(event) => void create(event)}
+        >
           <div className="min-w-0 flex-1 space-y-1">
             <label className="block text-sm font-medium" htmlFor="collection-name">
               {t('nameLabel')}
@@ -175,7 +179,12 @@ export function CollectionsToolbar({
 
       {canWrite && current !== null ? (
         <div className="space-y-2">
-          <form className="flex flex-wrap items-end gap-2" onSubmit={rename} key={current.id}>
+          <form
+            method="post"
+            className="flex flex-wrap items-end gap-2"
+            onSubmit={rename}
+            key={current.id}
+          >
             <div className="min-w-0 flex-1 space-y-1">
               <label className="block text-sm font-medium" htmlFor="collection-rename">
                 {t('renameLabel')}
