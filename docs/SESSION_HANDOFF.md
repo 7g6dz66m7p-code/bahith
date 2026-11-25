@@ -9,6 +9,16 @@
 
 ياً، لكن الحساب بلا رصيد (`credit_balance_exhausted`).
 
+## 2026-11-25 (الجولة الثالثة)
+
+- Neon Staging (proud-cloud): عُطّل Data API وNeon Auth (404 بعد الحذف). الإنتاج floral-rice فارغ.
+- الهجرات تعمل مع مالك غير superuser (Neon): 0002/0004 مراجعة 2 + EQUIVALENT_REVISIONS؛ مختبر على pg18.
+- `staging-ops.yml` يعمل عند تغيير `ops/staging-run.txt` (الإطلاق اليدوي يتطلب وجود الملف على main).
+  التشغيل 45600846483 (محاولتان): الأسرار الثلاثة فارغة داخل البيئة `staging` → توقف قبل أي اتصال.
+  لإعادة التشغيل: عدّل `ops/staging-run.txt` وادفع، أو أعد تشغيل الـrun من GitHub.
+- R2: `bahith-staging-files` (Staging)، `bahith-private-files` (إنتاج، لم يُلمس).
+- الأداء: `docs/reports/performance.md`؛ OCR: `docs/reports/ocr-arabic.md`؛ VPS: `deploy/README.md`.
+
 ## الدمج
 
 دُمجت أعمال الوكلاء الثلاثة (الإشعارات 0012، المكتبة 0013، `packages/migration`) مع رقم الهاتف 0011 ولوحة الإدارة 0010. كل الاختبارات ناجحة (انظر `TEST_REPORT.md`).
