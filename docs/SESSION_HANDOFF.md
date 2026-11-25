@@ -1,12 +1,13 @@
 # SESSION HANDOFF — BAHITH
 
-> اقرأ هذا أولاً. آخر تحديث: 2026-11-24.
+> اقرأ هذا أولاً. آخر تحديث: 2026-11-25. ا## الحالة
 
-## الحالة
+- الفرع `claude/new-session-tv7vfk` مدفوع إلى GitHub؛ PR ‏#2 مسودة؛ CI أخضر كاملاً منذ التشغيل 23.
+- OpenAI يعمل (سرّ شبكي)؛ Neon: إنتاج `floral-rice-81079531` (فارغ) وStaging `proud-cloud-29680152` (فارغ)؛
+  الترحيل عبر workflow ‏`db-deploy.yml` بعد إضافة أسرار GitHub (لا اتصال Postgres مباشر من هذه البيئة).
+- R2: ‏`bahith-private-files` (إنتاج)، ‏`bahith-staging-files`.
 
-- **آخر commit محلي:** `4cad1eb` على `claude/new-session-tv7vfk` (والفرع `feat/bahith-production-completion` مُنشأ عند النقطة نفسها).
-- **GitHub:** الدفع مرفوض (403). الحساب المربوط `ahmbdr10-tech` بلا صلاحية كتابة على `7g6dz66m7p-code/bahith`. البعيد ما زال عند `9d8a20c`. توجد نسخة bundle مُتحقق منها أُرسلت للمالك (`…-4cad1eb.bundle`).
-- **مزود الذكاء الاصطناعي:** مفتاح OpenAI محفوظ سراً شبكياً، لكن الحساب بلا رصيد (`credit_balance_exhausted`).
+ياً، لكن الحساب بلا رصيد (`credit_balance_exhausted`).
 
 ## الدمج
 
