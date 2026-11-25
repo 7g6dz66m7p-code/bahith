@@ -189,7 +189,9 @@ jobs:
           pnpm --filter @bahith/jobs exec tsx src/init-storage.ts
       - name: Model configuration (AI only when the staging environment has a key)
         run: |
-          echo "BETTER_AUTH_SECRET=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
+          auth_secret=$(openssl rand -hex 32)
+          echo "::add-mask::$auth_secret"
+          echo "BETTER_AUTH_SECRET=$auth_secret" >> "$GITHUB_ENV"
           if [ -n "$OPENAI_API_KEY" ]; then
             echo "AI_CHAT_MODEL=openai:gpt-5.4-mini" >> "$GITHUB_ENV"
             echo "AI_EMBEDDING_MODEL=openai:text-embedding-3-small" >> "$GITHUB_ENV"

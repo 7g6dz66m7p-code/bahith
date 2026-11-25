@@ -45,6 +45,46 @@ function appRoleStatements(dump: string): string[] {
     });
 }
 
+const IDENT = String.raw`"(?:[^"]|"")+"|[A-Za-z_][A-Za-z0-9_$]*`;
+const unquote = (ident: string) =>
+  ident.startsWith('"') ? ident.slice(1, -1).replaceAll('""', '"') : ident;
+const identList = (list: string) =>
+  [...list.matchAll(new RegExp(IDENT, 'gu'))]
+    .map((m) => m[0])
+    .filter((ident) => ident.toUpperCase() !== 'PUBLIC' && ident.toUpperCase() !== 'GROUP')
+    .map(unquote);
+
+/**
+ * Every role a schema-only restore script names: object owners, grantees and grantors,
+ * default-privilege owners and policy roles. A backup taken on one server (e.g. Neon,
+ * whose owner is `neondb_owner` and which grants to `neon_superuser`) names roles an empty
+ * target server does not have; restore needs to know them before pg_restore runs.
+ */
+export function referencedRoles(script: string): string[] {
+  const roles = new Set<string>();
+  const add = (list: string | undefined) => {
+    if (list !== undefined) for (const role of identList(list)) roles.add(role);
+  };
+  for (const raw of script.split('\n')) {
+    const line = raw.trim();
+    add(new RegExp(`\\bOWNER TO (${IDENT});$`, 'u').exec(line)?.[1]);
+    add(new RegExp(`\\bFOR ROLE ((?:${IDENT})(?:, (?:${IDENT}))*)`, 'u').exec(line)?.[1]);
+    add(new RegExp(`\\bGRANTED BY (${IDENT})`, 'u').exec(line)?.[1]);
+    const grant = new RegExp(
+      `^(?:ALTER DEFAULT PRIVILEGES .*?)?(?:GRANT|REVOKE) .* (?:TO|FROM) ((?:${IDENT})(?:, (?:${IDENT}))*)(?: WITH GRANT OPTION)?(?: GRANTED BY .*)?;$`,
+      'u',
+    ).exec(line);
+    add(grant?.[1]);
+    add(
+      new RegExp(
+        `^CREATE POLICY .* TO ((?:${IDENT})(?:, (?:${IDENT}))*)(?: USING| WITH CHECK|;|$)`,
+        'u',
+      ).exec(line)?.[1],
+    );
+  }
+  return [...roles].sort();
+}
+
 export const backupManifestSchema = z.strictObject({
   format: z.literal('bahith-backup-v1'),
   createdAt: z.string(),
@@ -128,12 +168,14 @@ export interface RestoreReport {
   manifest: BackupManifest;
   durationMs: number;
   tables: Record<string, number>;
+  /** Source-server roles (e.g. neondb_owner) whose objects now belong to the target admin. */
+  rolesMapped: string[];
 }
 
 /**
  * Restores a backup into an EMPTY database (refuses otherwise): checks every file's
- * SHA-256, re-creates the application roles, runs pg_restore with --exit-on-error, then
- * proves the result: same applied migrations and the same row count in every table.
+ * SHA-256, re-creates the application roles (and NOLOGIN stand-ins for the source server's
+ * own roles), runs pg_restore with --exit-on-error, then proves the result: same applied migrations and the same row count in every table.
  * Role passwords are set afterwards by `pnpm db:migrate` (provisioning).
  */
 export async function restoreDatabase(adminUrl: string, directory: string): Promise<RestoreReport> {
@@ -146,6 +188,7 @@ export async function restoreDatabase(adminUrl: string, directory: string): Prom
       throw new Error(`Backup file ${file} does not match its checksum; refusing to restore.`);
     }
   }
+  const standIns: string[] = [];
   const client = new pg.Client({ connectionString: adminUrl });
   await client.connect();
   try {
@@ -165,6 +208,28 @@ export async function restoreDatabase(adminUrl: string, directory: string): Prom
         if (!(error instanceof Error && 'code' in error && error.code === '42710')) throw error;
       }
     }
+    // Roles of the source server that this server lacks (Neon's neondb_owner, neon_superuser)
+    // are created as NOLOGIN stand-ins so ownership and grants restore exactly; afterwards
+    // their objects go to this server's admin and the stand-ins are dropped. Application
+    // roles (bahith_*) are never stand-ins: they come from roles.sql above.
+    const { stdout: script } = await run(
+      'pg_restore',
+      ['--schema-only', '--file=-', path.join(directory, 'database.dump')],
+      { env: pgEnv(adminUrl), maxBuffer: 64 * 1024 * 1024 },
+    );
+    const present = new Set(
+      (await client.query<{ name: string }>('SELECT rolname AS name FROM pg_roles')).rows.map(
+        (row) => row.name,
+      ),
+    );
+    for (const role of referencedRoles(script)) {
+      if (present.has(role)) continue;
+      if (role.startsWith(ROLE_PREFIX)) {
+        throw new Error(`Application role ${role} is missing from roles.sql; refusing to restore.`);
+      }
+      await client.query(`CREATE ROLE ${pg.escapeIdentifier(role)} NOLOGIN`);
+      standIns.push(role);
+    }
   } finally {
     await client.end();
   }
@@ -181,6 +246,12 @@ export async function restoreDatabase(adminUrl: string, directory: string): Prom
   const check = new pg.Client({ connectionString: adminUrl });
   await check.connect();
   try {
+    for (const role of standIns) {
+      const ident = pg.escapeIdentifier(role);
+      await check.query(`REASSIGN OWNED BY ${ident} TO CURRENT_USER`);
+      await check.query(`DROP OWNED BY ${ident}`);
+      await check.query(`DROP ROLE ${ident}`);
+    }
     const migrations = await check.query<{ tag: string }>(
       'SELECT tag FROM schema_migrations ORDER BY applied_at, tag',
     );
@@ -193,7 +264,7 @@ export async function restoreDatabase(adminUrl: string, directory: string): Prom
       if (tables[table] !== count)
         throw new Error(`Restored row count differs for table ${table}.`);
     }
-    return { manifest, durationMs: Date.now() - started, tables };
+    return { manifest, durationMs: Date.now() - started, tables, rolesMapped: standIns };
   } finally {
     await check.end();
   }

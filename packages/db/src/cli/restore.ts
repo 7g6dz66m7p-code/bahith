@@ -15,6 +15,9 @@ runCli(async () => {
   const report = await restoreDatabase(env.adminUrl, dir);
   process.stdout.write(
     `Restored and verified in ${String(Math.round(report.durationMs / 1000))} s ` +
-      `(${String(report.manifest.migrations.length)} migrations, row counts match).\n`,
+      `(${String(report.manifest.migrations.length)} migrations, row counts match).\n` +
+      (report.rolesMapped.length === 0
+        ? ''
+        : `Source-server roles mapped to this server's admin: ${report.rolesMapped.join(', ')}.\n`),
   );
 });

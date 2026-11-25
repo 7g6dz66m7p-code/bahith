@@ -58,6 +58,7 @@ describe('backup and restore', () => {
 
     const report = await restoreDatabase(target.getConnectionUri(), directory);
     expect(report.tables).toEqual(manifest.tables);
+    expect(report.rolesMapped).toEqual([]);
     // Well under the two-hour objective (this database is small; see the runbook).
     expect(report.durationMs).toBeLessThan(2 * 60 * 60 * 1000);
 
@@ -81,6 +82,42 @@ describe('backup and restore', () => {
     await expect(restoreDatabase(target.getConnectionUri(), directory)).rejects.toThrow(
       /not empty/u,
     );
+  });
+
+  it('restores a backup from a server with other admin roles (like Neon) and maps them', async () => {
+    // The source admin is "test"; this server's admin is "restorer" and has no "test" role,
+    // as a Neon backup names neondb_owner, which an empty server does not have.
+    const other = await new PostgreSqlContainer(POSTGRES_IMAGE).withUsername('restorer').start();
+    try {
+      const report = await restoreDatabase(other.getConnectionUri(), directory);
+      expect(report.rolesMapped).toEqual(['test']);
+      const check = new pg.Client({ connectionString: other.getConnectionUri() });
+      await check.connect();
+      try {
+        const owners = await check.query<{ owner: string }>(
+          `SELECT DISTINCT pg_get_userbyid(relowner) AS owner FROM pg_class
+            WHERE relnamespace = 'public'::regnamespace AND relkind = 'r'`,
+        );
+        expect(owners.rows).toEqual([{ owner: 'restorer' }]);
+        const definer = await check.query<{ owner: string }>(
+          `SELECT pg_get_userbyid(proowner) AS owner FROM pg_proc
+            WHERE oid = 'app.provision_personal_workspace()'::regprocedure`,
+        );
+        expect(definer.rows).toEqual([{ owner: 'bahith_identity_provisioner' }]);
+        const standIn = await check.query(`SELECT 1 FROM pg_roles WHERE rolname = 'test'`);
+        expect(standIn.rowCount).toBe(0);
+        const unprotected = await check.query(
+          `SELECT c.relname FROM pg_class c JOIN pg_attribute a ON a.attrelid = c.oid
+            WHERE c.relnamespace = 'public'::regnamespace AND c.relkind = 'r'
+              AND a.attname = 'workspace_id' AND NOT (c.relrowsecurity AND c.relforcerowsecurity)`,
+        );
+        expect(unprotected.rows).toEqual([]);
+      } finally {
+        await check.end();
+      }
+    } finally {
+      await other.stop();
+    }
   });
 
   it('refuses a backup whose files do not match the manifest', async () => {

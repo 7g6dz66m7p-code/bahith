@@ -1,1 +1,1 @@
-run 9: restore uses local role URLs, Chromium for PDF, storage check via @bahith/jobs
+run 10: restore maps the source server's roles (neondb_owner) to the target admin; per-run auth secret masked
