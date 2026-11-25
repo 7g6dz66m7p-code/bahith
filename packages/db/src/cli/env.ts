@@ -8,6 +8,22 @@ import { DbError } from '../errors';
 
 const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '::1', '[::1]']);
 
+/**
+ * Names (never values) of the parts of a role URL that do not match what provisioning
+ * needs: the expected role, a password, and the migration database's host, port, name.
+ */
+export function roleUrlMismatches(url: URL, admin: URL, role: string): string[] {
+  const problems: string[] = [];
+  if (decodeURIComponent(url.username) !== role) problems.push(`user is not ${role}`);
+  if (url.password === '') problems.push('password is missing');
+  if (url.hostname !== admin.hostname) problems.push('host differs from DATABASE_ADMIN_URL');
+  if (url.port !== admin.port) problems.push('port differs from DATABASE_ADMIN_URL');
+  if (url.pathname !== admin.pathname) {
+    problems.push('database name differs from DATABASE_ADMIN_URL');
+  }
+  return problems;
+}
+
 const envSchema = z.object({
   DATABASE_ADMIN_URL: z.url({ protocol: /^postgres(ql)?$/ }),
   DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
@@ -57,8 +73,9 @@ export function loadCliEnv(
         'pass --allow-remote only once you have it.',
     );
   }
-  if (app.password === '') {
-    throw new DbError('DB_CONFIG_INVALID', 'DATABASE_URL must include the application password.');
+  const appProblems = roleUrlMismatches(app, admin, 'bahith_app');
+  if (appProblems.length > 0) {
+    throw new DbError('DB_CONFIG_INVALID', `DATABASE_URL: ${appProblems.join('; ')}.`);
   }
 
   const authValue = process.env.AUTH_DATABASE_URL;
@@ -75,17 +92,9 @@ export function loadCliEnv(
   let identity: { authUrl: string; authPassword: string } | undefined;
   if (authResult.success) {
     const auth = new URL(authResult.data);
-    if (
-      auth.username !== 'bahith_auth' ||
-      auth.password === '' ||
-      auth.hostname !== admin.hostname ||
-      auth.port !== admin.port ||
-      auth.pathname !== admin.pathname
-    ) {
-      throw new DbError(
-        'DB_CONFIG_INVALID',
-        'AUTH_DATABASE_URL must use bahith_auth on the migration database with a password.',
-      );
+    const authProblems = roleUrlMismatches(auth, admin, 'bahith_auth');
+    if (authProblems.length > 0) {
+      throw new DbError('DB_CONFIG_INVALID', `AUTH_DATABASE_URL: ${authProblems.join('; ')}.`);
     }
     identity = { authUrl: authResult.data, authPassword: decodeURIComponent(auth.password) };
   }

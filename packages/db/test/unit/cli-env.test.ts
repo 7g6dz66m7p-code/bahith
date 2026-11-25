@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { loadCliEnv } from '../../src/cli/env';
+import { loadCliEnv, roleUrlMismatches } from '../../src/cli/env';
 
 // Placeholder credentials for parsing tests only; nothing connects anywhere.
 const pw = 'x'.repeat(8);
@@ -83,4 +83,32 @@ describe('loadCliEnv', () => {
       );
     },
   );
+});
+
+const admin = new URL(
+  'postgresql://owner:o@ep-x.eu-central-1.aws.neon.tech/neondb?sslmode=require',
+);
+
+describe('roleUrlMismatches (names of problems only, never values)', () => {
+  it('accepts the role on the same host, port and database', () => {
+    const ok = new URL(
+      'postgresql://bahith_auth:secret@ep-x.eu-central-1.aws.neon.tech/neondb?sslmode=require',
+    );
+    expect(roleUrlMismatches(ok, admin, 'bahith_auth')).toEqual([]);
+  });
+
+  it('names every mismatch without echoing any part of the URL', () => {
+    const wrong = new URL(
+      'postgresql://neondb_owner@ep-x-pooler.eu-central-1.aws.neon.tech:6543/other',
+    );
+    const problems = roleUrlMismatches(wrong, admin, 'bahith_auth');
+    expect(problems).toEqual([
+      'user is not bahith_auth',
+      'password is missing',
+      'host differs from DATABASE_ADMIN_URL',
+      'port differs from DATABASE_ADMIN_URL',
+      'database name differs from DATABASE_ADMIN_URL',
+    ]);
+    expect(problems.join(' ')).not.toMatch(/pooler|neondb_owner|other|6543/u);
+  });
 });
