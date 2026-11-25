@@ -35,3 +35,64 @@ async function provisionLoginRole(
   }
   await client.query(row.statement);
 }
+
+/** Roles that may hold privileges on BAHITH's objects; anything else is foreign. */
+const ALLOWED_GRANTEES = new Set([
+  APP_ROLE,
+  AUTH_ROLE,
+  'bahith_identity_provisioner',
+  // Platform administrators of managed Postgres (Neon) and the owner itself.
+  'neon_superuser',
+  'cloud_admin',
+]);
+
+/**
+ * Hosted Postgres can add roles and default privileges of its own: Neon's Data API
+ * grants `authenticated` full rights on every new table in `public` and serves them
+ * over REST. BAHITH reaches its data only through bahith_app / bahith_auth, so after
+ * every migration all privileges of other roles on BAHITH's schemas are revoked (also
+ * for future objects), and any that remain make provisioning fail.
+ */
+export async function revokeForeignPrivileges(client: pg.ClientBase): Promise<string[]> {
+  const owner = (await client.query<{ name: string }>('SELECT current_user AS name')).rows[0]?.name;
+  const allowed = new Set([...ALLOWED_GRANTEES, owner ?? '']);
+  const foreign = (
+    await client.query<{ grantee: string }>(
+      `SELECT DISTINCT grantee FROM information_schema.role_table_grants
+        WHERE table_schema IN ('public', 'app') AND grantee <> 'PUBLIC'
+       UNION
+       SELECT DISTINCT r.rolname FROM pg_default_acl d, aclexplode(d.defaclacl) a
+         JOIN pg_roles r ON r.oid = a.grantee
+        WHERE d.defaclrole = (SELECT oid FROM pg_roles WHERE rolname = current_user)`,
+    )
+  ).rows
+    .map((row) => row.grantee)
+    .filter((name) => !allowed.has(name));
+  for (const role of foreign) {
+    const statements = await client.query<{ statement: string }>(
+      `SELECT format(s, $1::text) AS statement FROM unnest(ARRAY[
+         'REVOKE ALL ON ALL TABLES IN SCHEMA public, app FROM %I',
+         'REVOKE ALL ON ALL SEQUENCES IN SCHEMA public, app FROM %I',
+         'REVOKE ALL ON ALL FUNCTIONS IN SCHEMA public, app FROM %I',
+         'REVOKE ALL ON SCHEMA app FROM %I',
+         'ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON TABLES FROM %I',
+         'ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON SEQUENCES FROM %I',
+         'ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON FUNCTIONS FROM %I',
+         'ALTER DEFAULT PRIVILEGES REVOKE ALL ON TABLES FROM %I',
+         'ALTER DEFAULT PRIVILEGES REVOKE ALL ON SEQUENCES FROM %I',
+         'ALTER DEFAULT PRIVILEGES REVOKE ALL ON FUNCTIONS FROM %I'
+       ]) AS s`,
+      [role],
+    );
+    for (const row of statements.rows) await client.query(row.statement);
+  }
+  const remaining = await client.query<{ grantee: string }>(
+    `SELECT DISTINCT grantee FROM information_schema.role_table_grants
+      WHERE table_schema IN ('public', 'app') AND grantee = ANY($1::text[])`,
+    [foreign],
+  );
+  if (remaining.rows.length > 0) {
+    throw new Error(`FOREIGN_PRIVILEGES_REMAIN: ${remaining.rows.map((r) => r.grantee).join(',')}`);
+  }
+  return foreign;
+}

@@ -1,7 +1,7 @@
 import pg from 'pg';
 
 import { migrateUp } from '../migrator';
-import { provisionAppRole, provisionAuthRole } from '../provision';
+import { provisionAppRole, provisionAuthRole, revokeForeignPrivileges } from '../provision';
 
 import { loadCliEnv, runCli } from './env';
 
@@ -14,6 +14,10 @@ runCli(async () => {
     await provisionAppRole(client, env.appPassword);
     if (env.authPassword === undefined) throw new Error('AUTH_DATABASE_URL is required.');
     await provisionAuthRole(client, env.authPassword);
+    const revoked = await revokeForeignPrivileges(client);
+    if (revoked.length > 0) {
+      process.stdout.write(`Revoked privileges of roles outside BAHITH: ${revoked.join(', ')}\n`);
+    }
     process.stdout.write(
       applied.length === 0
         ? 'Database is up to date.\n'

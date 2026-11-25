@@ -3,7 +3,7 @@ import type { StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import pg from 'pg';
 
 import { migrateUp } from './migrator';
-import { provisionAppRole, provisionAuthRole } from './provision';
+import { provisionAppRole, provisionAuthRole, revokeForeignPrivileges } from './provision';
 import { APP_ROLE, AUTH_ROLE } from './schema/_shared';
 export { seedReferenceData } from './seed';
 
@@ -39,6 +39,7 @@ export async function startTestDatabase(): Promise<TestDatabase> {
     await migrateUp(admin);
     await provisionAppRole(admin, appPassword);
     await provisionAuthRole(admin, authPassword);
+    await revokeForeignPrivileges(admin);
   } finally {
     await admin.end();
   }
