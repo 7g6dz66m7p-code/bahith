@@ -25,7 +25,7 @@ test('a scanned Arabic source is uploaded, OCR’d, searched and opened at its p
   browser,
 }, info) => {
   test.setTimeout(180_000);
-  const locale = info.project.name === 'ar' ? 'ar' : 'en';
+  const locale = info.project.name.startsWith('ar') ? 'ar' : 'en';
   const m = (locale === 'ar' ? ar : en).Project;
   await registerAndVerify(page, locale, 'Library fixture');
 
@@ -108,7 +108,7 @@ test('a scanned Arabic source is uploaded, OCR’d, searched and opened at its p
 });
 
 test('uploads are typed by their bytes and size-limited', async ({ page }, info) => {
-  const locale = info.project.name === 'ar' ? 'ar' : 'en';
+  const locale = info.project.name.startsWith('ar') ? 'ar' : 'en';
   await registerAndVerify(page, locale, 'Upload validation fixture');
   const { workspaces } = z
     .object({ workspaces: z.array(z.object({ id: z.uuid() })) })

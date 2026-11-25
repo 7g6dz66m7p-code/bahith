@@ -43,7 +43,7 @@ async function newProject(page: Page, locale: 'ar' | 'en') {
 
 test('collections, a highlight with a note, and a CSL-JSON import', async ({ page }, info) => {
   test.setTimeout(180_000);
-  const locale = info.project.name === 'ar' ? 'ar' : 'en';
+  const locale = info.project.name.startsWith('ar') ? 'ar' : 'en';
   const messages = locale === 'ar' ? ar : en;
   await registerAndVerify(page, locale, 'Organisation fixture');
   const { workspaceId, projectId } = await newProject(page, locale);
@@ -158,7 +158,7 @@ test('organisation and Zotero endpoints refuse outsiders, anonymous and cross-or
   page,
   browser,
 }, info) => {
-  const locale = info.project.name === 'ar' ? 'ar' : 'en';
+  const locale = info.project.name.startsWith('ar') ? 'ar' : 'en';
   await registerAndVerify(page, locale, 'Organisation owner');
   const { workspaceId, projectId } = await newProject(page, locale);
   const base = `/api/projects/${projectId}`;

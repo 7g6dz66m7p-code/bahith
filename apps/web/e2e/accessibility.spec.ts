@@ -14,8 +14,10 @@ test.beforeEach(async () => {
 });
 
 function localeFor(project: string): keyof typeof catalogs {
-  if (project !== 'ar' && project !== 'en') throw new Error('Unknown browser-test locale');
-  return project;
+  // Projects are "ar", "en" and their phone variants "ar-mobile", "en-mobile".
+  const locale = project.replace(/-mobile$/u, '');
+  if (locale !== 'ar' && locale !== 'en') throw new Error('Unknown browser-test locale');
+  return locale;
 }
 
 async function expectAccessible(page: Page) {

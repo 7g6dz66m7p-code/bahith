@@ -8,7 +8,7 @@ test.beforeEach(async () => {
 });
 
 test('a signed-in researcher verifies a phone number by SMS code', async ({ page }, info) => {
-  const locale = info.project.name === 'ar' ? 'ar' : 'en';
+  const locale = info.project.name.startsWith('ar') ? 'ar' : 'en';
   await registerAndVerify(page, locale, 'Phone fixture');
   // A distinct number per locale project: numbers are unique across accounts.
   const phone =

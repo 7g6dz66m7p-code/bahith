@@ -8,7 +8,8 @@ const expected = {
   en: { messages: en, dir: 'ltr' },
 } as const;
 
-function projectLocale(name: string): keyof typeof expected {
+function projectLocale(project: string): keyof typeof expected {
+  const name = project.replace(/-mobile$/u, '');
   if (name !== 'ar' && name !== 'en') {
     throw new Error(`unexpected Playwright project: ${name}`);
   }

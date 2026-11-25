@@ -26,7 +26,7 @@ test('a signed-in user links Telegram only with a valid Telegram signature', asy
   page,
   browser,
 }, info) => {
-  const locale = info.project.name === 'ar' ? 'ar' : 'en';
+  const locale = info.project.name.startsWith('ar') ? 'ar' : 'en';
   await registerAndVerify(page, locale, 'Telegram fixture');
   const headers = { origin: 'http://localhost:3100' };
   const telegramId = String(1_000_000 + Math.floor(Math.random() * 1_000_000_000));

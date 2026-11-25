@@ -16,7 +16,7 @@ test('the assistant asks for consent first and says clearly when no model is con
   page,
   browser,
 }, info) => {
-  const locale = info.project.name === 'ar' ? 'ar' : 'en';
+  const locale = info.project.name.startsWith('ar') ? 'ar' : 'en';
   const m = (locale === 'ar' ? ar : en).Assistant;
   await registerAndVerify(page, locale, 'Assistant fixture');
   const { workspaces } = z

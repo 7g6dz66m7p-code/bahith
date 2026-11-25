@@ -70,7 +70,7 @@ test('a supervisor comments and suggests; the owner accepts; stale suggestions a
   browser,
 }, info) => {
   test.setTimeout(180_000);
-  const locale = info.project.name === 'ar' ? 'ar' : 'en';
+  const locale = info.project.name.startsWith('ar') ? 'ar' : 'en';
   const r = (locale === 'ar' ? ar : en).Draft.review;
   const d = (locale === 'ar' ? ar : en).Draft;
 

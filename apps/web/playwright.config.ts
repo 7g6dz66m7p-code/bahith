@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 const PORT = 3100;
+const MOBILE_SPECS = /(journey|auth|home|phone|library|accessibility)\.spec\.ts$/u;
 
 export default defineConfig({
   testDir: './e2e',
@@ -17,6 +18,17 @@ export default defineConfig({
   projects: [
     { name: 'ar', use: { ...devices['Desktop Chrome'], locale: 'ar' } },
     { name: 'en', use: { ...devices['Desktop Chrome'], locale: 'en' } },
+    // Phones (touch, mobile viewport and user agent) for the core researcher journeys.
+    {
+      name: 'ar-mobile',
+      testMatch: MOBILE_SPECS,
+      use: { ...devices['Pixel 7'], locale: 'ar' },
+    },
+    {
+      name: 'en-mobile',
+      testMatch: MOBILE_SPECS,
+      use: { ...devices['Pixel 7'], locale: 'en' },
+    },
   ],
   webServer: {
     command: 'pnpm --filter @bahith/db exec tsx ../../apps/web/e2e/server.ts',

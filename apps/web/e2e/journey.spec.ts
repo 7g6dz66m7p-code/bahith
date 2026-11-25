@@ -24,7 +24,7 @@ test.beforeEach(async () => {
 
 test('from sign-up to an exported draft, through the interface only', async ({ page }, info) => {
   test.setTimeout(300_000);
-  const locale = info.project.name === 'ar' ? 'ar' : 'en';
+  const locale = info.project.name.startsWith('ar') ? 'ar' : 'en';
   const m = locale === 'ar' ? ar : en;
   const identity = {
     name: locale === 'ar' ? 'باحثة الرحلة' : 'Journey researcher',

@@ -16,7 +16,7 @@ test('an owner invites by email, the invitee joins, gets a new role and is remov
   page,
   browser,
 }, info) => {
-  const locale = info.project.name === 'ar' ? 'ar' : 'en';
+  const locale = info.project.name.startsWith('ar') ? 'ar' : 'en';
   test.setTimeout(120_000);
   const m = (locale === 'ar' ? ar : en).Members;
   const inv = (locale === 'ar' ? ar : en).Invitation;

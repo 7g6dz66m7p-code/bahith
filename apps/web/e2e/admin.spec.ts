@@ -18,7 +18,7 @@ test('platform admin needs 2FA, sees aggregate stats and sets plan limits; other
   browser,
 }, info) => {
   test.setTimeout(120_000);
-  const locale = info.project.name === 'ar' ? 'ar' : 'en';
+  const locale = info.project.name.startsWith('ar') ? 'ar' : 'en';
   const t = (locale === 'ar' ? ar : en).Admin;
   const usage = (locale === 'ar' ? ar : en).Usage;
   const identity = await registerAndVerify(

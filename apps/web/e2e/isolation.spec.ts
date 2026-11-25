@@ -11,7 +11,7 @@ test('session identity and project scope protect every research HTTP endpoint', 
   page,
   browser,
 }, info) => {
-  const locale = info.project.name === 'ar' ? 'ar' : 'en';
+  const locale = info.project.name.startsWith('ar') ? 'ar' : 'en';
   await registerAndVerify(page, locale, 'API owner fixture');
   const inventory = z
     .object({ workspaces: z.array(z.object({ id: z.uuid() })) })
@@ -92,7 +92,7 @@ test('reference, verification and assistant endpoints refuse outsiders, anonymou
   page,
   browser,
 }, info) => {
-  const locale = info.project.name === 'ar' ? 'ar' : 'en';
+  const locale = info.project.name.startsWith('ar') ? 'ar' : 'en';
   await registerAndVerify(page, locale, 'Endpoint owner fixture');
   const inventory = z
     .object({ workspaces: z.array(z.object({ id: z.uuid() })) })

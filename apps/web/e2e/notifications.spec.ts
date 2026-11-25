@@ -62,7 +62,7 @@ test('a review note notifies the owner only; reading and marking stay private', 
   browser,
 }, info) => {
   test.setTimeout(180_000);
-  const locale = info.project.name === 'ar' ? 'ar' : 'en';
+  const locale = info.project.name.startsWith('ar') ? 'ar' : 'en';
   const n = (locale === 'ar' ? ar : en).Notifications;
 
   // The owner's project and draft.

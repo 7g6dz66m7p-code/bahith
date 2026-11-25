@@ -37,7 +37,7 @@ test.beforeEach(async () => {
 test('BibTeX is imported as unverified references, deduplicated and exported', async ({
   page,
 }, info) => {
-  const locale = info.project.name === 'ar' ? 'ar' : 'en';
+  const locale = info.project.name.startsWith('ar') ? 'ar' : 'en';
   const m = (locale === 'ar' ? ar : en).References;
   await registerAndVerify(page, locale, 'References fixture');
   const { workspaces } = z

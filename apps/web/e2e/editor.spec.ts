@@ -25,7 +25,7 @@ test.beforeEach(async () => {
 
 test('write, cite, autosave, compare versions and export a draft', async ({ page }, info) => {
   test.setTimeout(240_000);
-  const locale = info.project.name === 'ar' ? 'ar' : 'en';
+  const locale = info.project.name.startsWith('ar') ? 'ar' : 'en';
   const messages = locale === 'ar' ? ar : en;
   const p = messages.Project;
   const d = messages.Draft;
@@ -119,7 +119,7 @@ test('stale saves are refused and drafts are private to the project', async ({
   page,
   browser,
 }, info) => {
-  const locale = info.project.name === 'ar' ? 'ar' : 'en';
+  const locale = info.project.name.startsWith('ar') ? 'ar' : 'en';
   await registerAndVerify(page, locale, 'Draft API fixture');
   const { workspaces } = z
     .object({ workspaces: z.array(z.object({ id: z.uuid() })) })
