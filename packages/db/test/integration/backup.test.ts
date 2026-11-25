@@ -120,6 +120,45 @@ describe('backup and restore', () => {
     }
   });
 
+  it('a backup taken while the database is being written to matches its own manifest', async () => {
+    // Staging run 12: sign-ups during the backup made the counts (taken after pg_dump)
+    // differ from the dump. Counts and dump now share one snapshot.
+    const writer = new pg.Client({ connectionString: inject('adminUrl') });
+    await writer.connect();
+    const live = await mkdtemp(path.join(os.tmpdir(), 'bahith-backup-live-'));
+    const fresh = await new PostgreSqlContainer(POSTGRES_IMAGE).start();
+    const state = { writing: true, written: 0 };
+    const writes = (async () => {
+      while (state.writing) {
+        await writer.query(`INSERT INTO users (name, email) VALUES ('Live write', $1)`, [
+          `live-write-${String(state.written)}-${crypto.randomUUID()}@example.test`,
+        ]);
+        state.written += 1;
+      }
+    })();
+    try {
+      const manifest = await backupDatabase(inject('adminUrl'), live);
+      state.writing = false;
+      await writes;
+      expect(state.written).toBeGreaterThan(0);
+      const report = await restoreDatabase(fresh.getConnectionUri(), live);
+      expect(report.tables).toEqual(manifest.tables);
+    } finally {
+      state.writing = false;
+      await writes.catch(() => undefined);
+      // Each user got a personal workspace (trigger); remove both, like the staging cleanup.
+      await writer.query(
+        `DELETE FROM workspaces WHERE id IN (
+           SELECT m.workspace_id FROM memberships m JOIN users u ON u.id = m.user_id
+            WHERE u.email LIKE 'live-write-%@example.test')`,
+      );
+      await writer.query(`DELETE FROM users WHERE email LIKE 'live-write-%@example.test'`);
+      await writer.end();
+      await fresh.stop();
+      await rm(live, { recursive: true, force: true });
+    }
+  });
+
   it('refuses a backup whose files do not match the manifest', async () => {
     const dump = path.join(directory, 'roles.sql');
     await writeFile(dump, `${await readFile(dump, 'utf8')}-- tampered\n`);

@@ -163,15 +163,15 @@ async function tableCounts(client: pg.ClientBase): Promise<Record<string, number
  * data + RLS policies + grants), roles.sql (application roles, no passwords) and
  * manifest.json (applied migrations, row counts per table, SHA-256 of each file).
  * Needs an admin connection (to read every tenant's rows past RLS).
+ *
+ * The dump, the migrations and the row counts all come from ONE snapshot (exported by a
+ * REPEATABLE READ transaction and handed to pg_dump), so a backup of a live database
+ * that is being written to still has a manifest that matches its dump exactly.
  */
 export async function backupDatabase(adminUrl: string, directory: string): Promise<BackupManifest> {
   await mkdir(directory, { recursive: true });
   const env = pgEnv(adminUrl);
   const dumpPath = path.join(directory, 'database.dump');
-  await run('pg_dump', ['--format=custom', '--no-password', `--file=${dumpPath}`], {
-    env,
-    maxBuffer: 16 * 1024 * 1024,
-  });
   const { stdout: rolesDump } = await run(
     'pg_dumpall',
     ['--roles-only', '--no-role-passwords', '--no-password', `--database=${env.PGDATABASE ?? ''}`],
@@ -184,15 +184,27 @@ export async function backupDatabase(adminUrl: string, directory: string): Promi
   const client = new pg.Client({ connectionString: adminUrl });
   await client.connect();
   try {
+    await client.query('BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY');
+    const snapshot = (await client.query<{ id: string }>('SELECT pg_export_snapshot() AS id'))
+      .rows[0]?.id;
+    if (snapshot === undefined) throw new Error('Could not export a snapshot for the backup.');
     const migrations = await client.query<{ tag: string }>(
       'SELECT tag FROM schema_migrations ORDER BY applied_at, tag',
     );
+    const tables = await tableCounts(client);
+    // The snapshot stays valid while this transaction is open.
+    await run(
+      'pg_dump',
+      ['--format=custom', '--no-password', `--snapshot=${snapshot}`, `--file=${dumpPath}`],
+      { env, maxBuffer: 16 * 1024 * 1024 },
+    );
+    await client.query('COMMIT');
     const manifest: BackupManifest = {
       format: 'bahith-backup-v1',
       createdAt: new Date().toISOString(),
       database: env.PGDATABASE ?? '',
       migrations: migrations.rows.map((row) => row.tag),
-      tables: await tableCounts(client),
+      tables,
       files: {
         'database.dump': sha256(await readFile(dumpPath)),
         'roles.sql': sha256(roles),

@@ -1,1 +1,1 @@
-run 12: foreign-role check covers schemas, columns, sequences, functions, default privileges
+run 13: backup dump and manifest from one snapshot
