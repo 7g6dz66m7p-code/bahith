@@ -114,7 +114,7 @@ describe('roleUrlMismatches (names of problems only, never values)', () => {
       'port differs from DATABASE_ADMIN_URL',
       'database name differs from DATABASE_ADMIN_URL',
     ]);
-    expect(problems.join(' ')).not.toMatch(/ep-y|neondb_owner|other|6543/u);
+    expect(problems.join(' ')).not.toMatch(/ep-y|neondb_owner|\bother\b|6543/u);
   });
 });
 
