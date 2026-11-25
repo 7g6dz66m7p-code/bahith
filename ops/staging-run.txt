@@ -1,1 +1,1 @@
-run 14: clear R2 message before the backup upload
+run 15: R2 token and OPENAI_API_KEY added by the owner — presence check
