@@ -3,11 +3,11 @@
 # secrets: every credential is supplied at run time through the environment. An extra
 # CA (e.g. a corporate proxy) can be given to the build only, as the "extra_ca" secret.
 FROM node:22.23.0-bookworm-slim AS base
-ENV PNPM_HOME=/pnpm PATH=/pnpm:$PATH NEXT_TELEMETRY_DISABLED=1 TURBO_TELEMETRY_DISABLED=1 \
-    COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+ENV NEXT_TELEMETRY_DISABLED=1 TURBO_TELEMETRY_DISABLED=1
+# pnpm is installed into the image at build time: containers never download tooling at start.
 RUN --mount=type=secret,id=extra_ca,required=false \
     NODE_EXTRA_CA_CERTS=$([ -s /run/secrets/extra_ca ] && echo /run/secrets/extra_ca) \
-    sh -c 'corepack enable && corepack prepare pnpm@10.28.0 --activate'
+    npm install -g --no-fund --no-audit pnpm@10.28.0 && pnpm --version
 WORKDIR /app
 
 FROM base AS build
@@ -39,6 +39,17 @@ COPY --from=build --chown=node:node /app /app
 USER node
 
 FROM runtime AS web
+# PDF export renders with Chromium; Noto provides Arabic and Latin glyphs.
+USER root
+RUN --mount=type=secret,id=extra_ca,required=false \
+    if [ -s /run/secrets/extra_ca ]; then \
+      install -m 0644 /run/secrets/extra_ca /tmp/extra-ca.crt \
+      && echo 'Acquire::https::CAInfo "/tmp/extra-ca.crt";' > /etc/apt/apt.conf.d/99extra-ca; fi \
+ && apt-get update -qq \
+ && apt-get install -y -qq --no-install-recommends chromium fonts-noto-core fonts-noto-ui-core \
+ && rm -rf /var/lib/apt/lists/* /etc/apt/apt.conf.d/99extra-ca /tmp/extra-ca.crt
+ENV PDF_CHROMIUM_PATH=/usr/bin/chromium
+USER node
 EXPOSE 3000
 CMD ["pnpm", "--filter", "@bahith/web", "exec", "next", "start", "-p", "3000", "-H", "0.0.0.0"]
 

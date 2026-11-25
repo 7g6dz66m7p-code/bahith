@@ -5,7 +5,10 @@ from pathlib import Path
 from pydantic import Field, RedisDsn, ValidationError
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-_REPO_ROOT = Path(__file__).resolve().parents[4]
+_PARENTS = Path(__file__).resolve().parents
+# In the monorepo the repo-root .env is four levels up; in a container image (installed
+# outside the repo) there is none and only the process environment is used.
+_REPO_ROOT = _PARENTS[4] if len(_PARENTS) > 4 else _PARENTS[-1]
 
 
 class ConfigError(RuntimeError):

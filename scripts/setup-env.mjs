@@ -109,6 +109,7 @@ set('NCBI_API_KEY', () => '');
 set('PLATFORM_ADMIN_EMAILS', () => '');
 set('PAYMENTS_PROVIDER', () => '');
 set('PAYMENTS_LIVE_AUTHORIZED', () => '');
+set('PDF_CHROMIUM_PATH', () => '');
 set('SMS_PROVIDER', () => '');
 set('SMS_CAPTURE_DIR', () => '');
 set('LEGACY_DATABASE_URL', () => '');

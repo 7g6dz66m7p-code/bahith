@@ -9,9 +9,13 @@ import path from 'node:path';
 
 const BASE = process.env.LOAD_BASE_URL ?? 'http://localhost:3100';
 if (!/^http:\/\/(localhost|127\.0\.0\.1):\d+$/u.test(BASE)) throw new Error('local harness only');
-const runtime = JSON.parse(
-  await readFile(path.resolve(import.meta.dirname, '../.next/e2e-runtime.json'), 'utf8'),
-) as { mailUrl: string };
+// The staging stack passes its own Mailpit (LOAD_MAIL_URL); the e2e harness writes its own.
+const runtime =
+  process.env.LOAD_MAIL_URL === undefined
+    ? (JSON.parse(
+        await readFile(path.resolve(import.meta.dirname, '../.next/e2e-runtime.json'), 'utf8'),
+      ) as { mailUrl: string })
+    : { mailUrl: process.env.LOAD_MAIL_URL };
 const origin = { origin: BASE, 'content-type': 'application/json' };
 const email = `load-${crypto.randomUUID()}@example.test`;
 const password = `Load-${crypto.randomUUID()}`;
@@ -72,17 +76,19 @@ response = await fetch(`${BASE}/api/projects/${project.id}/sources?workspaceId=$
   body: form,
 });
 if (!response.ok) throw new Error(`upload ${String(response.status)}`);
-for (let i = 0; i < 120; i += 1) {
+let ready = false;
+for (let i = 0; i < 180 && !ready; i += 1) {
   const library = (await (
     await fetch(`${BASE}/api/projects/${project.id}/sources?workspaceId=${workspaceId}`, {
       headers: auth,
     })
   ).json()) as { sources: { files: { status: string }[] }[] };
   const status = library.sources[0]?.files[0]?.status;
-  if (status === 'ready') break;
   if (status === 'failed') throw new Error('processing failed');
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  ready = status === 'ready';
+  if (!ready) await new Promise((resolve) => setTimeout(resolve, 1000));
 }
+if (!ready) throw new Error('processing did not finish in 180 s');
 process.stdout.write(
   JSON.stringify({ BASE, COOKIE: cookie, WORKSPACE_ID: workspaceId, PROJECT_ID: project.id }),
 );

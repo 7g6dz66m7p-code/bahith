@@ -51,7 +51,12 @@ export async function exportPdf(input: unknown, options: PdfOptions = {}): Promi
   const ownsBrowser = browser === undefined;
   if (browser === undefined) {
     try {
-      browser = await chromium.launch();
+      // Container images ship the distribution's Chromium (PDF_CHROMIUM_PATH); locally,
+      // Playwright's own browser is used.
+      const executablePath = process.env.PDF_CHROMIUM_PATH?.trim();
+      browser = await chromium.launch(
+        executablePath === undefined || executablePath === '' ? {} : { executablePath },
+      );
     } catch (error) {
       throw new ExportError('EXPORT_RENDERER_UNAVAILABLE', { cause: error });
     }
