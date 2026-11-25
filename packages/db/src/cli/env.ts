@@ -21,6 +21,21 @@ export function endpointHost(hostname: string): string {
   return [first.replace(/-pooler$/u, ''), ...rest].join('.');
 }
 
+/** Neon endpoint id (`ep-…`, pooled suffix removed), or null for other hosts. */
+export function neonEndpointId(hostname: string): string | null {
+  if (!/\.neon\.tech$/u.test(hostname)) return null;
+  const first = (hostname.split('.')[0] ?? '').replace(/-pooler$/u, '');
+  return /^ep-[a-z0-9-]+$/u.test(first) ? first : null;
+}
+
+/** Same database server: equal hosts, or the same Neon endpoint in any host format. */
+export function sameServer(a: string, b: string): boolean {
+  const endpointA = neonEndpointId(a);
+  const endpointB = neonEndpointId(b);
+  if (endpointA !== null || endpointB !== null) return endpointA === endpointB;
+  return endpointHost(a) === endpointHost(b);
+}
+
 export function isPooledHost(hostname: string): boolean {
   return /-pooler$/u.test(hostname.split('.')[0] ?? '');
 }
@@ -29,8 +44,12 @@ export function roleUrlMismatches(url: URL, admin: URL, role: string): string[] 
   const problems: string[] = [];
   if (decodeURIComponent(url.username) !== role) problems.push(`user is not ${role}`);
   if (url.password === '') problems.push('password is missing');
-  if (endpointHost(url.hostname) !== endpointHost(admin.hostname)) {
-    problems.push('host differs from DATABASE_ADMIN_URL');
+  if (!sameServer(url.hostname, admin.hostname)) {
+    problems.push(
+      neonEndpointId(url.hostname) !== null && neonEndpointId(admin.hostname) !== null
+        ? 'a different Neon endpoint than DATABASE_ADMIN_URL (another project or branch)'
+        : 'host differs from DATABASE_ADMIN_URL',
+    );
   }
   if (url.port !== admin.port) problems.push('port differs from DATABASE_ADMIN_URL');
   if (url.pathname !== admin.pathname) {

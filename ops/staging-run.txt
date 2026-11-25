@@ -1,1 +1,1 @@
-2026-11-25 run 5: pooled DATABASE_ADMIN_URL switched to the direct host of the same endpoint
+2026-11-25 run 6: Neon endpoint identity across host formats

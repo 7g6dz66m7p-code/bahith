@@ -1,6 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { endpointHost, isPooledHost, loadCliEnv, roleUrlMismatches } from '../../src/cli/env';
+import {
+  endpointHost,
+  isPooledHost,
+  loadCliEnv,
+  neonEndpointId,
+  roleUrlMismatches,
+  sameServer,
+} from '../../src/cli/env';
 
 // Placeholder credentials for parsing tests only; nothing connects anywhere.
 const pw = 'x'.repeat(8);
@@ -103,7 +110,7 @@ describe('roleUrlMismatches (names of problems only, never values)', () => {
     expect(problems).toEqual([
       'user is not bahith_auth',
       'password is missing',
-      'host differs from DATABASE_ADMIN_URL',
+      'a different Neon endpoint than DATABASE_ADMIN_URL (another project or branch)',
       'port differs from DATABASE_ADMIN_URL',
       'database name differs from DATABASE_ADMIN_URL',
     ]);
@@ -151,5 +158,28 @@ describe('pooled DATABASE_ADMIN_URL', () => {
     expect(admin.username).toBe('owner');
     expect(admin.password).toBe(pw);
     expect(admin.search).toBe('?sslmode=require');
+  });
+});
+
+describe('Neon endpoint identity across host formats', () => {
+  it('old and new (cell) host formats, pooled or not, are the same endpoint', () => {
+    const forms = [
+      'ep-old-shape-abc123.eu-central-1.aws.neon.tech',
+      'ep-old-shape-abc123.c-10.eu-central-1.aws.neon.tech',
+      'ep-old-shape-abc123-pooler.c-10.eu-central-1.aws.neon.tech',
+    ];
+    for (const a of forms) for (const b of forms) expect(sameServer(a, b)).toBe(true);
+    expect(neonEndpointId(forms[2] ?? '')).toBe('ep-old-shape-abc123');
+  });
+
+  it('a different endpoint (another project) is never the same server', () => {
+    expect(
+      sameServer('ep-a.c-10.eu-central-1.aws.neon.tech', 'ep-b.c-10.eu-central-1.aws.neon.tech'),
+    ).toBe(false);
+    const other = new URL('postgresql://bahith_app:p@ep-b.c-10.eu-central-1.aws.neon.tech/neondb');
+    const admin = new URL('postgresql://o:p@ep-a.c-10.eu-central-1.aws.neon.tech/neondb');
+    expect(roleUrlMismatches(other, admin, 'bahith_app')).toEqual([
+      'a different Neon endpoint than DATABASE_ADMIN_URL (another project or branch)',
+    ]);
   });
 });
