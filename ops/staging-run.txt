@@ -1,1 +1,1 @@
-2026-11-25 run 1: first staging migration, storage check and backup test (requested by the owner)
+2026-11-25 run 2: secrets added by the owner; migrate, verify, R2, backup/restore, real app journey against Neon staging
