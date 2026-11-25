@@ -4,7 +4,9 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import type { DumpReport } from '../../src/index';
 import {
+  dryRun,
   inspectDatabase,
+  loadMapping,
   loadDumpIntoContainer,
   MysqlLegacySource,
   parseMapping,
@@ -108,6 +110,28 @@ describe('legacy MySQL dump: real structure from the dump itself (synthetic fixt
       });
     } finally {
       await connection.end();
+    }
+  });
+
+  it('dry-runs the dump through the read-only source and explains every rejection', async () => {
+    const mapping = await loadMapping(
+      fileURLToPath(new URL('../../fixtures/mapping.synthetic-mysql.json', import.meta.url)),
+    );
+    const source = new MysqlLegacySource({ connectionString: loaded.uri, mapping });
+    try {
+      const plan = await dryRun(source, mapping);
+      expect(plan.readCounts).toMatchObject({ users: 3, subscriptions: 2 });
+      const reasons = plan.outcomes
+        .filter((o) => o.status !== 'accepted')
+        .map((o) => `${o.entity}:${o.reasons.join('+')}`)
+        .sort();
+      expect(reasons).toEqual([
+        'subscriptions:invalid:periodEnd+invalid:periodStart',
+        'subscriptions:subscription_without_payment',
+        'users:missing_email',
+      ]);
+    } finally {
+      await source.close();
     }
   });
 });

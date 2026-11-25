@@ -1,5 +1,6 @@
 import { parseArgs } from 'node:util';
 
+import { loadDumpIntoContainer } from './inspect';
 import { loadMapping } from './mapping';
 import { dryRun } from './planner';
 import { buildReport, writeReport } from './report';
@@ -16,7 +17,7 @@ import { PostgresLegacySource } from './sources/postgres';
  * history). Output contains counts, legacy ids and reason codes only.
  */
 const USAGE =
-  'usage: dry-run --source=json:<path>|postgres|mysql --mapping=<path> --out=<dir> [--since=<ISO date>]\n';
+  'usage: dry-run --source=dump:<file.sql>|json:<path>|postgres|mysql --mapping=<path> --out=<dir> [--since=<ISO date>]\n';
 
 async function main(argv: string[]): Promise<number> {
   const { values } = parseArgs({
@@ -35,7 +36,14 @@ async function main(argv: string[]): Promise<number> {
   }
   const mapping = await loadMapping(values.mapping);
   let source: LegacySource;
-  if (values.source.startsWith('json:')) {
+  let disposable: { stop(): Promise<unknown> } | undefined;
+  if (values.source.startsWith('dump:')) {
+    // The legacy MySQL dump file itself, loaded into a throwaway MariaDB container that is
+    // removed afterwards; read through the same read-only MySQL source.
+    const loaded = await loadDumpIntoContainer(values.source.slice('dump:'.length));
+    disposable = loaded.container;
+    source = new MysqlLegacySource({ connectionString: loaded.uri, mapping });
+  } else if (values.source.startsWith('json:')) {
     source = await JsonDumpSource.fromFile(values.source.slice('json:'.length), mapping);
   } else if (values.source === 'postgres') {
     const url = process.env['LEGACY_DATABASE_URL'];
@@ -78,6 +86,7 @@ async function main(argv: string[]): Promise<number> {
     return 0;
   } finally {
     await source.close();
+    await disposable?.stop();
   }
 }
 
