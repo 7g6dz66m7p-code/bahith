@@ -63,6 +63,21 @@ GitHub → Settings → Environments → `staging` → **Environment secrets**:
 ورحلة التطبيق بملفات حقيقية على R2 ثم حذف ملفات الحسابات الاختبارية وإثبات خلو بادئتها، ونسخة احتياطية تُرفع
 إلى R2 ثم تُنزَّل إلى مجلد فارغ وتُستعاد منها وحدها.
 
+## 3أ. الطريقة الآلية (بلا نسخ أي مفتاح يدوياً)
+
+قيم R2 لا تظهر لأحد: تُنشأ عبر Cloudflare API، وتُشفَّر بالمفتاح العام لبيئة `staging` (sealed box)، ولا
+يفك تشفيرها إلا GitHub. يلزم تفويضان مؤقتان فقط:
+
+1. **رمز Cloudflare مؤقت (bootstrap)** يُدخَل في النموذج الآمن لجلسة Claude (لا في المحادثة):
+   My Profile → API Tokens → Create Token → Custom token، الصلاحيات **User · API Tokens · Edit** و
+   **Account · Account Settings · Read**، الحساب نفسه فقط، وتاريخ انتهاء الغد. السكربت
+   `scripts/staging-r2-bootstrap.py` يُنشئ به الرمز `BAHITH-Staging-R2-CI` (حاوية `bahith-staging-files`
+   فقط، Object Read & Write)، ويختبره، ثم **يلغي رمز bootstrap نفسه**.
+2. **رمز GitHub دقيق (fine-grained)** يُحفظ كسرّ `GH_SECRETS_TOKEN` في بيئة `staging`:
+   المستودع `7g6dz66m7p-code/bahith` فقط، **Environments: Read and write** و**Secrets: Read-only**،
+   انتهاء بعد يوم. الـworkflow ‏`Staging secrets (sealed)` لا يكتب إلا الأسرار الثلاثة وفي `staging` فقط.
+   احذف الرمز بعد النجاح.
+
 ## 4. بعد الإضافة
 
 أخبرني، وسأشغّل بالترتيب: **Database migrate (Neon) → staging**، ثم **Storage check (R2 staging)**،
