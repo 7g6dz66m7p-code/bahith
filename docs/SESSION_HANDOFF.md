@@ -24,6 +24,17 @@ AI_CHAT_MODEL=openai:gpt-4.1 OPENAI_API_KEY=proxy-injected NODE_USE_ENV_PROXY=1 
 git push -u origin claude/new-session-tv7vfk   # عند إصلاح الصلاحيات
 ```
 
+## 2026-11-25
+
+- OpenAI يعمل فعلياً (سرّ شبكي لـ api.openai.com؛ `.env` المحلي: `OPENAI_API_KEY=proxy-injected`،
+  `AI_CHAT_MODEL=openai:gpt-5.4-mini`). التفاصيل: `docs/reports/openai-integration.md`.
+- Staging: `pnpm staging:env` ثم `docker compose -f docker-compose.staging.yml --env-file .env.staging up -d --build --wait`؛
+  الرحلة: `LOAD_BASE_URL=http://localhost:3200 LOAD_MAIL_URL=http://127.0.0.1:8225 pnpm --filter @bahith/web exec tsx load/prepare.ts > env.json`
+  ثم `STAGING_EXPECT_AI=1 tsx load/staging-journey.ts env.json`.
+- Docker هنا: مرآة `mirror.gcr.io` في `/etc/docker/daemon.json` (Docker Hub يحد الطلبات)، والبناء بـ
+  `--secret id=extra_ca,src=/root/.ccr/ca-bundle.crt` وbuild-args للوكيل.
+- قرار معلّق: بوابة eval على CI (x11/x12) — مطابقة المسافات في التحقق الحرفي.
+
 ## المتبقي (بالأولوية)
 
 1. واجهة إدخال الهاتف وفرض الإلزام (`REQUIRE_PHONE_VERIFICATION`) — الخادم جاهز (0011 + plugin).
