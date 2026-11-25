@@ -8,7 +8,8 @@ import { APP_ROLE, AUTH_ROLE } from './schema/_shared';
 export { seedReferenceData } from './seed';
 
 /** Same image as docker-compose.yml: Postgres 16 with pgvector. */
-export const POSTGRES_IMAGE = 'pgvector/pgvector:pg16';
+/** Postgres major under test; BAHITH_TEST_PG_IMAGE checks another (e.g. Neon's 18). */
+export const POSTGRES_IMAGE = process.env.BAHITH_TEST_PG_IMAGE ?? 'pgvector/pgvector:pg16';
 
 export interface TestDatabase {
   container: StartedPostgreSqlContainer;

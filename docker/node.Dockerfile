@@ -17,7 +17,9 @@ RUN --mount=type=secret,id=extra_ca,required=false \
     sh -c 'pnpm install --frozen-lockfile && pnpm --filter @bahith/web build'
 
 FROM base AS runtime
-# pg_dump/pg_restore 16 for the backup CLI (same major as the server), from PGDG.
+# Must equal the server's major version for backups (16 locally/CI, 18 on Neon).
+ARG PG_CLIENT_MAJOR=16
+# pg_dump/pg_restore for the backup CLI (same major as the server), from PGDG.
 RUN --mount=type=secret,id=extra_ca,required=false \
     sed -i 's#http://deb.debian.org#https://deb.debian.org#g' /etc/apt/sources.list.d/debian.sources \
  && if [ -s /run/secrets/extra_ca ]; then \
@@ -31,10 +33,10 @@ RUN --mount=type=secret,id=extra_ca,required=false \
       https://www.postgresql.org/media/keys/ACCC4CF8.asc \
  && echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt bookworm-pgdg main" \
       > /etc/apt/sources.list.d/pgdg.list \
- && apt-get update -qq && apt-get install -y -qq --no-install-recommends postgresql-client-16 \
+ && apt-get update -qq && apt-get install -y -qq --no-install-recommends postgresql-client-${PG_CLIENT_MAJOR} \
  && apt-get purge -y -qq curl gnupg && apt-get autoremove -y -qq \
  && rm -rf /var/lib/apt/lists/* /etc/apt/apt.conf.d/99extra-ca /tmp/extra-ca.crt
-ENV PATH=/usr/lib/postgresql/16/bin:$PATH NODE_ENV=production
+ENV PATH=/usr/lib/postgresql/${PG_CLIENT_MAJOR}/bin:$PATH NODE_ENV=production
 COPY --from=build --chown=node:node /app /app
 USER node
 
