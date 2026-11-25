@@ -4,11 +4,18 @@ name: Database backup and restore test
 # backup into a throwaway Postgres in the runner, which checks checksums, migrations and
 # row counts. A failed restore fails the job (and GitHub notifies).
 # Secrets (environment "production"): DATABASE_ADMIN_URL, DATABASE_URL,
-# AUTH_DATABASE_URL, R2_ACCOUNT_ID, R2_BACKUP_BUCKET, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY.
+# AUTH_DATABASE_URL, R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY; variable R2_BACKUP_BUCKET.
 on:
   schedule:
     - cron: '17 1 * * *'
   workflow_dispatch:
+    inputs:
+      target:
+        description: 'staging or production'
+        required: true
+        default: staging
+        type: choice
+        options: [staging, production]
 
 permissions:
   contents: read
@@ -16,7 +23,7 @@ permissions:
 jobs:
   backup:
     runs-on: ubuntu-latest
-    environment: production
+    environment: ${{ inputs.target || 'production' }}
     env:
       DATABASE_ADMIN_URL: ${{ secrets.DATABASE_ADMIN_URL }}
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
@@ -45,13 +52,19 @@ jobs:
           echo /usr/lib/postgresql/18/bin >> "$GITHUB_PATH"
       - name: Backup
         run: |
-          [ -n "$DATABASE_ADMIN_URL" ] || { echo "::error::production secrets are not set"; exit 1; }
+          if [ -z "$DATABASE_ADMIN_URL" ]; then
+            # The nightly run is a no-op until production exists; a manual run must not be.
+            if [ "${{ github.event_name }}" = schedule ]; then echo "::warning::no database secrets yet; skipped"; exit 0; fi
+            echo "::error::database secrets are not set for this environment"; exit 1
+          fi
           pnpm --filter @bahith/db exec tsx src/cli/backup.ts --allow-remote --dir="$RUNNER_TEMP/backup"
       - name: Restore test into an empty server
+        if: env.DATABASE_ADMIN_URL != ''
         env:
           DATABASE_ADMIN_URL: postgresql://postgres:restore-check-only@localhost:5432/postgres
         run: pnpm --filter @bahith/db exec tsx src/cli/restore.ts --dir="$RUNNER_TEMP/backup"
       - name: Upload to R2
+        if: env.DATABASE_ADMIN_URL != ''
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
@@ -59,5 +72,5 @@ jobs:
         run: |
           stamp=$(date -u +%Y-%m-%dT%H%MZ)
           tar -C "$RUNNER_TEMP" -czf "$RUNNER_TEMP/bahith-$stamp.tgz" backup
-          aws s3 cp "$RUNNER_TEMP/bahith-$stamp.tgz" "s3://${{ secrets.R2_BACKUP_BUCKET }}/db/bahith-$stamp.tgz" \
+          aws s3 cp "$RUNNER_TEMP/bahith-$stamp.tgz" "s3://${{ vars.R2_BACKUP_BUCKET }}/db-backups/bahith-$stamp.tgz" \
             --endpoint-url "https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com"

@@ -1,0 +1,33 @@
+name: Storage check (R2 staging)
+
+# Synthetic objects only, in a bucket whose name contains "staging" (the script refuses
+# any other bucket): upload with server-verified SHA-256, read back, stream, anonymous
+# access refused, delete, gone after delete. Production files are never touched.
+# Environment "staging": secrets R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY;
+# variable R2_BUCKET (bahith-staging-files).
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    environment: staging
+    env:
+      S3_ENDPOINT: https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
+      S3_REGION: auto
+      S3_BUCKET: ${{ vars.R2_BUCKET }}
+      S3_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      S3_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      S3_FORCE_PATH_STYLE: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @bahith/pipeline exec tsx src/cli/storage-check.ts

@@ -45,5 +45,5 @@ jobs:
         run: pnpm --filter @bahith/db exec tsx src/cli/migrate.ts --allow-remote
       - name: Reference data (plans; no prices)
         run: pnpm --filter @bahith/db exec tsx src/cli/seed.ts --allow-remote
-      - name: Verify (counts only)
-        run: pnpm --filter @bahith/db exec tsx src/cli/verify-deployment.ts --allow-remote
+      - name: Verify schema, RLS, roles, pgvector and tenant isolation (rolled back)
+        run: pnpm --filter @bahith/db exec tsx src/cli/verify-deployment.ts --allow-remote --isolation-smoke
