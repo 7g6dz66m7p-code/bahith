@@ -1,1 +1,1 @@
-2026-11-25 run 4: Neon pooled and direct hosts of one endpoint accepted; admin must be direct
+2026-11-25 run 5: pooled DATABASE_ADMIN_URL switched to the direct host of the same endpoint

@@ -89,9 +89,11 @@ export function loadCliEnv(
     );
   }
   if (isPooledHost(admin.hostname)) {
-    throw new DbError(
-      'DB_CONFIG_INVALID',
-      'DATABASE_ADMIN_URL uses the pooled host (-pooler): migrations need the direct host.',
+    // Migrations and backups need a session (not PgBouncer's transaction pooling). The
+    // direct host of the same Neon endpoint is the pooled host without "-pooler".
+    admin.hostname = endpointHost(admin.hostname);
+    process.stderr.write(
+      'notice: DATABASE_ADMIN_URL is pooled; using the direct host of the same endpoint.\n',
     );
   }
   const appProblems = roleUrlMismatches(app, admin, 'bahith_app');
@@ -121,7 +123,7 @@ export function loadCliEnv(
   }
 
   return {
-    adminUrl: parsed.data.DATABASE_ADMIN_URL,
+    adminUrl: admin.toString(),
     appUrl: parsed.data.DATABASE_URL,
     appPassword: decodeURIComponent(app.password),
     ...identity,

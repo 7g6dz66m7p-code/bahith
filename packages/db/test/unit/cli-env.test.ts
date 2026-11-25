@@ -127,3 +127,29 @@ describe('Neon direct and pooled hosts', () => {
     expect(roleUrlMismatches(pooledApp, admin, 'bahith_app')).toEqual([]);
   });
 });
+
+describe('pooled DATABASE_ADMIN_URL', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.restoreAllMocks();
+  });
+
+  it('is switched to the direct host of the same endpoint, credentials unchanged', () => {
+    vi.spyOn(process, 'loadEnvFile').mockImplementation(() => undefined);
+    vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
+    const host = 'ep-x.c-1.eu-central-1.aws.neon.tech';
+    const pooled = host.replace('ep-x.', 'ep-x-pooler.');
+    vi.stubEnv('DATABASE_ADMIN_URL', `postgresql://owner:${pw}@${pooled}/neondb?sslmode=require`);
+    vi.stubEnv('DATABASE_URL', `postgresql://bahith_app:${pw}@${pooled}/neondb?sslmode=require`);
+    vi.stubEnv(
+      'AUTH_DATABASE_URL',
+      `postgresql://bahith_auth:${pw}@${host}/neondb?sslmode=require`,
+    );
+    const env = loadCliEnv(['--allow-remote'], { requireAuth: true });
+    const admin = new URL(env.adminUrl);
+    expect(admin.hostname).toBe(host);
+    expect(admin.username).toBe('owner');
+    expect(admin.password).toBe(pw);
+    expect(admin.search).toBe('?sslmode=require');
+  });
+});
