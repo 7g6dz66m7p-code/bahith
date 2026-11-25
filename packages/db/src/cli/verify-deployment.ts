@@ -78,6 +78,7 @@ runCli(async () => {
           `bypass=${bypass.join(',')} foreign=${foreign.join(',')}`,
       );
     }
+    await roleLogins(env.appUrl, env.authUrl, env.adminUrl);
     if (process.argv.includes('--isolation-smoke')) await isolationSmoke(client);
   } finally {
     await client.end();
@@ -157,4 +158,65 @@ async function isolationSmoke(client: pg.Client): Promise<void> {
   } finally {
     await client.query('ROLLBACK');
   }
+}
+
+/**
+ * Each runtime role logs in with its own URL and can do only its own job; the
+ * provisioner role can never log in. Prints role names and outcomes only.
+ */
+async function roleLogins(appUrl: string, authUrl: string | undefined, adminUrl: string) {
+  const probe = async (
+    url: string,
+    expected: string,
+    forbiddenTable: string,
+  ): Promise<Record<string, string>> => {
+    const role = new pg.Client({ connectionString: url });
+    await role.connect();
+    try {
+      const who = await role.query<{ user: string; bypass: boolean; superuser: boolean }>(
+        `SELECT current_user AS user, rolbypassrls AS bypass, rolsuper AS superuser
+           FROM pg_roles WHERE rolname = current_user`,
+      );
+      const row = who.rows[0];
+      let forbidden = 'readable';
+      try {
+        await role.query(`SELECT 1 FROM ${forbiddenTable} LIMIT 1`);
+      } catch (error) {
+        forbidden = (error as { code?: string }).code === '42501' ? 'refused' : 'error';
+      }
+      return {
+        role: row?.user ?? '?',
+        expected,
+        bypassRls: String(row?.bypass),
+        superuser: String(row?.superuser),
+        [forbiddenTable]: forbidden,
+      };
+    } finally {
+      await role.end();
+    }
+  };
+  const results = [await probe(appUrl, 'bahith_app', 'sessions')];
+  if (authUrl !== undefined) results.push(await probe(authUrl, 'bahith_auth', 'projects'));
+  const provisioner = new URL(adminUrl);
+  provisioner.username = 'bahith_identity_provisioner';
+  provisioner.password = 'login-must-be-refused';
+  let provisionerLogin = 'allowed';
+  const attempt = new pg.Client({ connectionString: provisioner.toString() });
+  try {
+    await attempt.connect();
+    await attempt.end();
+  } catch {
+    provisionerLogin = 'refused';
+  }
+  process.stdout.write(
+    `role logins: ${JSON.stringify(results)}; bahith_identity_provisioner login: ${provisionerLogin}\n`,
+  );
+  const bad = results.some(
+    (r) =>
+      r.role !== r.expected ||
+      r.bypassRls !== 'false' ||
+      r.superuser !== 'false' ||
+      Object.values(r).includes('readable'),
+  );
+  if (bad || provisionerLogin !== 'refused') throw new Error('ROLE_LOGIN_CHECK_FAILED');
 }

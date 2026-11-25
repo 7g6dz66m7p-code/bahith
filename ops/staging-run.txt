@@ -1,1 +1,1 @@
-2026-11-25 run 7: role URLs rebuilt from DATABASE_ADMIN_URL's host and the secrets' passwords
+2026-11-25 run 8: new Neon-compliant role passwords; role login checks
