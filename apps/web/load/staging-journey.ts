@@ -12,7 +12,10 @@ const env = JSON.parse(await readFile(process.argv[2] ?? '', 'utf8')) as {
   WORKSPACE_ID: string;
   PROJECT_ID: string;
 };
-if (!/^http:\/\/(localhost|127\.0\.0\.1):\d+$/u.test(env.BASE)) throw new Error('local stack only');
+// Local stacks, or a staging host (never the production domain): it creates test accounts.
+if (!/^(http:\/\/(localhost|127\.0\.0\.1):\d+|https:\/\/staging\.[a-z0-9.-]+)$/u.test(env.BASE)) {
+  throw new Error('local or staging stacks only');
+}
 const headers = { origin: env.BASE, cookie: env.COOKIE, 'content-type': 'application/json' };
 const q = `workspaceId=${env.WORKSPACE_ID}`;
 const step = (name: string, ok: boolean, detail = '') => {

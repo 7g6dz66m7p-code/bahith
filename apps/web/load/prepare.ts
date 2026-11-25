@@ -8,7 +8,10 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
 const BASE = process.env.LOAD_BASE_URL ?? 'http://localhost:3100';
-if (!/^http:\/\/(localhost|127\.0\.0\.1):\d+$/u.test(BASE)) throw new Error('local harness only');
+// Local stacks, or a staging host (never the production domain): it creates test accounts.
+if (!/^(http:\/\/(localhost|127\.0\.0\.1):\d+|https:\/\/staging\.[a-z0-9.-]+)$/u.test(BASE)) {
+  throw new Error('local or staging stacks only');
+}
 // The staging stack passes its own Mailpit (LOAD_MAIL_URL); the e2e harness writes its own.
 const runtime =
   process.env.LOAD_MAIL_URL === undefined
