@@ -11,7 +11,17 @@ BEGIN
 END
 $$;
 --> statement-breakpoint
-ALTER ROLE bahith_app NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE NOREPLICATION;
+-- A pre-existing role is corrected only when it actually holds a dangerous attribute:
+-- managed Postgres owners (e.g. Neon's neondb_owner) are not superusers and may not run
+-- ALTER ROLE ... NOSUPERUSER at all, even as a no-op. (Revision 2, see migrator.ts.)
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'bahith_app'
+             AND (rolsuper OR rolbypassrls OR rolcreatedb OR rolcreaterole OR rolreplication)) THEN
+    ALTER ROLE bahith_app NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE NOREPLICATION;
+  END IF;
+END
+$$;
 --> statement-breakpoint
 -- Every privilege of the application role is listed explicitly below.
 GRANT USAGE ON SCHEMA public TO bahith_app;

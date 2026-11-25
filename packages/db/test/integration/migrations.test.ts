@@ -4,7 +4,7 @@ import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { z } from 'zod';
 
-import { loadMigrations, migrateUp, rollbackLast } from '../../src/migrator';
+import { EQUIVALENT_REVISIONS, loadMigrations, migrateUp, rollbackLast } from '../../src/migrator';
 import { POSTGRES_IMAGE } from '../../src/testing';
 
 /**
@@ -57,6 +57,28 @@ describe('migrations', () => {
 
   it('is idempotent: a second run applies nothing', async () => {
     expect(await migrateUp(client)).toEqual([]);
+  });
+
+  it('accepts only the listed earlier checksum of a revised migration', async () => {
+    const setChecksum = (tag: string, checksum: string) =>
+      client.query('UPDATE schema_migrations SET checksum = $2 WHERE tag = $1', [tag, checksum]);
+    const current = new Map((await loadMigrations()).map((m) => [m.tag, m.checksum]));
+    try {
+      for (const [tag, previous] of Object.entries(EQUIVALENT_REVISIONS)) {
+        // A database migrated with the earlier text keeps working…
+        await setChecksum(tag, previous[0] ?? '');
+        expect(await migrateUp(client)).toEqual([]);
+      }
+      // …but any other change to an applied migration is still refused.
+      await setChecksum('0002_security', 'f'.repeat(64));
+      await expect(migrateUp(client)).rejects.toMatchObject({
+        code: 'DB_MIGRATION_CHECKSUM_MISMATCH',
+      });
+    } finally {
+      for (const tag of Object.keys(EQUIVALENT_REVISIONS)) {
+        await setChecksum(tag, current.get(tag) ?? '');
+      }
+    }
   });
 
   it('creates the HNSW and GIN indexes on chunks', async () => {

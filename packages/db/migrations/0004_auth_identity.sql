@@ -87,8 +87,20 @@ BEGIN
   END IF;
 END
 $$;
-ALTER ROLE bahith_auth NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE NOREPLICATION NOINHERIT;
-ALTER ROLE bahith_identity_provisioner NOLOGIN NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE NOREPLICATION NOINHERIT;
+-- Corrected only when a pre-existing role holds a dangerous attribute (revision 2: managed
+-- Postgres owners may not run ALTER ROLE ... NOSUPERUSER, even as a no-op).
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'bahith_auth'
+             AND (rolsuper OR rolbypassrls OR rolcreatedb OR rolcreaterole OR rolreplication OR rolinherit)) THEN
+    ALTER ROLE bahith_auth NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE NOREPLICATION NOINHERIT;
+  END IF;
+  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'bahith_identity_provisioner'
+             AND (rolcanlogin OR rolsuper OR rolbypassrls OR rolcreatedb OR rolcreaterole OR rolreplication OR rolinherit)) THEN
+    ALTER ROLE bahith_identity_provisioner NOLOGIN NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE NOREPLICATION NOINHERIT;
+  END IF;
+END
+$$;
 GRANT USAGE ON SCHEMA public TO bahith_auth;
 GRANT SELECT, INSERT, UPDATE, DELETE ON users, sessions, accounts, verifications, two_factors, auth_rate_limits TO bahith_auth;
 REVOKE INSERT, UPDATE ON users FROM bahith_app;
@@ -124,7 +136,19 @@ BEGIN
 END;
 $$;
 GRANT CREATE ON SCHEMA app TO bahith_identity_provisioner;
-ALTER FUNCTION app.provision_personal_workspace() OWNER TO bahith_identity_provisioner;
+-- Handing the function to the provisioner needs SET ROLE on it; a non-superuser owner
+-- (Neon) gets that only through a temporary grant, revoked right after (revision 2).
+DO $$
+BEGIN
+  IF NOT pg_has_role(current_user, 'bahith_identity_provisioner', 'SET') THEN
+    EXECUTE format('GRANT bahith_identity_provisioner TO %I WITH INHERIT FALSE, SET TRUE', current_user);
+    ALTER FUNCTION app.provision_personal_workspace() OWNER TO bahith_identity_provisioner;
+    EXECUTE format('REVOKE bahith_identity_provisioner FROM %I', current_user);
+  ELSE
+    ALTER FUNCTION app.provision_personal_workspace() OWNER TO bahith_identity_provisioner;
+  END IF;
+END
+$$;
 REVOKE CREATE ON SCHEMA app FROM bahith_identity_provisioner;
 REVOKE ALL ON FUNCTION app.provision_personal_workspace() FROM PUBLIC;
 CREATE TRIGGER users_personal_workspace AFTER INSERT ON users

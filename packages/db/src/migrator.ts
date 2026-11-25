@@ -65,6 +65,18 @@ export async function loadMigrations(dir: string = MIGRATIONS_DIR): Promise<Migr
   );
 }
 
+/**
+ * Earlier checksums that are accepted for a migration revised in place. Only for
+ * revisions with the same end state on every database where the old text succeeded:
+ * 0002 and 0004 revision 2 (2026-11-25) run the same ALTER ROLE only when a role
+ * actually holds a dangerous attribute, so they also work for non-superuser owners
+ * (Neon). Anything else still fails with DB_MIGRATION_CHECKSUM_MISMATCH.
+ */
+export const EQUIVALENT_REVISIONS: Readonly<Record<string, readonly string[]>> = {
+  '0002_security': ['b2d9d37e5845ac6b4b297b32c343c3d2a133c317639ed3345645549ae9b6e371'],
+  '0004_auth_identity': ['d0aa75417fa37fedc4cc1abd8fa49a65a02dc7537bc6e1135d728e93bd31723b'],
+};
+
 const appliedRowSchema = z.object({ tag: z.string(), checksum: z.string() });
 
 async function ensureMigrationsTable(client: pg.ClientBase): Promise<void> {
@@ -119,7 +131,10 @@ export async function migrateUp(
   for (const migration of all) {
     const appliedChecksum = applied.get(migration.tag);
     if (appliedChecksum !== undefined) {
-      if (appliedChecksum !== migration.checksum) {
+      if (
+        appliedChecksum !== migration.checksum &&
+        !(EQUIVALENT_REVISIONS[migration.tag] ?? []).includes(appliedChecksum)
+      ) {
         throw new DbError(
           'DB_MIGRATION_CHECKSUM_MISMATCH',
           `Migration ${migration.tag} was modified after it was applied. Add a new migration instead.`,
