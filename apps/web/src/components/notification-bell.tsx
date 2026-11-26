@@ -26,10 +26,15 @@ export function NotificationBell({ count }: { count: number }) {
         <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
       </svg>
       <span>{t('bell')}</span>
+      {/* The count is drawn by CSS from data-count, so the link's visible text stays "the
+          bell" and its spoken name (aria-label) contains it (WCAG 2.5.3 Label in Name). */}
       {count > 0 ? (
-        <span className="notification-count" aria-hidden="true" data-testid="notification-count">
-          {count > 99 ? t('manyUnread') : count}
-        </span>
+        <span
+          className="notification-count"
+          aria-hidden="true"
+          data-testid="notification-count"
+          data-count={count > 99 ? t('manyUnread') : String(count)}
+        />
       ) : null}
     </Link>
   );

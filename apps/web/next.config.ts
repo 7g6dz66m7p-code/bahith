@@ -50,7 +50,7 @@ const nextConfig: NextConfig = {
     ]);
   },
   // Workspace packages ship TypeScript sources; Next compiles them.
-  transpilePackages: ['@bahith/db', '@bahith/auth'],
+  transpilePackages: ['@bahith/db', '@bahith/auth', '@bahith/ui'],
   poweredByHeader: false,
   reactStrictMode: true,
   typedRoutes: true,
