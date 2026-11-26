@@ -41,3 +41,7 @@ __pycache__/
 
 # eval output (copied into reports, not committed)
 eval/sanad/results/
+
+# Storybook and Lighthouse CI build output
+storybook-static/
+.lighthouseci/

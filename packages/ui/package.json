@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./liquid-glass.css": "./src/liquid-glass.css"
   },
   "scripts": {
     "lint": "eslint .",
@@ -13,7 +14,17 @@
   "devDependencies": {
     "@bahith/config": "workspace:*",
     "@types/node": "^22.19.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
     "eslint": "^9.39.5",
+    "motion": "14.13.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
     "typescript": "~6.0.3"
+  },
+  "peerDependencies": {
+    "motion": "^14.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   }
 }

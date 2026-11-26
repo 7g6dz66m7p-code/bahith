@@ -3,52 +3,61 @@
 @import '@fontsource/ibm-plex-sans-arabic/400.css';
 @import '@fontsource/ibm-plex-sans-arabic/600.css';
 @import '@fontsource-variable/noto-naskh-arabic';
+@import '@bahith/ui/liquid-glass.css';
+/* The glass engine's components use Tailwind utilities too. */
+@source '../../../../packages/ui/src';
 
 :root {
   color-scheme: light;
-  --background: #f5f4ef;
-  --foreground: #172f2c;
-  --surface: #ffffff;
-  --border: #c2d0c9;
-  --muted: #50615e;
-  --accent: #1f6757;
+  --background: #eef8f3;
+  --foreground: #022c22;
+  --surface: #fbfefc;
+  --border: #8fb9a7;
+  --muted: #2f5d50;
+  --accent: #047857;
   --danger: #a72332;
-  --surface-glass: rgb(255 255 255 / 0.8);
-  --glow: rgb(31 103 87 / 0.1);
-  --shadow: 0 1px 2px rgb(23 47 44 / 0.06), 0 12px 32px -12px rgb(23 47 44 / 0.18);
+  --surface-glass: rgb(255 255 255 / 0.66);
+  --glow: rgb(16 185 129 / 0.18);
+  --shadow: 0 1px 1px rgb(2 44 34 / 0.04), 0 18px 40px -22px rgb(2 44 34 / 0.35);
 }
+/* BAHITH Liquid Glass palette (tokens in @bahith/ui/liquid-glass.css); the semantic
+   names below are what every page uses, so all pages share the same theme. */
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --background: #101c1b;
-  --foreground: #edf4ef;
-  --surface: #1a2a27;
-  --border: #4f655e;
-  --muted: #b9c9c1;
-  --accent: #93d7bc;
+  --background: #022c22;
+  --foreground: #ecfdf5;
+  --surface: #053b2e;
+  --border: #2f7a62;
+  --muted: #a7d8c4;
+  --accent: #34d399;
   --danger: #ffabb2;
-  --surface-glass: rgb(26 42 39 / 0.82);
-  --glow: rgb(147 215 188 / 0.08);
-  --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 12px 32px -12px rgb(0 0 0 / 0.55);
+  --surface-glass: rgb(6 78 59 / 0.45);
+  --glow: rgb(16 185 129 / 0.3);
+  --shadow: 0 1px 1px rgb(0 0 0 / 0.25), 0 22px 48px -24px rgb(0 0 0 / 0.75);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     color-scheme: dark;
-    --background: #101c1b;
-    --foreground: #edf4ef;
-    --surface: #1a2a27;
-    --border: #4f655e;
-    --muted: #b9c9c1;
-    --accent: #93d7bc;
+    --background: #022c22;
+    --foreground: #ecfdf5;
+    --surface: #053b2e;
+    --border: #2f7a62;
+    --muted: #a7d8c4;
+    --accent: #34d399;
     --danger: #ffabb2;
-    --surface-glass: rgb(26 42 39 / 0.82);
-    --glow: rgb(147 215 188 / 0.08);
-    --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 12px 32px -12px rgb(0 0 0 / 0.55);
+    --surface-glass: rgb(6 78 59 / 0.45);
+    --glow: rgb(16 185 129 / 0.3);
+    --shadow: 0 1px 1px rgb(0 0 0 / 0.25), 0 22px 48px -24px rgb(0 0 0 / 0.75);
   }
+}
+html {
+  background: var(--lg-bg-2);
 }
 body {
   background:
     radial-gradient(60rem 30rem at 85% -10%, var(--glow), transparent 70%),
-    radial-gradient(50rem 28rem at 0% 110%, var(--glow), transparent 70%), var(--background);
+    radial-gradient(50rem 28rem at 0% 110%, var(--glow), transparent 70%),
+    linear-gradient(180deg, var(--lg-bg-1), var(--lg-bg-2));
   background-attachment: fixed;
   min-height: 100vh;
   color: var(--foreground);
@@ -79,8 +88,8 @@ button:disabled {
   opacity: 0.65;
 }
 .surface {
-  border: 1px solid var(--border);
-  border-radius: 1.5rem;
+  border: 1px solid var(--lg-edge);
+  border-radius: var(--lg-radius-lg);
   background: var(--surface);
   box-shadow: var(--shadow);
 }
@@ -89,8 +98,8 @@ button:disabled {
   @media not (prefers-reduced-transparency: reduce) {
     .surface {
       background: var(--surface-glass);
-      -webkit-backdrop-filter: saturate(160%) blur(18px);
-      backdrop-filter: saturate(160%) blur(18px);
+      -webkit-backdrop-filter: saturate(var(--lg-saturate)) blur(var(--lg-blur));
+      backdrop-filter: saturate(var(--lg-saturate)) blur(var(--lg-blur));
     }
   }
 }
@@ -123,7 +132,7 @@ button:disabled {
   align-items: center;
   justify-content: center;
   min-height: 2.875rem;
-  border-radius: 0.85rem;
+  border-radius: 999px;
   padding: 0.65rem 1.15rem;
   font-weight: 600;
   text-align: center;
@@ -294,6 +303,9 @@ button:disabled {
   line-height: 1.4rem;
   text-align: center;
 }
+.notification-count::before {
+  content: attr(data-count);
+}
 .notification-unread {
   border-inline-start: 4px solid var(--accent);
 }
@@ -339,4 +351,25 @@ button:disabled {
   :root:not([data-theme='light']) .highlight-pink {
     --highlight: #f5a3c9;
   }
+}
+
+/* Liquid Glass dashboard: the latest sources as book spines (title, year, verification). */
+.lg-book {
+  position: relative;
+  border: 1px solid var(--lg-edge);
+  border-radius: 0.6rem 0.9rem 0.9rem 0.6rem;
+  color: #ecfdf5;
+  box-shadow:
+    inset 6px 0 0 rgb(0 0 0 / 0.22),
+    var(--lg-shadow);
+  background: linear-gradient(160deg, #065f46, #022c22);
+}
+.lg-book[data-tone='1'] {
+  background: linear-gradient(160deg, #0f766e, #042f2e);
+}
+.lg-book[data-tone='2'] {
+  background: linear-gradient(160deg, #14532d, #052e16);
+}
+.lg-book[data-tone='3'] {
+  background: linear-gradient(160deg, #1e3a5f, #0b1b2e);
 }

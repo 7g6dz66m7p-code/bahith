@@ -191,7 +191,7 @@ test('a review note notifies the owner only; reading and marking stay private', 
     await page.goto(`/${locale}/dashboard`);
     const bell = page.getByTestId('notification-bell');
     await expect(bell).toHaveAttribute('aria-label', n.bellUnread.replace('{count}', '2'));
-    await expect(page.getByTestId('notification-count')).toHaveText('2');
+    await expect(page.getByTestId('notification-count')).toHaveAttribute('data-count', '2');
     await bell.click();
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(n.title);
     const items = page.getByTestId('notification');

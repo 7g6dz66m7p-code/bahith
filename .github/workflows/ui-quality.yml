@@ -1,0 +1,88 @@
+name: UI quality
+
+# The Liquid Glass UI: Storybook builds, every visual story matches its baseline in
+# Arabic/English and light/dark with no serious axe violation, and Lighthouse CI holds
+# the public pages to accessibility, best-practice and layout-shift budgets (performance
+# and LCP are reported as warnings until a production-like host exists). No secrets.
+on:
+  push:
+    paths:
+      - 'apps/web/**'
+      - 'packages/ui/**'
+      - 'packages/config/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/ui-quality.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ui-quality-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  NEXT_TELEMETRY_DISABLED: '1'
+  STORYBOOK_DISABLE_TELEMETRY: '1'
+
+jobs:
+  storybook:
+    name: Storybook, visual regression and story accessibility
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @bahith/web exec playwright install --with-deps chromium
+      - run: pnpm --filter @bahith/web build-storybook
+      - run: pnpm --filter @bahith/web test:visual
+      - name: Visual differences (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-diffs
+          path: apps/web/test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+      - name: Storybook (static)
+        uses: actions/upload-artifact@v4
+        with:
+          name: storybook-static
+          path: apps/web/storybook-static/
+          retention-days: 7
+
+  lighthouse:
+    name: Lighthouse CI (public pages, ar + en)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      # The real app runs with its services (database, Redis, mail, storage, workers).
+      - uses: astral-sh/setup-uv@v6
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq tesseract-ocr tesseract-ocr-ara tesseract-ocr-eng
+      - run: sudo scripts/install-arabic-ocr-model.sh
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @bahith/web exec playwright install --with-deps chromium
+      - name: Lighthouse CI
+        working-directory: apps/web
+        run: |
+          export CHROME_PATH="$(node -e "console.log(require('@playwright/test').chromium.executablePath())")"
+          pnpm exec lhci autorun --config=lighthouserc.json
+      - name: Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-reports
+          path: apps/web/.lighthouseci/
+          retention-days: 7
+          if-no-files-found: ignore

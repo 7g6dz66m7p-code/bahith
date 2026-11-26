@@ -636,5 +636,140 @@
     "sendFailed": "We couldn’t send the code. Try again later.",
     "tooManyRequests": "Too many attempts. Wait a few minutes and try again.",
     "unavailable": "SMS verification is not available yet. You can keep using your account normally."
+  },
+  "Glass": {
+    "brandName": "BAHITH",
+    "brandLatin": "BAHITH",
+    "tagline": "The smart scientific research platform",
+    "pillars": {
+      "precise": "Precise search",
+      "trusted": "Evidence-backed sources",
+      "deeper": "Deeper analysis",
+      "ai": "AI-assisted"
+    },
+    "nav": {
+      "label": "Main navigation",
+      "openMenu": "Menu",
+      "closeMenu": "Close menu",
+      "dashboard": "Dashboard",
+      "search": "Scientific search",
+      "projects": "My projects",
+      "sources": "My sources",
+      "library": "Library",
+      "assistant": "AI assistant",
+      "sanad": "Verification (SANAD-X)",
+      "reports": "Reports",
+      "teams": "Teams",
+      "settings": "Settings",
+      "unavailable": "Not available yet",
+      "needsProject": "Needs a project"
+    },
+    "topbar": {
+      "label": "Account bar",
+      "upload": "Upload a source to the latest project"
+    },
+    "search": {
+      "label": "Search your project's sources",
+      "placeholder": "Start your research…",
+      "submit": "Search",
+      "scope": "Project whose sources are searched",
+      "noProject": "Create a project and upload its sources to search them here.",
+      "resultsTitle": "Results from the sources of “{project}”",
+      "noResults": "No matching passage in this project's sources.",
+      "error": "Search is unavailable right now. Try again.",
+      "page": "Page {page}",
+      "noPage": "No page number",
+      "openSource": "Open source",
+      "searching": "Searching…",
+      "note": "Searches the text of the sources actually uploaded and shows the page each passage comes from."
+    },
+    "tools": {
+      "title": "Research tools",
+      "projects": "Research projects",
+      "sources": "Source analysis",
+      "library": "Academic library",
+      "assistant": "AI assistant",
+      "content": "Content analysis",
+      "compare": "Study comparison",
+      "references": "References & citations",
+      "unavailable": "Not available yet",
+      "needsProject": "Create a project first"
+    },
+    "assistant": {
+      "title": "AI assistant",
+      "description": "Answers only from your project's sources: every sentence is tied to a passage and page, and it says “no evidence found” when there is none.",
+      "start": "Start a new conversation",
+      "needsProject": "Needs a project with sources"
+    },
+    "activity": {
+      "title": "Recent activity",
+      "empty": "No activity yet.",
+      "all": "View all activity"
+    },
+    "workflow": {
+      "title": "Research workflow",
+      "project": "Project: {title}",
+      "question": "Define the topic",
+      "sources": "Collect sources",
+      "analysed": "Analyse content",
+      "drafted": "Write the draft",
+      "review": "Final review",
+      "untracked": "Not tracked by the platform yet",
+      "done": "Done",
+      "pending": "Not done",
+      "ring": "{percent}% of the tracked stages done",
+      "basis": "Computed from the 4 stages the platform tracks",
+      "empty": "Create a project to see its workflow here."
+    },
+    "projectsCard": {
+      "title": "My research projects",
+      "viewAll": "View all",
+      "updated": "Last activity: {date}",
+      "progress": "Tracked stages done: {percent}%",
+      "empty": "No projects yet."
+    },
+    "stats": {
+      "title": "My numbers",
+      "projects": "Projects",
+      "sources": "Sources",
+      "notes": "Notes",
+      "drafts": "Drafts",
+      "partial": "Computed from the newest {counted} of {total} projects.",
+      "failed": "The details of {count} project(s) could not be read."
+    },
+    "shelf": {
+      "title": "My latest sources",
+      "empty": "No sources added yet.",
+      "verified": "Metadata verified",
+      "unverified": "Not verified yet",
+      "open": "Open the project library",
+      "previous": "Previous sources",
+      "next": "Next sources"
+    },
+    "sanad": {
+      "title": "SANAD-X",
+      "description": "Verify quotations and claims with evidence from the source text itself.",
+      "claims": "Check a claim",
+      "quotes": "Check quotations",
+      "plagiarism": "Plagiarism detection",
+      "review": "Human review",
+      "unavailable": "Not available",
+      "needsProject": "Needs a project"
+    },
+    "chart": {
+      "title": "Research activity (last 30 days)",
+      "total": "{count, plural, =0 {No events} one {# event} other {# events}}",
+      "change": "{value}% compared with the previous two weeks",
+      "noBase": "No basis for comparison yet",
+      "basis": "Sources added, drafts updated, notes and new projects.",
+      "day": "{date}: {count}"
+    },
+    "plan": {
+      "title": "Plan",
+      "none": "No plan",
+      "ai": "AI requests this month: {used} of {limit}",
+      "aiNoLimit": "AI requests this month: {used} (no limit set)",
+      "current": "Plan: {name}"
+    }
   }
 }

@@ -1,0 +1,472 @@
+/*
+ * BAHITH Liquid Glass — design tokens and glass primitives.
+ *
+ * Palette (brand): Deep Emerald #022C22, Dark Emerald #064E3B, Primary Green #059669,
+ * Neon Green #10B981, Light Emerald #34D399, Glass White #ECFDF5. Text and controls use
+ * the shades below that keep WCAG 2.2 AA contrast in both themes (e.g. white on #047857
+ * is 5.5:1, #022C22 on #10B981 is 7:1); the neon greens are for light and glow only.
+ *
+ * Effects degrade in three steps: html[data-glass='lite'] (set by GlassThemeProvider on
+ * low-power devices or Save-Data) drops blur and motion, prefers-reduced-motion drops
+ * motion, prefers-reduced-transparency and browsers without backdrop-filter get solid
+ * surfaces.
+ */
+:root {
+  --lg-deep: #022c22;
+  --lg-dark: #064e3b;
+  --lg-primary: #059669;
+  --lg-neon: #10b981;
+  --lg-light: #34d399;
+  --lg-white: #ecfdf5;
+  --lg-ink-strong: #047857;
+
+  --lg-radius-sm: 0.75rem;
+  --lg-radius: 1.25rem;
+  --lg-radius-lg: 1.75rem;
+  --lg-blur: 18px;
+  --lg-saturate: 170%;
+  --lg-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --lg-duration: 260ms;
+
+  /* Light theme: glass white over pale emerald. */
+  --lg-bg-1: #f2fbf7;
+  --lg-bg-2: #dff5ea;
+  --lg-surface: rgb(255 255 255 / 0.62);
+  --lg-surface-solid: #fbfefc;
+  --lg-surface-strong: rgb(255 255 255 / 0.8);
+  --lg-edge: rgb(6 78 59 / 0.16);
+  --lg-edge-strong: rgb(5 150 105 / 0.45);
+  --lg-highlight: rgb(255 255 255 / 0.85);
+  --lg-sheen: rgb(255 255 255 / 0.55);
+  --lg-glow: rgb(16 185 129 / 0.22);
+  --lg-glow-soft: rgb(52 211 153 / 0.14);
+  --lg-wave-1: rgb(16 185 129 / 0.18);
+  --lg-wave-2: rgb(5 150 105 / 0.14);
+  --lg-wave-3: rgb(52 211 153 / 0.12);
+  --lg-shadow: 0 1px 1px rgb(2 44 34 / 0.04), 0 18px 40px -22px rgb(2 44 34 / 0.35);
+  --lg-button-bg: linear-gradient(135deg, #047857, #065f46);
+  --lg-button-fg: #ffffff;
+  --lg-track: rgb(6 78 59 / 0.12);
+  --lg-ink: #047857;
+}
+
+:root[data-theme='dark'] {
+  --lg-bg-1: #022c22;
+  --lg-bg-2: #01231b;
+  --lg-surface: rgb(6 78 59 / 0.42);
+  --lg-surface-solid: #053b2e;
+  --lg-surface-strong: rgb(6 78 59 / 0.62);
+  --lg-edge: rgb(52 211 153 / 0.2);
+  --lg-edge-strong: rgb(52 211 153 / 0.55);
+  --lg-highlight: rgb(236 253 245 / 0.14);
+  --lg-sheen: rgb(236 253 245 / 0.14);
+  --lg-glow: rgb(16 185 129 / 0.32);
+  --lg-glow-soft: rgb(52 211 153 / 0.16);
+  --lg-wave-1: rgb(16 185 129 / 0.24);
+  --lg-wave-2: rgb(5 150 105 / 0.22);
+  --lg-wave-3: rgb(52 211 153 / 0.16);
+  --lg-shadow: 0 1px 1px rgb(0 0 0 / 0.25), 0 22px 48px -24px rgb(0 0 0 / 0.75);
+  --lg-button-bg: linear-gradient(135deg, #34d399, #10b981);
+  --lg-button-fg: #022c22;
+  --lg-track: rgb(236 253 245 / 0.12);
+  --lg-ink: #34d399;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --lg-bg-1: #022c22;
+    --lg-bg-2: #01231b;
+    --lg-surface: rgb(6 78 59 / 0.42);
+    --lg-surface-solid: #053b2e;
+    --lg-surface-strong: rgb(6 78 59 / 0.62);
+    --lg-edge: rgb(52 211 153 / 0.2);
+    --lg-edge-strong: rgb(52 211 153 / 0.55);
+    --lg-highlight: rgb(236 253 245 / 0.14);
+    --lg-sheen: rgb(236 253 245 / 0.14);
+    --lg-glow: rgb(16 185 129 / 0.32);
+    --lg-glow-soft: rgb(52 211 153 / 0.16);
+    --lg-wave-1: rgb(16 185 129 / 0.24);
+    --lg-wave-2: rgb(5 150 105 / 0.22);
+    --lg-wave-3: rgb(52 211 153 / 0.16);
+    --lg-shadow: 0 1px 1px rgb(0 0 0 / 0.25), 0 22px 48px -24px rgb(0 0 0 / 0.75);
+    --lg-button-bg: linear-gradient(135deg, #34d399, #10b981);
+    --lg-button-fg: #022c22;
+    --lg-track: rgb(236 253 245 / 0.12);
+    --lg-ink: #34d399;
+  }
+}
+
+/* ---------- Glass surface ---------- */
+.lg-glass {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid var(--lg-edge);
+  border-radius: var(--lg-radius);
+  background: var(--lg-surface-solid);
+  box-shadow:
+    var(--lg-shadow),
+    inset 0 1px 0 var(--lg-highlight);
+}
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  @media not (prefers-reduced-transparency: reduce) {
+    html:not([data-glass='lite']) .lg-glass {
+      background: var(--lg-surface);
+      -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+      backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+    }
+  }
+}
+.lg-glass[data-elevation='raised'] {
+  background: var(--lg-surface-strong);
+}
+/* Specular light that follows the pointer (--lg-x/--lg-y are set by GlassCard). */
+.lg-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      28rem circle at var(--lg-x, 85%) var(--lg-y, -20%),
+      var(--lg-sheen),
+      transparent 42%
+    ),
+    linear-gradient(160deg, var(--lg-highlight), transparent 38%);
+  opacity: 0.55;
+  transition: opacity var(--lg-duration) var(--lg-ease);
+}
+.lg-glass[data-interactive='true']:hover::before {
+  opacity: 0.9;
+}
+/* A slow sheen sweeping across the surface. */
+.lg-glass[data-sheen='true']::after {
+  content: '';
+  position: absolute;
+  inset: -40% -60%;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 42%, var(--lg-sheen) 50%, transparent 58%);
+  opacity: 0.35;
+  transform: translateX(-60%);
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-glass='lite']) .lg-glass[data-sheen='true']::after {
+    animation: lg-sheen 9s var(--lg-ease) infinite;
+  }
+}
+@keyframes lg-sheen {
+  0%,
+  55% {
+    transform: translateX(-60%);
+  }
+  100% {
+    transform: translateX(60%);
+  }
+}
+
+/* ---------- Interactive states ---------- */
+.lg-interactive {
+  transition:
+    transform var(--lg-duration) var(--lg-ease),
+    box-shadow var(--lg-duration) var(--lg-ease),
+    border-color var(--lg-duration) var(--lg-ease);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lg-interactive:hover {
+    transform: translateY(-2px);
+  }
+}
+.lg-interactive:hover,
+.lg-interactive:focus-visible {
+  border-color: var(--lg-edge-strong);
+  box-shadow:
+    var(--lg-shadow),
+    0 0 0 1px var(--lg-edge-strong),
+    0 0 28px -6px var(--lg-glow);
+}
+.lg-interactive[aria-current='page'],
+.lg-interactive[data-active='true'] {
+  border-color: var(--lg-edge-strong);
+  background: var(--lg-button-bg);
+  color: var(--lg-button-fg);
+  box-shadow:
+    var(--lg-shadow),
+    0 0 26px -6px var(--lg-glow);
+}
+.lg-interactive[aria-disabled='true'] {
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lg-interactive[aria-disabled='true']:hover {
+    transform: none;
+  }
+}
+
+/* ---------- Buttons ---------- */
+.lg-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding-inline: 1.1rem;
+  border-radius: 999px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.lg-button[data-variant='primary'] {
+  border: 1px solid transparent;
+  background: var(--lg-button-bg);
+  color: var(--lg-button-fg);
+  box-shadow: 0 10px 28px -12px var(--lg-glow);
+}
+.lg-button[data-variant='glass'] {
+  border: 1px solid var(--lg-edge);
+  background: var(--lg-surface-strong);
+  color: var(--foreground);
+}
+.lg-button[data-size='icon'] {
+  width: 2.75rem;
+  padding: 0;
+}
+.lg-button:disabled,
+.lg-button[aria-disabled='true'] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ---------- Search ---------- */
+.lg-search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem;
+  border-radius: 999px;
+}
+.lg-search input {
+  flex: 1;
+  min-width: 0;
+  min-height: 2.75rem;
+  border: 0;
+  padding-inline: 1rem;
+  background: transparent;
+  color: var(--foreground);
+  font-size: 1.05rem;
+}
+.lg-search input::placeholder {
+  color: var(--muted);
+}
+.lg-search input:focus-visible {
+  outline: none;
+}
+.lg-search:focus-within {
+  border-color: var(--lg-edge-strong);
+  box-shadow:
+    var(--lg-shadow),
+    0 0 0 3px var(--lg-glow);
+}
+
+/* ---------- Tooltip ---------- */
+.lg-tooltip {
+  position: absolute;
+  z-index: 50;
+  inset-block-start: calc(100% + 0.5rem);
+  inset-inline-start: 50%;
+  translate: 50% 0;
+  width: max-content;
+  max-width: 16rem;
+  padding: 0.45rem 0.7rem;
+  border-radius: var(--lg-radius-sm);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  pointer-events: none;
+}
+:dir(ltr) .lg-tooltip {
+  translate: -50% 0;
+}
+
+/* ---------- Ambient light and waves ---------- */
+.lg-ambient {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(60rem 36rem at 80% -12%, var(--lg-glow), transparent 65%),
+    radial-gradient(48rem 30rem at 5% 105%, var(--lg-glow-soft), transparent 70%),
+    linear-gradient(180deg, var(--lg-bg-1), var(--lg-bg-2));
+}
+.lg-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.55;
+  background: var(--lg-glow);
+}
+.lg-network line {
+  stroke: var(--lg-light);
+  stroke-opacity: 0.22;
+  stroke-width: 1;
+}
+.lg-network circle {
+  fill: var(--lg-light);
+  fill-opacity: 0.55;
+}
+.lg-waves {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  height: 42vh;
+  min-height: 14rem;
+}
+.lg-wave {
+  transform-box: fill-box;
+}
+.lg-wave[data-layer='1'] {
+  fill: var(--lg-wave-1);
+}
+.lg-wave[data-layer='2'] {
+  fill: var(--lg-wave-2);
+}
+.lg-wave[data-layer='3'] {
+  fill: var(--lg-wave-3);
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-glass='lite']) .lg-wave[data-layer='1'] {
+    animation: lg-drift 26s linear infinite;
+  }
+  html:not([data-glass='lite']) .lg-wave[data-layer='2'] {
+    animation: lg-drift 38s linear infinite reverse;
+  }
+  html:not([data-glass='lite']) .lg-wave[data-layer='3'] {
+    animation: lg-drift 52s linear infinite;
+  }
+  html:not([data-glass='lite']) .lg-orb {
+    animation: lg-float 18s ease-in-out infinite alternate;
+  }
+  html:not([data-glass='lite']) .lg-network circle {
+    animation: lg-pulse 4.5s ease-in-out infinite;
+  }
+}
+@keyframes lg-drift {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes lg-float {
+  to {
+    transform: translate3d(4%, 6%, 0) scale(1.08);
+  }
+}
+@keyframes lg-pulse {
+  50% {
+    fill-opacity: 0.2;
+  }
+}
+
+/* ---------- Entrance and page transitions (CSS: visible without JavaScript) ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-glass='lite']) .lg-rise,
+  html:not([data-glass='lite']) .lg-page {
+    animation: lg-rise 0.45s var(--lg-ease) both;
+  }
+}
+/* Movement only, never opacity: text keeps its full contrast from the first frame
+   (an accessibility check or a reader mid-animation always sees AA colours). */
+@keyframes lg-rise {
+  from {
+    transform: translateY(10px);
+  }
+}
+
+/* ---------- Skeleton loading ---------- */
+.lg-skeleton {
+  border-radius: var(--lg-radius-sm);
+  background: linear-gradient(90deg, var(--lg-track), var(--lg-highlight), var(--lg-track));
+  background-size: 200% 100%;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lg-skeleton {
+    animation: lg-shimmer 1.6s ease-in-out infinite;
+  }
+}
+@keyframes lg-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* ---------- Progress ---------- */
+.lg-progress {
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--lg-track);
+  overflow: hidden;
+}
+.lg-progress > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--lg-primary), var(--lg-light));
+}
+
+/* ---------- Icons, badges, navigation ---------- */
+.lg-icon {
+  color: var(--lg-ink);
+}
+.lg-badge {
+  flex-shrink: 0;
+  padding: 0.1rem 0.55rem;
+  border: 1px solid var(--lg-edge);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+.lg-nav-item {
+  color: var(--foreground);
+  font-weight: 600;
+  text-decoration: none;
+}
+.lg-nav-item[aria-current='page'] .lg-badge {
+  color: inherit;
+}
+
+/* ---------- Dialog (GlassModal) ---------- */
+.lg-dialog {
+  max-width: none;
+  max-height: none;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--foreground);
+  overflow: visible;
+}
+.lg-dialog::backdrop {
+  background: rgb(2 44 34 / 0.55);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+.lg-dialog-side {
+  height: 100dvh;
+  margin-block: 0;
+  margin-inline-start: 0;
+  margin-inline-end: auto;
+}
+
+/* Fully solid, motionless glass when the user asks for less transparency or motion. */
+@media (prefers-reduced-motion: reduce) {
+  .lg-glass::after,
+  .lg-orb,
+  .lg-wave,
+  .lg-skeleton {
+    animation: none !important;
+  }
+}
