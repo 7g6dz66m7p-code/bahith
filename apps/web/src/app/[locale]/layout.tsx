@@ -5,6 +5,8 @@ import { notFound } from 'next/navigation';
 import { locale as rootLocale } from 'next/root-params';
 import type { ReactNode } from 'react';
 
+import { AmbientGlow, GlassThemeProvider } from '@bahith/ui';
+
 import { ThemeToggle } from '@/components/theme-toggle';
 import { localeDirection, routing } from '@/i18n/routing';
 
@@ -32,10 +34,13 @@ export default async function LocaleLayout({ children }: { children: ReactNode }
     <html lang={locale} dir={localeDirection(locale)}>
       <body className="min-h-dvh bg-background text-foreground antialiased">
         <NextIntlClientProvider>
-          {children}
-          <div className="fixed bottom-4 end-4 z-40">
-            <ThemeToggle />
-          </div>
+          <GlassThemeProvider>
+            <AmbientGlow />
+            {children}
+            <div className="fixed bottom-4 end-4 z-40">
+              <ThemeToggle />
+            </div>
+          </GlassThemeProvider>
         </NextIntlClientProvider>
       </body>
     </html>

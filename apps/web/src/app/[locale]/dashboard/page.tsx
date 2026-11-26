@@ -4,7 +4,7 @@ import { locale as rootLocale } from 'next/root-params';
 
 import { DashboardView } from '@/components/dashboard-view';
 import { routing } from '@/i18n/routing';
-import { getDashboardData } from '@/server/dashboard';
+import { getDashboardData, getDashboardExtras } from '@/server/dashboard';
 import { getUnreadNotificationCount } from '@/server/notifications';
 import { requireSession } from '@/server/session';
 
@@ -16,12 +16,14 @@ export default async function DashboardPage() {
     getDashboardData(session.user.id),
     getUnreadNotificationCount(session.user.id),
   ]);
+  const extras = await getDashboardExtras(session.user.id, data);
   return (
     <DashboardView
       name={session.user.name}
       workspaces={data.workspaces}
       projects={data.projects}
       unreadNotifications={unread}
+      extras={extras}
     />
   );
 }
