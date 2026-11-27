@@ -1,0 +1,171 @@
+name: Staging preview (Vercel)
+
+# Connects the bahith-preview branch deployment to the staging services, directly from
+# GitHub secrets to the Vercel API (no value in a log, file, artifact or chat), redeploys
+# it, then runs the real researcher journey against it with the document workers on this
+# runner. Runs when ops/staging-preview.txt changes on the preview branch only.
+#
+# Production is never addressed: every Vercel variable is scoped to target "preview" and
+# this one git branch; the project is checked by id AND name; the database roles are the
+# staging bahith_app / bahith_auth (rebuilt by role-urls.ts); main is refused.
+on:
+  push:
+    branches: ['feat/bahith-liquid-glass']
+    paths: ['ops/staging-preview.txt']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: staging-preview
+  cancel-in-progress: false
+
+env:
+  VERCEL_TEAM_ID: team_Iv7IuZUmdrrkNwuR7mfeEskd
+  VERCEL_PROJECT_ID: prj_1xspDGpGF7c0cf8XJvC1RLAWtHIY
+  PREVIEW_BRANCH: feat/bahith-liquid-glass
+  PREVIEW_URL: https://bahith-preview-git-feat-bahith-liquid-glass-5bqyn5mk8k-3740.vercel.app
+
+jobs:
+  configure:
+    runs-on: ubuntu-latest
+    environment: staging
+    outputs:
+      deployment: ${{ steps.deploy.outputs.deployment }}
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      DATABASE_ADMIN_URL: ${{ secrets.DATABASE_ADMIN_URL }}
+      SECRET_DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      SECRET_AUTH_DATABASE_URL: ${{ secrets.AUTH_DATABASE_URL }}
+      REDIS_URL: ${{ secrets.REDIS_URL }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      # Resend SMTP. Only the password (a sending-access API key) is secret.
+      SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+      SMTP_HOST: ${{ secrets.SMTP_PASSWORD && 'smtp.resend.com' || '' }}
+      SMTP_PORT: ${{ secrets.SMTP_PASSWORD && '465' || '' }}
+      SMTP_SECURE: ${{ secrets.SMTP_PASSWORD && 'true' || '' }}
+      SMTP_USER: ${{ secrets.SMTP_PASSWORD && 'resend' || '' }}
+      SMTP_FROM: ${{ secrets.SMTP_PASSWORD && (vars.SMTP_FROM || 'onboarding@resend.dev') || '' }}
+      # Cloudflare R2 through the S3-compatible storage layer.
+      S3_ENDPOINT: ${{ secrets.R2_ACCOUNT_ID && format('https://{0}.r2.cloudflarestorage.com', secrets.R2_ACCOUNT_ID) || '' }}
+      S3_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      S3_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      S3_REGION: ${{ secrets.R2_ACCESS_KEY_ID && 'auto' || '' }}
+      S3_BUCKET: ${{ secrets.R2_ACCESS_KEY_ID && (vars.R2_BUCKET || 'bahith-staging-files') || '' }}
+      S3_FORCE_PATH_STYLE: ${{ secrets.R2_ACCESS_KEY_ID && 'true' || '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Required secrets present (names only)
+        run: |
+          missing=()
+          for v in VERCEL_TOKEN DATABASE_ADMIN_URL SECRET_DATABASE_URL SECRET_AUTH_DATABASE_URL \
+            REDIS_URL SMTP_PASSWORD OPENAI_API_KEY S3_ENDPOINT S3_ACCESS_KEY_ID S3_SECRET_ACCESS_KEY; do
+            [ -n "${!v}" ] || missing+=("${v#SECRET_}")
+          done
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "::error::missing in environment staging: ${missing[*]} (R2_* for S3_*)"
+            exit 1
+          fi
+          case "$REDIS_URL" in rediss://*) ;; *) echo "::error::REDIS_URL must be TLS (rediss://)"; exit 1;; esac
+          case "$S3_BUCKET" in *staging*) ;; *) echo "::error::refusing a non-staging bucket"; exit 1;; esac
+      - run: pnpm install --frozen-lockfile
+      - name: Role URLs from DATABASE_ADMIN_URL's host + the secrets' passwords (masked)
+        run: pnpm --filter @bahith/db exec tsx src/cli/role-urls.ts
+      - name: Write the preview variables to Vercel (sensitive for secrets)
+        env:
+          BETTER_AUTH_URL: ${{ env.PREVIEW_URL }}
+          DATABASE_ADMIN_URL: ''
+        run: bash scripts/vercel-preview-env.sh
+      - name: Redeploy the branch with the new variables
+        id: deploy
+        run: bash scripts/vercel-preview-deploy.sh
+
+  journey:
+    needs: configure
+    runs-on: ubuntu-latest
+    environment: staging
+    timeout-minutes: 40
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      DATABASE_ADMIN_URL: ${{ secrets.DATABASE_ADMIN_URL }}
+      SECRET_DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      SECRET_AUTH_DATABASE_URL: ${{ secrets.AUTH_DATABASE_URL }}
+      REDIS_URL: ${{ secrets.REDIS_URL }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      AI_EMBEDDING_MODEL: openai:text-embedding-3-small
+      S3_ENDPOINT: https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
+      S3_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      S3_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      S3_REGION: auto
+      S3_BUCKET: ${{ vars.R2_BUCKET || 'bahith-staging-files' }}
+      S3_FORCE_PATH_STYLE: 'true'
+      # Read-only use: the test fetches its own verification e-mail (full-access key,
+      # kept in GitHub only, never sent to Vercel).
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      LOAD_MAIL_PROVIDER: resend
+      STAGING_EXPECT_AI: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - uses: astral-sh/setup-uv@v6
+      - name: OCR (Tesseract + pinned Arabic model), Postgres client
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq tesseract-ocr tesseract-ocr-ara tesseract-ocr-eng postgresql-client
+          sudo scripts/install-arabic-ocr-model.sh
+      - run: pnpm install --frozen-lockfile
+      - name: Role URLs from DATABASE_ADMIN_URL's host + the secrets' passwords (masked)
+        run: pnpm --filter @bahith/db exec tsx src/cli/role-urls.ts
+      # The preview (Vercel) only enqueues; extraction, OCR, indexing and embeddings run
+      # here, against the same Upstash Redis, Neon (bahith_app) and R2, for this run only.
+      - name: Start the document workers (jobs + Python worker) on this runner
+        run: |
+          (cd apps/jobs && nohup pnpm exec tsx src/main.ts > "$RUNNER_TEMP/jobs.log" 2>&1 &)
+          (cd apps/worker && nohup uv run --quiet python -m bahith_worker > "$RUNNER_TEMP/worker.log" 2>&1 &)
+          sleep 10
+          grep -q 'jobs.started' "$RUNNER_TEMP/jobs.log" || { tail -n 20 "$RUNNER_TEMP/jobs.log"; exit 1; }
+          grep -q 'worker started' "$RUNNER_TEMP/worker.log" || { tail -n 20 "$RUNNER_TEMP/worker.log"; exit 1; }
+      - name: Preview health (through a temporary protection bypass)
+        env:
+          DEPLOYMENT: ${{ needs.configure.outputs.deployment }}
+        run: bash scripts/vercel-preview-journey.sh
+      - name: Worker logs (on failure; ids and codes only)
+        if: failure()
+        run: tail -n 40 "$RUNNER_TEMP/jobs.log" "$RUNNER_TEMP/worker.log"
+      - name: Delete the test documents from R2 and prove they are gone
+        if: always()
+        env:
+          AWS_DEFAULT_REGION: auto
+          AWS_REQUEST_CHECKSUM_CALCULATION: when_required
+          AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
+        run: |
+          set -euo pipefail
+          export AWS_ACCESS_KEY_ID="$S3_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$S3_SECRET_ACCESS_KEY"
+          ids=$(psql "$DATABASE_ADMIN_URL" -At -v ON_ERROR_STOP=1 -c "SELECT DISTINCT m.workspace_id FROM memberships m JOIN users u ON u.id = m.user_id WHERE u.email LIKE 'delivered+%@resend.dev'")
+          count() { { aws s3 ls "s3://$S3_BUCKET/workspaces/$1/" --recursive --endpoint-url "$S3_ENDPOINT" || true; } | wc -l; }
+          total=0; left=0
+          for id in $ids; do
+            total=$((total + $(count "$id")))
+            aws s3 rm "s3://$S3_BUCKET/workspaces/$id/" --recursive --endpoint-url "$S3_ENDPOINT" --only-show-errors
+            left=$((left + $(count "$id")))
+          done
+          echo "test workspaces: $(echo "$ids" | grep -c . || true); objects deleted from R2: $total; left: $left"
+          [ "$left" -eq 0 ] || { echo "::error::objects remain in R2 after deletion"; exit 1; }
+      - name: Remove the test accounts and their workspaces from Neon staging
+        if: always()
+        run: |
+          psql "$DATABASE_ADMIN_URL" -v ON_ERROR_STOP=1 -q <<'SQL'
+          DELETE FROM workspaces WHERE id IN (
+            SELECT m.workspace_id FROM memberships m JOIN users u ON u.id = m.user_id
+             WHERE u.email LIKE 'delivered+%@resend.dev');
+          DELETE FROM users WHERE email LIKE 'delivered+%@resend.dev';
+          SELECT 'test users left: ' || count(*) FROM users WHERE email LIKE 'delivered+%@resend.dev';
+          SQL
