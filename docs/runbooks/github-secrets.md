@@ -63,20 +63,39 @@ GitHub → Settings → Environments → `staging` → **Environment secrets**:
 ورحلة التطبيق بملفات حقيقية على R2 ثم حذف ملفات الحسابات الاختبارية وإثبات خلو بادئتها، ونسخة احتياطية تُرفع
 إلى R2 ثم تُنزَّل إلى مجلد فارغ وتُستعاد منها وحدها.
 
-## 3أ. الطريقة الآلية (بلا نسخ أي مفتاح يدوياً)
+## 3أ. معاينة Vercel ‏(`bahith-preview`) بخدمات مجانية
 
-قيم R2 لا تظهر لأحد: تُنشأ عبر Cloudflare API، وتُشفَّر بالمفتاح العام لبيئة `staging` (sealed box)، ولا
-يفك تشفيرها إلا GitHub. يلزم تفويضان مؤقتان فقط:
+النقل مباشر: **GitHub Actions → Vercel API** (‏`.github/workflows/staging-preview.yml`). القيم لا تمر بالمحادثة،
+ولا تُكتب في سجل أو ملف أو artifact (ولا حتى مشفرة). الأسرار تُحفظ في Vercel بنوع **Sensitive**
+(لا تُقرأ بعد الحفظ)، وكل متغير مقيّد بـ **Preview** والفرع `feat/bahith-liquid-glass` فقط؛ الإنتاج لا يُمس.
+مفتاح المصادقة `BETTER_AUTH_SECRET` يُولَّد مستقلاً لـ Staging داخل الـworkflow عند غيابه، ويعيش في Vercel فقط.
 
-1. **رمز Cloudflare مؤقت (bootstrap)** يُدخَل في النموذج الآمن لجلسة Claude (لا في المحادثة):
-   My Profile → API Tokens → Create Token → Custom token، الصلاحيات **User · API Tokens · Edit** و
-   **Account · Account Settings · Read**، الحساب نفسه فقط، وتاريخ انتهاء الغد. السكربت
-   `scripts/staging-r2-bootstrap.py` يُنشئ به الرمز `BAHITH-Staging-R2-CI` (حاوية `bahith-staging-files`
-   فقط، Object Read & Write)، ويختبره، ثم **يلغي رمز bootstrap نفسه**.
-2. **رمز GitHub دقيق (fine-grained)** يُحفظ كسرّ `GH_SECRETS_TOKEN` في بيئة `staging`:
-   المستودع `7g6dz66m7p-code/bahith` فقط، **Environments: Read and write** و**Secrets: Read-only**،
-   انتهاء بعد يوم. الـworkflow ‏`Staging secrets (sealed)` لا يكتب إلا الأسرار الثلاثة وفي `staging` فقط.
-   احذف الرمز بعد النجاح.
+أضِف في GitHub → Settings → Environments → `staging` → **Environment secrets**:
+
+| الاسم                                                       | من أين                                                                                                                                                                |
+| ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `VERCEL_TOKEN`                                              | Vercel → Account Settings → Tokens → Create: النطاق **فريق المشروع فقط** (لا "Full Account")، الانتهاء **يوم واحد** (أو 7). احذفه بعد التشغيل.                        |
+| `REDIS_URL`                                                 | Upstash Console → Create Database (Free، منطقة قريبة من Neon، **Eviction: off**) → رابط `rediss://…` من تبويب Connect (TLS إجباري؛ الـworkflow يرفض `redis://`).      |
+| `SMTP_PASSWORD`                                             | Resend → API Keys → Create: الصلاحية **Sending access** (وقيّدها بالنطاق إن تحقق).                                                                                     |
+| `RESEND_API_KEY`                                            | Resend → مفتاح ثانٍ **Full access**، يبقى في GitHub فقط: الاختبار يقرأ به رسالة التحقق المرسلة إلى عنوان اختبار Resend (`delivered+…@resend.dev`). لا يُرسل إلى Vercel. |
+| `R2_ACCOUNT_ID`، `R2_ACCESS_KEY_ID`، `R2_SECRET_ACCESS_KEY` | كما في القسم 3 (رمز R2 مقيّد بالحاوية `bahith-staging-files`).                                                                                                         |
+
+اختياري (Variable لا Secret): `SMTP_FROM` — الافتراضي `onboarding@resend.dev` (عنوان Resend التجريبي، يكفي
+لعناوين الاختبار). للإرسال إلى بريد حقيقي: تحقّق من نطاق فرعي في Resend (سجلات DNS في Hostinger بموافقتك)
+واضبط `SMTP_FROM=no-reply@<النطاق الفرعي>`.
+
+التشغيل: عدّل `ops/staging-preview.txt` على الفرع `feat/bahith-liquid-glass` وادفع. الـworkflow:
+
+1. يتحقق من وجود الأسرار (بالأسماء فقط)، ويبني رابطي `bahith_app`/`bahith_auth` من مضيف `DATABASE_ADMIN_URL`.
+2. يكتب المتغيرات في Vercel (Sensitive للأسرار)، ثم يعيد نشر الفرع وينتظر READY ويثبت رابط الفرع عليه.
+3. يشغّل `jobs` والعامل Python (OCR) **على المشغّل نفسه** طوال الاختبار (Vercel لا يشغّل العمال).
+4. ينشئ **تجاوز حماية مؤقتاً** (Protection Bypass for Automation)، يختبر به الصحة، والتسجيل، والتحقق من البريد،
+   والدخول، ولوحة التحكم (ar/en)، والمشروع، والرفع، والمعالجة، والبحث، وSANAD-X، والمساعد، والمسودة والتصدير،
+   والعزل — ثم **يلغي التجاوز** مهما كانت النتيجة. حماية المعاينة نفسها لا تتغير.
+5. يحذف ملفات الحسابات الاختبارية من R2 ويثبت خلوها، ثم يحذف الحسابات من Neon.
+
+قيود معروفة: Vercel يحدّ جسم الطلب في الدوال (حوالي 4.5 MB)، فالرفع الأكبر يفشل على المعاينة (لا على VPS).
+والمعالجة تعمل فقط أثناء تشغيل الـworkflow؛ ملف يُرفع يدوياً على المعاينة يبقى «قيد المعالجة» حتى التشغيل التالي.
 
 ## 4. بعد الإضافة
 

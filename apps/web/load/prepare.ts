@@ -2,25 +2,32 @@
  * Prepares a real signed-in researcher on the local e2e harness for load testing:
  * sign-up, email verification through the harness's Mailpit, sign-in, a project, and
  * one uploaded synthetic source processed by the real workers. Prints k6 variables.
- * Local only: refuses any base URL that is not localhost.
+ * Test stacks only (local, staging or a preview branch): see remote.ts.
  */
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
+import {
+  assertTestStack,
+  installProtectionBypass,
+  testRecipient,
+  verificationLink,
+} from './remote';
+
 const BASE = process.env.LOAD_BASE_URL ?? 'http://localhost:3100';
-// Local stacks, or a staging host (never the production domain): it creates test accounts.
-if (!/^(http:\/\/(localhost|127\.0\.0\.1):\d+|https:\/\/staging\.[a-z0-9.-]+)$/u.test(BASE)) {
-  throw new Error('local or staging stacks only');
-}
+assertTestStack(BASE);
+installProtectionBypass(BASE);
 // The staging stack passes its own Mailpit (LOAD_MAIL_URL); the e2e harness writes its own.
-const runtime =
-  process.env.LOAD_MAIL_URL === undefined
-    ? (JSON.parse(
-        await readFile(path.resolve(import.meta.dirname, '../.next/e2e-runtime.json'), 'utf8'),
-      ) as { mailUrl: string })
-    : { mailUrl: process.env.LOAD_MAIL_URL };
+// A preview reads the e-mail from Resend instead (LOAD_MAIL_PROVIDER=resend).
+const mailUrl = async () =>
+  process.env.LOAD_MAIL_URL ??
+  (
+    JSON.parse(
+      await readFile(path.resolve(import.meta.dirname, '../.next/e2e-runtime.json'), 'utf8'),
+    ) as { mailUrl: string }
+  ).mailUrl;
 const origin = { origin: BASE, 'content-type': 'application/json' };
-const email = `load-${crypto.randomUUID()}@example.test`;
+const email = testRecipient();
 const password = `Load-${crypto.randomUUID()}`;
 
 let response = await fetch(`${BASE}/api/auth/sign-up/email`, {
@@ -29,21 +36,8 @@ let response = await fetch(`${BASE}/api/auth/sign-up/email`, {
   body: JSON.stringify({ name: 'Load test', email, password, callbackURL: `${BASE}/ar/dashboard` }),
 });
 if (!response.ok) throw new Error(`sign-up ${String(response.status)}`);
-let link: string | undefined;
-for (let i = 0; i < 40 && link === undefined; i += 1) {
-  const list = (await (await fetch(`${runtime.mailUrl}/api/v1/messages`)).json()) as {
-    messages: { ID: string; To: { Address: string }[] }[];
-  };
-  const message = list.messages.find((m) => m.To.some((to) => to.Address === email));
-  if (message !== undefined) {
-    const body = (await (
-      await fetch(`${runtime.mailUrl}/api/v1/message/${message.ID}`)
-    ).json()) as { Text: string };
-    link = /https?:\/\/\S+/u.exec(body.Text)?.[0];
-  }
-  if (link === undefined) await new Promise((resolve) => setTimeout(resolve, 500));
-}
-if (link === undefined) throw new Error('no verification email');
+const link = await verificationLink(email, mailUrl);
+if (new URL(link).origin !== new URL(BASE).origin) throw new Error('verification link host');
 await fetch(link, { redirect: 'manual' });
 response = await fetch(`${BASE}/api/auth/sign-in/email`, {
   method: 'POST',

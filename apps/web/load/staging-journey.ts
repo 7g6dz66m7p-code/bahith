@@ -2,10 +2,12 @@
  * Researcher journey against a running stack (staging): continues from prepare.ts
  * (sign-up, e-mail verification, sign-in, project, upload, real processing) with
  * search, quotation verification, a document and DOCX/PDF export. Prints a pass/fail
- * line per step; exits non-zero on the first failure. Local stacks only.
+ * line per step; exits non-zero on the first failure. Test stacks only (see remote.ts).
  */
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
+
+import { assertTestStack, installProtectionBypass } from './remote';
 
 const env = JSON.parse(await readFile(process.argv[2] ?? '', 'utf8')) as {
   BASE: string;
@@ -13,16 +15,28 @@ const env = JSON.parse(await readFile(process.argv[2] ?? '', 'utf8')) as {
   WORKSPACE_ID: string;
   PROJECT_ID: string;
 };
-// Local stacks, or a staging host (never the production domain): it creates test accounts.
-if (!/^(http:\/\/(localhost|127\.0\.0\.1):\d+|https:\/\/staging\.[a-z0-9.-]+)$/u.test(env.BASE)) {
-  throw new Error('local or staging stacks only');
-}
+assertTestStack(env.BASE);
+installProtectionBypass(env.BASE);
 const headers = { origin: env.BASE, cookie: env.COOKIE, 'content-type': 'application/json' };
 const q = `workspaceId=${env.WORKSPACE_ID}`;
 const step = (name: string, ok: boolean, detail = '') => {
   process.stdout.write(`${ok ? 'PASS' : 'FAIL'} ${name}${detail === '' ? '' : ` — ${detail}`}\n`);
   if (!ok) process.exit(1);
 };
+
+// The signed-in dashboard renders server-side for both locales (real data, real session).
+for (const locale of ['ar', 'en']) {
+  const page = await fetch(`${env.BASE}/${locale}/dashboard`, {
+    headers: { cookie: env.COOKIE },
+    redirect: 'manual',
+  });
+  const html = await page.text();
+  step(
+    `dashboard (${locale})`,
+    page.status === 200 && html.includes('id="research-search"'),
+    `HTTP ${String(page.status)}`,
+  );
+}
 
 const search = await fetch(`${env.BASE}/api/sanad/retrieve`, {
   method: 'POST',
