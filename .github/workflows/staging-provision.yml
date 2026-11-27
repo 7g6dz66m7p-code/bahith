@@ -1,0 +1,30 @@
+name: Staging provision (R2 credential)
+
+# Creates the staging R2 credential on this runner and stores it as "staging"
+# environment secrets through GitHub's official sealed-box API. No value is printed,
+# written to a file, committed or uploaded. Existing R2 secrets are reused. The two
+# bootstrap secrets are revoked/removed at the end. See scripts/staging-provision-r2.py.
+on:
+  push:
+    branches: ['feat/bahith-liquid-glass']
+    paths: ['ops/staging-provision.txt']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: staging-provision
+  cancel-in-progress: false
+
+jobs:
+  r2:
+    runs-on: ubuntu-latest
+    environment: staging
+    env:
+      CLOUDFLARE_BOOTSTRAP_TOKEN: ${{ secrets.CLOUDFLARE_BOOTSTRAP_TOKEN }}
+      GH_SECRETS_TOKEN: ${{ secrets.GH_SECRETS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Create, test and store the bucket-scoped R2 credential
+        run: uv run --no-project --with pynacl==1.5.0 --with boto3==1.35.36 python scripts/staging-provision-r2.py

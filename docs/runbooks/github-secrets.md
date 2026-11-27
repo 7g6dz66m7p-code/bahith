@@ -80,6 +80,14 @@ GitHub → Settings → Environments → `staging` → **Environment secrets**:
 | `RESEND_API_KEY`                                            | Resend → مفتاح ثانٍ **Full access**، يبقى في GitHub فقط: الاختبار يقرأ به رسالة التحقق المرسلة إلى عنوان اختبار Resend (`delivered+…@resend.dev`). لا يُرسل إلى Vercel. |
 | `R2_ACCOUNT_ID`، `R2_ACCESS_KEY_ID`، `R2_SECRET_ACCESS_KEY` | كما في القسم 3 (رمز R2 مقيّد بالحاوية `bahith-staging-files`).                                                                                                         |
 
+**R2 آلياً (بدل إدخال قيمه الثلاث):** أضف سرّين مؤقتين في `staging`:
+`CLOUDFLARE_BOOTSTRAP_TOKEN` (Cloudflare → My Profile → API Tokens → Custom: **User · API Tokens · Edit** و
+**Account · Account Settings · Read**، انتهاء الغد) و`GH_SECRETS_TOKEN` (GitHub fine-grained: هذا المستودع فقط،
+**Environments: Read and write**، انتهاء يوم). ثم عدّل `ops/staging-provision.txt` وادفع: الـworkflow
+`Staging provision (R2 credential)` يُنشئ رمزاً على `bahith-staging-files` وحدها (Object Read & Write)، ويختبره
+(كتابة/قراءة/حذف)، ويخزن القيم الثلاث بتشفير GitHub الرسمي (sealed box)، ثم يلغي رمز Cloudflare المؤقت ويحذف
+السرّين المؤقتين. إن وُجدت أسرار R2 مسبقاً لا يُنشئ شيئاً. ألغِ رمز GitHub من إعدادات حسابك بعدها.
+
 اختياري (Variable لا Secret): `SMTP_FROM` — الافتراضي `onboarding@resend.dev` (عنوان Resend التجريبي، يكفي
 لعناوين الاختبار). للإرسال إلى بريد حقيقي: تحقّق من نطاق فرعي في Resend (سجلات DNS في Hostinger بموافقتك)
 واضبط `SMTP_FROM=no-reply@<النطاق الفرعي>`.
